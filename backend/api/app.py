@@ -6,7 +6,7 @@ from fastapi import FastAPI
 
 from backend.api.middleware.cors import setup_cors
 from backend.api.middleware.error_handler import setup_error_handlers
-from backend.api.routes import diagnostics, edit, export, jobs, results, scale, upload
+from backend.api.routes import diagnostics, edit, export, jobs, results, scale, single_model, upload
 from backend.api.websocket import router as ws_router
 
 
@@ -15,6 +15,7 @@ def create_app() -> FastAPI:
     setup_cors(app)
     setup_error_handlers(app)
 
+    app.include_router(single_model.router)
     app.include_router(upload.router)
     app.include_router(jobs.router)
     app.include_router(results.router)
