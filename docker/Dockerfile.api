@@ -1,0 +1,16 @@
+# FastAPI backend (CPU; GPU optional for inline dev only)
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY requirements/api.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+COPY backend /app/backend
+COPY config /app/config
+COPY vendors /app/vendors
+COPY scripts /app/scripts
+
+ENV PYTHONPATH=/app
+EXPOSE 8000
+CMD ["uvicorn", "backend.api.app:app", "--host", "0.0.0.0", "--port", "8000"]

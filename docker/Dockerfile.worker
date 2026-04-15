@@ -1,0 +1,15 @@
+# Pipeline worker (GPU); runs Celery tasks — swap CMD when celery_app exists
+FROM pytorch/pytorch:2.2.0-cuda12.1-cudnn8-runtime
+
+WORKDIR /app
+
+COPY requirements/api.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+COPY backend /app/backend
+COPY config /app/config
+COPY vendors /app/vendors
+
+ENV PYTHONPATH=/app
+# Placeholder: blocking worker until Celery app is wired
+CMD ["python", "-c", "print('civil-agent worker image ready; configure Celery CMD')"]

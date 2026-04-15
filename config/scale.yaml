@@ -1,0 +1,12 @@
+# Scale extraction parameters
+ocr:
+  enabled: true
+  min_confidence: 0.4
+
+scale_bar:
+  min_length_px: 40
+  aspect_ratio_max: 25.0
+
+resolver:
+  prefer: [scale_bar, title_block, dimension_ocr]
+  fallback_unit: m

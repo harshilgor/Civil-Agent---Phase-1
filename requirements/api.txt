@@ -1,0 +1,9 @@
+# FastAPI backend, worker queue, HTTP client
+-r pytorch.txt
+fastapi>=0.109
+uvicorn[standard]>=0.27
+python-multipart>=0.0.6
+celery[redis]>=5.3
+redis>=5.0
+httpx>=0.26
+websockets>=12.0

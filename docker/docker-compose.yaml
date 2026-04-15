@@ -1,0 +1,70 @@
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: civil
+      POSTGRES_PASSWORD: civil
+      POSTGRES_DB: civil_agent
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    image: civil-agent-api:local
+    ports:
+      - "8000:8000"
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      DATABASE_URL: postgresql://civil:civil@postgres:5432/civil_agent
+    depends_on:
+      - redis
+      - postgres
+    volumes:
+      - ../config:/app/config:ro
+      - ../backend:/app/backend:ro
+      - ../vendors:/app/vendors:ro
+
+  worker:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.worker
+    image: civil-agent-worker:local
+    environment:
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      - redis
+    volumes:
+      - ../config:/app/config:ro
+      - ../backend:/app/backend:ro
+      - ../vendors:/app/vendors:ro
+
+  tf-worker:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.tensorflow
+    image: civil-agent-tensorflow:local
+    volumes:
+      - ../config:/app/config:ro
+      - ../vendors/tf2_deepfloorplan:/app/vendors/tf2_deepfloorplan:ro
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.frontend
+    image: civil-agent-frontend:local
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+
+volumes:
+  postgres_data: {}

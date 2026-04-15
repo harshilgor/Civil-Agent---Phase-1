@@ -1,0 +1,14 @@
+# TensorFlow 2 — DeepFloorplan isolation
+FROM tensorflow/tensorflow:2.15.0-gpu
+
+WORKDIR /app
+
+COPY requirements/tensorflow.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+COPY config /app/config
+COPY vendors/tf2_deepfloorplan /app/vendors/tf2_deepfloorplan
+COPY backend /app/backend
+
+ENV PYTHONPATH=/app
+CMD ["python", "-c", "import tensorflow as tf; print(tf.__version__)"]

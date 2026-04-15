@@ -1,0 +1,9 @@
+# Global pipeline: mode, resolution, thresholds
+mode: light # light | deep
+resolution:
+  target_max_dim: 1024
+  min_dim: 256
+thresholds:
+  agreement_min: 0.35
+  boundary_confidence: 0.5
+  room_confidence: 0.45
