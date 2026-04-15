@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
@@ -17,6 +16,7 @@ from .stage2_fusion.fusion_router import FusionRouter
 def run_pipeline(
     image_path: str | Path,
     config_dir: str | Path | None = None,
+    mode_override: str | None = None,
 ) -> dict[str, Any]:
     """
     Run a functional Phase-1 Light pipeline vertical slice:
@@ -27,40 +27,69 @@ def run_pipeline(
     config: AppConfig = load_config(cfg_path)
     image_path = Path(image_path)
 
-    mode = PipelineMode(config.pipeline.mode)
-    loaded, source_format = load_raster_input(image_path)
-    normalized = normalize_image(loaded, target_max_dim=int(config.pipeline.resolution.get("target_max_dim", 1024)))
-    stage0 = ImageTensor(data=normalized, original_shape=normalized.shape[:2], scale=1.0)
+    mode_value = mode_override or config.pipeline.mode
+    # Current functional vertical slice is implemented for Light mode only.
+    mode = PipelineMode.LIGHT if mode_value != PipelineMode.DEEP.value else PipelineMode.DEEP
+    try:
+        loaded, source_format = load_raster_input(image_path)
+        normalized = normalize_image(
+            loaded,
+            target_max_dim=int(config.pipeline.resolution.get("target_max_dim", 1024)),
+        )
+        stage0 = ImageTensor(data=normalized, original_shape=normalized.shape[:2], scale=1.0)
 
-    perception = PerceptionOrchestrator(mode=mode).run(stage0)
-    fused = FusionRouter(mode).fuse(perception)
+        perception = PerceptionOrchestrator(mode=mode).run(stage0)
+        fused = FusionRouter(mode).fuse(perception)
 
-    diagnostics = dict(perception.diagnostics)
-    diagnostics["fusion"] = fused.get("diagnostics", {}) if isinstance(fused, dict) else {}
+        diagnostics = dict(perception.diagnostics)
+        diagnostics["fusion"] = fused.get("diagnostics", {}) if isinstance(fused, dict) else {}
 
-    payload = {
-        "mode": mode.value,  # kept for existing tests
-        "pipeline": {
+        payload = {
+            "mode": mode.value,  # kept for existing tests
+            "pipeline": {
+                "mode": mode.value,
+                "source_format": source_format,
+                "thresholds": config.pipeline.thresholds,
+                "resolution": config.pipeline.resolution,
+                "failure_policy": "best_effort",
+            },
+            "rooms": fused.get("rooms", []) if isinstance(fused, dict) else [],
+            "boundaries": [
+                {
+                    "start": {"x": e.start[0], "y": e.start[1]},
+                    "end": {"x": e.end[0], "y": e.end[1]},
+                    "confidence": e.confidence,
+                }
+                for e in fused.get("boundaries", [])
+            ]
+            if isinstance(fused, dict)
+            else [],
+            "scale": None,
+            "metadata": {
+                "input_image": str(image_path),
+                "image_width": int(normalized.shape[1]),
+                "image_height": int(normalized.shape[0]),
+                "diagnostics": diagnostics,
+            },
+        }
+    except Exception as exc:
+        payload = {
             "mode": mode.value,
-            "source_format": source_format,
-            "thresholds": config.pipeline.thresholds,
-            "resolution": config.pipeline.resolution,
-            "failure_policy": "best_effort",
-        },
-        "rooms": fused.get("rooms", []) if isinstance(fused, dict) else [],
-        "boundaries": [
-            {"start": {"x": e.start[0], "y": e.start[1]}, "end": {"x": e.end[0], "y": e.end[1]}, "confidence": e.confidence}
-            for e in fused.get("boundaries", [])
-        ] if isinstance(fused, dict) else [],
-        "scale": None,
-        "metadata": {
-            "input_image": str(image_path),
-            "image_width": int(normalized.shape[1]),
-            "image_height": int(normalized.shape[0]),
-            "diagnostics": diagnostics,
-            "perception_dump": asdict(perception),
-        },
-    }
+            "pipeline": {
+                "mode": mode.value,
+                "source_format": "unknown",
+                "thresholds": config.pipeline.thresholds,
+                "resolution": config.pipeline.resolution,
+                "failure_policy": "best_effort",
+            },
+            "rooms": [],
+            "boundaries": [],
+            "scale": None,
+            "metadata": {
+                "input_image": str(image_path),
+                "diagnostics": {"pipeline_error": str(exc)},
+            },
+        }
 
     return {
         **payload,

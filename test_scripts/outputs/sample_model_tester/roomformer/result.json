@@ -1,0 +1,19 @@
+{
+  "model": "roomformer",
+  "loaded": true,
+  "predicted": true,
+  "artifacts": {
+    "saved_density_map": "C:\\Phase 1 - Civil agent\\test_scripts\\outputs\\sample_model_tester\\roomformer\\density_map.png",
+    "saved_polygons_overlay": "C:\\Phase 1 - Civil agent\\test_scripts\\outputs\\sample_model_tester\\roomformer\\polygons_overlay.png",
+    "polygon_count": 17,
+    "pred_logits_shape": [
+      20,
+      40
+    ],
+    "pred_coords_shape": [
+      20,
+      40,
+      2
+    ]
+  }
+}

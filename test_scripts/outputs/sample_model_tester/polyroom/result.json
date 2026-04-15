@@ -1,0 +1,12 @@
+{
+  "model": "polyroom",
+  "loaded": true,
+  "predicted": false,
+  "error": "predict failed: Phase 1 only guarantees load+weights validation; inference wiring is next.",
+  "diagnostics": {
+    "error": "Phase 1 only guarantees load+weights validation; inference wiring is next.",
+    "polyroom_weights_path": "C:\\Phase 1 - Civil agent\\vendors\\polyroom\\checkpoints",
+    "polyroom_model_module": "polyroom.models",
+    "polyroom_model_source": "local"
+  }
+}

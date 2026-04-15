@@ -19,7 +19,7 @@ def _run_pipeline_job(job_id: str, image_path: Path, mode: str, job_svc: JobServ
         job_svc.set_running(job_id, "stage0_input", 10.0)
         from backend.pipeline import run_pipeline
 
-        meta = run_pipeline(image_path, config_dir=PROJECT_ROOT / "config")
+        meta = run_pipeline(image_path, config_dir=PROJECT_ROOT / "config", mode_override=mode)
         # Preserve source image endpoint in results for the frontend viewer.
         metadata = dict(meta.get("metadata", {}))
         metadata["image_url"] = f"/jobs/{job_id}/image"

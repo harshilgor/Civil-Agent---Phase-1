@@ -1,0 +1,32 @@
+{
+  "model": "cubicasa",
+  "loaded": true,
+  "predicted": true,
+  "artifacts": {
+    "saved_rooms": "C:\\Phase 1 - Civil agent\\test_scripts\\outputs\\sample_model_tester\\cubicasa\\rooms.png",
+    "saved_walls": "C:\\Phase 1 - Civil agent\\test_scripts\\outputs\\sample_model_tester\\cubicasa\\walls.png",
+    "detected_room_classes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      11
+    ],
+    "room_logits_shape": [
+      12,
+      512,
+      672
+    ],
+    "boundary_logits_shape": [
+      21,
+      512,
+      672
+    ]
+  }
+}

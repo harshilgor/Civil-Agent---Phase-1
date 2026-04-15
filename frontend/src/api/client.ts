@@ -2,9 +2,10 @@ import type { JobSummary, PipelineResults } from "./types";
 
 const base = () => import.meta.env.VITE_API_URL ?? "";
 
-export async function uploadFloorplan(file: File): Promise<{ job_id: string }> {
+export async function uploadFloorplan(file: File, mode: "light" | "deep" = "light"): Promise<{ job_id: string }> {
   const fd = new FormData();
   fd.append("file", file);
+  fd.append("mode", mode);
   const res = await fetch(`${base()}/upload`, { method: "POST", body: fd });
   if (!res.ok) throw new Error(await res.text());
   return res.json();

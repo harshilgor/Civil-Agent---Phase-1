@@ -11,8 +11,7 @@ export function UploadPage() {
   const submit = async (file: File) => {
     setBusy(true);
     try {
-      void mode;
-      const { job_id } = await uploadFloorplan(file);
+      const { job_id } = await uploadFloorplan(file, mode);
       nav(`/processing/${job_id}`);
     } finally {
       setBusy(false);

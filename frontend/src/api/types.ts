@@ -40,4 +40,5 @@ export interface PipelineResults {
   boundaries: Edge[];
   scale: ScaleResult | null;
   metadata: Record<string, unknown>;
+  mode?: "light" | "deep";
 }

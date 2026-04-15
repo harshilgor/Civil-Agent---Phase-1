@@ -1,0 +1,12 @@
+{
+  "model": "raster_to_graph",
+  "loaded": true,
+  "predicted": false,
+  "error": "predict failed: Phase 1 only guarantees load+weights validation; inference wiring is next.",
+  "diagnostics": {
+    "error": "Phase 1 only guarantees load+weights validation; inference wiring is next.",
+    "raster_to_graph_weights_path": "C:\\Phase 1 - Civil agent\\vendors\\raster_to_graph\\weights",
+    "raster_to_graph_model_module": "models",
+    "raster_to_graph_model_source": "local"
+  }
+}
