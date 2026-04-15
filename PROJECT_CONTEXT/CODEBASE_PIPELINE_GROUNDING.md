@@ -3,19 +3,19 @@
 ## Why this document exists
 
 This is the implementation grounding map for coding agents working in this repository.
-It links each existing folder and file in the skeleton to:
+It links the current folders and files to:
 
 - product expectations from `PROJECT_CONTEXT/PRODUCT_BRIEF.md`
 - technical pipeline responsibilities from `PROJECT_CONTEXT/TECHNICAL_BRIEF.md`
-- current implementation status in the skeleton (implemented vs stub)
+- current implementation status (implemented vs stub)
 
-If a requested change does not map to an existing file path in this document, do not create new structure unless explicitly approved.
+If a requested change does not map to an existing path in this document, you may extend or simplify structure when it clearly improves correctness, maintainability, or delivery speed and remains aligned with the product and technical briefs.
 
-## Non-negotiable repository constraints
+## Repository constraints and flexibility policy
 
-- Populate the existing skeleton; do not expand or contract structure by default.
-- No new folders unless explicitly requested.
-- Do not delete existing files to "simplify" architecture.
+- Prefer reusing existing structure first, then expand or contract when there is a clear engineering reason.
+- New folders/files are allowed when they reduce coupling, remove ambiguity, or implement missing brief requirements.
+- Removing or consolidating files is allowed when it simplifies architecture without losing required behavior.
 - Keep work aligned with Phase 1 scope only.
 - Do not build out-of-scope features listed in `PRODUCT_BRIEF.md`.
 
@@ -340,7 +340,7 @@ Everything below maps existing files to this flow.
 - `frontend/tests/canvas/coordinate_transform.test.ts`: transform math verification.
 - `frontend/tests/integration/smoke.test.ts`: baseline integration smoke.
 
-## Known skeleton reality vs target architecture
+## Known current reality vs target architecture
 
 The file layout is mostly aligned to the technical brief, but implementation depth is intentionally incomplete:
 
@@ -349,7 +349,7 @@ The file layout is mostly aligned to the technical brief, but implementation dep
 - `vendors/` is present but empty
 - worker path is scaffolded but not fully productionized
 
-This means future work should prioritize filling implementation in existing files, not inventing parallel structures.
+This means future work should prioritize filling implementation in existing files, but structural changes are acceptable when they provide a justified, brief-aligned improvement.
 
 ## Implementation routing by feature request
 

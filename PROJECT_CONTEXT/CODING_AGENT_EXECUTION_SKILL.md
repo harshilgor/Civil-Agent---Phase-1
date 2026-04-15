@@ -1,14 +1,13 @@
 ---
-name: civil-agent-skeleton-execution
-description: Actionable workflow for implementing Civil Agent features strictly within the existing skeleton. Use when coding backend pipeline stages, API routes, frontend canvas/panels, tests, and exports without creating new folders or parallel architectures.
+name: civil-agent-execution-flexible
+description: Actionable workflow for implementing Civil Agent features with a structure-first mindset that is flexible. Use when coding backend pipeline stages, API routes, frontend canvas/panels, tests, and exports, including justified refactors that expand or contract project structure.
 ---
 
-# Civil Agent Skeleton Execution Skill
+# Civil Agent Flexible Execution Skill
 
 ## Mission
 
-Implement Phase 1 features by filling existing files only.
-Do not expand or contract the repository skeleton unless explicitly instructed.
+Implement Phase 1 features with bias toward existing files first, while allowing justified structural evolution when needed.
 
 ## Source-of-truth documents
 
@@ -18,10 +17,11 @@ Read these before coding:
 2. `PROJECT_CONTEXT/TECHNICAL_BRIEF.md`
 3. `PROJECT_CONTEXT/CODEBASE_PIPELINE_GROUNDING.md`
 
-## Hard constraints
+## Constraints and flexibility rules
 
-- Do not add new folders by default.
-- Do not delete existing structure.
+- Prefer existing paths first before creating or removing structure.
+- Add folders/files when they improve separation of concerns, readability, testing, or feature delivery.
+- Remove/consolidate structure when it reduces duplication and preserves required behavior.
 - Keep architecture consistent with current stage folders and route modules.
 - Preserve Phase 1 scope boundaries.
 - Prefer deterministic, config-driven behavior over hardcoded values.
@@ -30,7 +30,7 @@ Read these before coding:
 
 1. **Locate responsibility first**
    - Map requested behavior to exact existing files via `CODEBASE_PIPELINE_GROUNDING.md`.
-   - If no file mapping exists, stop and ask for permission before adding structure.
+   - If no mapping exists or mapping is weak, define the minimal structural change that cleanly fits the briefs, then implement it.
 
 2. **Touch minimum viable surface**
    - Modify only the files necessary for the requested behavior.
@@ -112,8 +112,8 @@ Read these before coding:
 
 Before finishing any task:
 
-- Ensure changed code is in existing mapped files.
-- Confirm no accidental new directories were introduced.
+- Ensure changed code is either in mapped files or in intentionally added paths with clear purpose.
+- Confirm any new/removed directories are intentional and documented in the change summary.
 - Confirm route payloads still match `frontend/src/api/types.ts`.
 - Verify scale-none behavior still yields pixel-unit-safe handling.
 - Verify confidence tier naming is unchanged: `high`, `needs_review`, `low_confidence`.
@@ -122,6 +122,7 @@ Before finishing any task:
 ## Anti-patterns to avoid
 
 - Adding parallel "v2" folders instead of filling current modules.
+- Restructuring the tree without a concrete engineering reason.
 - Replacing deterministic fusion with learned fusion (out of Phase 1 scope).
 - Blocking user edits on topology violations (must warn, not hard-fail).
 - Hardcoding model input sizes globally instead of handling per adapter.
@@ -134,5 +135,5 @@ A task is done only when:
 1. behavior is implemented in the proper existing files
 2. contracts remain consistent across backend and frontend
 3. obvious regressions are checked via tests or targeted verification
-4. changes remain within skeleton and Phase 1 boundaries
+4. structural changes (if any) are justified, minimal, and Phase 1 aligned
 
