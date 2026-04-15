@@ -59,3 +59,7 @@ def get_export_service() -> ExportService:
 
 def get_result_store() -> ResultStore:
     return get_services().results
+
+
+def get_image_store() -> ImageStore:
+    return get_services().images
