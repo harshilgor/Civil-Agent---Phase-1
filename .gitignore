@@ -1,4 +1,7 @@
-# Dataset split directories (any depth)
-train/
-val/
-test/
+# Stru3d dataset splits (large; keep local only)
+data/stru3d/train/
+data/stru3d/val/
+data/stru3d/test/
+
+# Dependencies (install with npm / pnpm / yarn)
+node_modules/
