@@ -1,0 +1,4 @@
+# Dataset split directories (any depth)
+train/
+val/
+test/
