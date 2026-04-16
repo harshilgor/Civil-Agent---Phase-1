@@ -5,3 +5,11 @@ data/stru3d/test/
 
 # Dependencies (install with npm / pnpm / yarn)
 node_modules/
+
+# Model weights / checkpoints (>100 MiB; not allowed as normal Git blobs on GitHub)
+vendors/cubicasa/weights/
+vendors/tf2_deepfloorplan/weights/
+vendors/roomformer/checkpoints/
+vendors/polyroom/checkpoints/
+vendors/raster_to_graph/weights/
+vendors/floorplan_transformation/weights/
