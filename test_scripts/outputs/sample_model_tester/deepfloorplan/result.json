@@ -2,25 +2,34 @@
   "model": "deepfloorplan",
   "loaded": true,
   "predicted": true,
+  "errors": [],
+  "traceback": null,
   "artifacts": {
-    "saved_rooms": "C:\\Phase 1 - Civil agent\\test_scripts\\outputs\\sample_model_tester\\deepfloorplan\\rooms.png",
-    "saved_boundaries": "C:\\Phase 1 - Civil agent\\test_scripts\\outputs\\sample_model_tester\\deepfloorplan\\boundaries.png",
+    "saved_rooms": "rooms.png",
+    "saved_boundaries": "boundaries.png",
     "detected_room_classes": [
+      0,
       1,
+      2,
       3,
+      4,
       6,
       7,
       8
     ],
     "room_logits_shape": [
-      619,
-      800,
+      600,
+      309,
       9
     ],
     "boundary_logits_shape": [
-      619,
-      800,
+      600,
+      309,
       3
     ]
-  }
+  },
+  "artifact_files": [
+    "rooms.png",
+    "boundaries.png"
+  ]
 }

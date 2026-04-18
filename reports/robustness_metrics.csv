@@ -1,0 +1,9 @@
+case_id,completeness_drop_from_clean,p1_confidence_drop,p2_confidence_drop,wall_iou_drop,ocr_accuracy_drop,human_review_clean,human_review_degraded
+raster_office_blur,0.0,0.0,-0.0899,,-0.8571,False,False
+raster_office_skew,0.0,0.0,-0.2025,,0.1429,False,False
+raster_office_crop,0.0,0.0,0.2589,,-0.8571,False,False
+raster_compressed_scan,0.0,0.0,0.0,,0.0,False,False
+raster_low_resolution,0.0,0.0,-0.1208,,0.0,False,False
+raster_missing_dimension_labels,0.0,0.0,0.0,0.0,-0.8571,False,False
+raster_ambiguous_unit_labels,0.0,0.0,0.0,0.0,-0.8571,False,False
+raster_no_grid_labels,0.0,0.0,0.0,0.0,0.1429,False,False

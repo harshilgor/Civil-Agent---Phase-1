@@ -1,12 +1,20 @@
 {
   "model": "raster_to_graph",
-  "loaded": true,
-  "predicted": false,
-  "error": "predict failed: Phase 1 only guarantees load+weights validation; inference wiring is next.",
-  "diagnostics": {
-    "error": "Phase 1 only guarantees load+weights validation; inference wiring is next.",
-    "raster_to_graph_weights_path": "C:\\Phase 1 - Civil agent\\vendors\\raster_to_graph\\weights",
-    "raster_to_graph_model_module": "models",
-    "raster_to_graph_model_source": "local"
-  }
+  "loaded": false,
+  "predicted": true,
+  "errors": [
+    "load failed: Weights directory exists but is empty (only placeholders): C:\\Phase 1 - Civil agent\\vendors\\raster_to_graph\\weights"
+  ],
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Phase 1 - Civil agent\\backend\\pipeline\\single_model_run.py\", line 254, in run_single_model\n    adapter.load()\n  File \"C:\\Phase 1 - Civil agent\\backend\\pipeline\\stage1_perception\\adapters\\raster_to_graph_adapter.py\", line 28, in load\n    weights = resolve_weights_path(chosen_weights, require_file=False)\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Phase 1 - Civil agent\\backend\\pipeline\\stage1_perception\\load_utils.py\", line 51, in resolve_weights_path\n    raise ModelLoadError(\nbackend.pipeline.stage1_perception.load_utils.ModelLoadError: Weights directory exists but is empty (only placeholders): C:\\Phase 1 - Civil agent\\vendors\\raster_to_graph\\weights\n",
+  "artifacts": {
+    "fallback_used": true,
+    "fallback_reason": "adapter load failed: Weights directory exists but is empty (only placeholders): C:\\Phase 1 - Civil agent\\vendors\\raster_to_graph\\weights",
+    "saved_density_map": "density_map.png",
+    "saved_polygons_overlay": "polygons_overlay.png",
+    "polygon_count": 0
+  },
+  "artifact_files": [
+    "density_map.png",
+    "polygons_overlay.png"
+  ]
 }

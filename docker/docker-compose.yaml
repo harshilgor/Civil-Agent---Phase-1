@@ -3,17 +3,11 @@ services:
     image: redis:7-alpine
     ports:
       - "6379:6379"
-
-  postgres:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: civil
-      POSTGRES_PASSWORD: civil
-      POSTGRES_DB: civil_agent
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   api:
     build:
@@ -24,13 +18,15 @@ services:
       - "8000:8000"
     environment:
       REDIS_URL: redis://redis:6379/0
-      DATABASE_URL: postgresql://civil:civil@postgres:5432/civil_agent
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
     depends_on:
-      - redis
-      - postgres
+      redis:
+        condition: service_healthy
     volumes:
       - ../config:/app/config:ro
       - ../backend:/app/backend:ro
+      - ../src:/app/src:ro
       - ../vendors:/app/vendors:ro
 
   worker:
@@ -40,21 +36,41 @@ services:
     image: civil-agent-worker:local
     environment:
       REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+    command: ["celery", "-A", "src.worker.celery_app", "worker",
+              "--loglevel=INFO", "--concurrency=1"]
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     volumes:
       - ../config:/app/config:ro
-      - ../backend:/app/backend:ro
+      - ../src:/app/src:ro
       - ../vendors:/app/vendors:ro
 
-  tf-worker:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile.tensorflow
-    image: civil-agent-tensorflow:local
-    volumes:
-      - ../config:/app/config:ro
-      - ../vendors/tf2_deepfloorplan:/app/vendors/tf2_deepfloorplan:ro
+  flower:
+    image: mher/flower:2.0
+    command:
+      - "celery"
+      - "--broker=redis://redis:6379/0"
+      - "flower"
+      - "--port=5555"
+      - "--basic_auth=${FLOWER_USER:-admin}:${FLOWER_PASSWORD:-changeme}"
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+    ports:
+      - "5555:5555"
+    depends_on:
+      redis:
+        condition: service_healthy
 
   frontend:
     build:
@@ -65,6 +81,3 @@ services:
       - "3000:80"
     depends_on:
       - api
-
-volumes:
-  postgres_data: {}

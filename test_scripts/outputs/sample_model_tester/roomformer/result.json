@@ -1,19 +1,20 @@
 {
   "model": "roomformer",
-  "loaded": true,
+  "loaded": false,
   "predicted": true,
+  "errors": [
+    "load failed: Weights path does not exist: C:\\Phase 1 - Civil agent\\vendors\\roomformer\\checkpoints\\roomformer_stru3d.pth"
+  ],
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Phase 1 - Civil agent\\backend\\pipeline\\single_model_run.py\", line 254, in run_single_model\n    adapter.load()\n  File \"C:\\Phase 1 - Civil agent\\backend\\pipeline\\stage1_perception\\adapters\\roomformer_adapter.py\", line 33, in load\n    weights = resolve_weights_path(chosen_weights, require_file=True)\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Phase 1 - Civil agent\\backend\\pipeline\\stage1_perception\\load_utils.py\", line 47, in resolve_weights_path\n    raise ModelLoadError(f\"Weights path does not exist: {path}\")\nbackend.pipeline.stage1_perception.load_utils.ModelLoadError: Weights path does not exist: C:\\Phase 1 - Civil agent\\vendors\\roomformer\\checkpoints\\roomformer_stru3d.pth\n",
   "artifacts": {
-    "saved_density_map": "C:\\Phase 1 - Civil agent\\test_scripts\\outputs\\sample_model_tester\\roomformer\\density_map.png",
-    "saved_polygons_overlay": "C:\\Phase 1 - Civil agent\\test_scripts\\outputs\\sample_model_tester\\roomformer\\polygons_overlay.png",
-    "polygon_count": 17,
-    "pred_logits_shape": [
-      20,
-      40
-    ],
-    "pred_coords_shape": [
-      20,
-      40,
-      2
-    ]
-  }
+    "fallback_used": true,
+    "fallback_reason": "adapter load failed: Weights path does not exist: C:\\Phase 1 - Civil agent\\vendors\\roomformer\\checkpoints\\roomformer_stru3d.pth",
+    "saved_density_map": "density_map.png",
+    "saved_polygons_overlay": "polygons_overlay.png",
+    "polygon_count": 0
+  },
+  "artifact_files": [
+    "density_map.png",
+    "polygons_overlay.png"
+  ]
 }

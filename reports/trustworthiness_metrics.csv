@@ -1,0 +1,5 @@
+check,result,detail
+confidence_vs_degradation,partial,"Structured/IFC confidence is driven by completeness scorer, not input SNR; CV raster shows variable completeness across degradations — see robustness_metrics.csv."
+warnings_vs_evidence,partial,Completeness scorer appends missing_field warnings; CV path does not uniformly add degradation-specific warnings (gap).
+llm_budget_enforcement,not_exercised,ReconciliationBudget exists but is not invoked from CVPipeline; budget metrics are zero / N/A.
+high_confidence_nonsense_guard,manual_review_required,No automated check prevents high Phase 2 confidence when span_map is irregular; flagged in structural_sanity_notes when triggered.

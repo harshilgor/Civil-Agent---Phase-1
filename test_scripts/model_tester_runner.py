@@ -17,10 +17,14 @@ from backend.pipeline.core.registry import registry  # noqa: E402
 from backend.pipeline.stage1_perception import adapters  # noqa: F401, E402
 from backend.pipeline.single_model_run import (  # noqa: E402
     KNOWN_SINGLE_MODELS,
+    get_active_model_name,
     run_single_model,
 )
 
-MODEL_ORDER = list(KNOWN_SINGLE_MODELS)
+try:
+    MODEL_ORDER = [get_active_model_name()]
+except Exception:
+    MODEL_ORDER = list(KNOWN_SINGLE_MODELS)
 
 
 def _save_json(path: Path, payload: dict[str, Any]) -> None:
@@ -80,14 +84,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--image",
         type=Path,
-        default=ROOT / "sample_model_tester_img.png",
+        default=ROOT / "sample_model_tester_img_2.png",
         help="Sample image path. Default expects sample_model_tester_img.png in repo root.",
     )
     parser.add_argument(
         "--models",
         nargs="+",
         default=MODEL_ORDER,
-        help=f"Models to run. Default: {' '.join(MODEL_ORDER)}",
+        help=f"Models to run. Default: {' '.join(MODEL_ORDER)} (active branch model).",
     )
     return parser.parse_args()
 
