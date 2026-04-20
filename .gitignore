@@ -1,0 +1,78 @@
+# === Python ===
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+
+# === Model weights — NEVER commit. Fetched via WEIGHTS_BACKEND (local|s3). ===
+*.pth
+*.pkl
+*.ckpt
+*.safetensors
+*.h5
+*.pb
+*.onnx
+*.bin
+*.tflite
+
+# TensorFlow checkpoint shards
+*.data-?????-of-?????
+*.index
+*.meta
+checkpoint
+
+# Weights/checkpoint directories (top-level and nested)
+weights/
+checkpoints/
+vendors/**/weights/
+vendors/**/checkpoints/
+vendors/**/log/
+vendors/**/log.zip
+vendors/**/checkpoints.zip
+
+# === Compiled extension build artifacts ===
+*.so
+*.o
+*.obj
+*.pyd
+build/
+vendors/**/ops/build/
+vendors/**/ops/**/*.egg-info/
+vendors/**/ops/dist/
+
+# === Large benchmark fixtures (hosted outside Git) ===
+data/*.ifc
+data/**/*.ifc
+data/*.dwg
+data/*.pdf
+# Exception: small JSON samples stay tracked
+!data/samples/
+
+# === Env / secrets ===
+.env
+.env.local
+.env.*.local
+
+# === OS / IDE ===
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# === Local weight cache (WEIGHTS_BACKEND=local) ===
+weights-cache/
+/var/civil-agent/weights/
+
+# === Frontend (covered by frontend/.gitignore but belt-and-braces) ===
+node_modules/
+.next/
+dist/
+
+# === Cleanup artifacts ===
+pre-rewrite-refs.txt
+cleanup-paths.txt

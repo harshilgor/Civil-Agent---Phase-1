@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "civil-agent"
-version = "0.2.0"
+version = "0.3.0"
 description = "Input / Building Understanding Layer — converts architectural inputs to a machine-readable Building Graph"
 requires-python = ">=3.11"
 
@@ -39,6 +39,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# TensorFlow is intentionally absent; DeepFloorplan removed in Phase 1 cleanup.
 ml = [
     "torch>=2.4.0",
     "torchvision>=0.19.0",
@@ -46,7 +47,6 @@ ml = [
     "ultralytics>=8.3.0",
     "paddleocr>=2.9.0",
     "paddlepaddle>=2.6.0",
-    "Pillow>=10.4.0",
     "pdf2image>=1.17.0",
 ]
 ifc = [
@@ -72,7 +72,6 @@ dev = [
     "pytest-cov>=5.0.0",
     "ruff>=0.7.0",
     "mypy>=1.11.0",
-    "httpx>=0.27.0",
 ]
 
 [tool.setuptools.packages.find]
