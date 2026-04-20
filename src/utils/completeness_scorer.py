@@ -13,8 +13,38 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from src.schema.building_graph import BuildingGraph, CompletenessScore
-from src.schema.enums import DetectorSource
+from src.schema.enums import DetectorSource, InputSource
 from src.utils.geometry import polygon_area_mm2
+
+
+# ---------------------------------------------------------------------------
+# Per-channel detector expectations.
+#
+# The completeness scorer penalises an element subsystem only when the input
+# channel is *expected* to have populated it.  For Channel A (structured
+# form) and Channel B (parsed CAD / IFC) the user supplies every element
+# directly — there is no ML detector that could have produced openings,
+# column candidates, or fine-grained cores, so their absence on those
+# channels is a by-design omission, not a deficit.  Channel C (CV pipeline)
+# is the only one that pays the cost when an optional detector didn't run.
+#
+# Callers that need the element in every graph (e.g. geometry closure) keep
+# scoring normally; this set governs only the *detector_coverage* axis and
+# the ``missing_subsystems`` list on :class:`CompletenessScore`.
+# ---------------------------------------------------------------------------
+
+_USER_AUTHORITATIVE_CHANNELS: frozenset[InputSource] = frozenset(
+    {
+        InputSource.STRUCTURED_FORM,
+        InputSource.DXF_FILE,
+        InputSource.DWG_FILE,
+        InputSource.IFC_FILE,
+    }
+)
+
+
+def _is_user_authoritative(bg: BuildingGraph) -> bool:
+    return bg.metadata.input_source in _USER_AUTHORITATIVE_CHANNELS
 
 
 # Section weights — must sum to 1.0
@@ -60,7 +90,7 @@ class CompletenessScorer:
         sections["grid"] = self._score_grid(bg, warnings)
         sections["walls"] = self._score_walls(bg, missing, warnings)
         sections["rooms"] = self._score_rooms(bg, missing, warnings)
-        sections["openings"] = self._score_openings(bg, warnings)
+        sections["openings"] = self._score_openings(bg, warnings, missing)
         sections["column_candidates"] = self._score_columns(bg, warnings)
         sections["cores"] = self._score_cores(bg, warnings)
         sections["facade"] = self._score_facade(bg, missing, warnings)
@@ -160,10 +190,21 @@ class CompletenessScorer:
         return 0.3 + (0.2 if label_ok else 0.0) + (0.2 if type_ok else 0.0) + (0.3 if closed_ok else 0.0)
 
     @staticmethod
-    def _score_openings(bg: BuildingGraph, warnings: list[str]) -> float:
+    def _score_openings(
+        bg: BuildingGraph, warnings: list[str], missing: list[str]
+    ) -> float:
         openings = bg.openings
         if not openings:
+            if _is_user_authoritative(bg):
+                # Channel A / B never enumerate doors & windows; absence is a
+                # by-design omission, not a detection failure.  The graph is
+                # still considered complete on this axis so the review gate
+                # doesn't flag a clean structured-form submission.
+                return 1.0
+            # Channel C (CV pipeline) genuinely should have produced openings
+            # if the symbol detector ran.
             warnings.append("No openings (doors/windows) detected")
+            missing.append("openings (symbol_detector did not contribute)")
             return 0.0
         associated = all(o.wall_id and o.wall_id != "unknown" for o in openings)
         return 1.0 if associated else 0.5
@@ -265,18 +306,29 @@ def _aggregate(sections: dict[str, float], keys: tuple[str, ...]) -> float:
 def _collect_missing_subsystems(bg: BuildingGraph, report: CompletenessReport) -> list[str]:
     """Flag detector subsystems that produced nothing for this graph.
 
-    These come from two places:
+    Only the CV pipeline (Channel C) is expected to invoke ML detectors, so
+    this list stays empty for user-authoritative channels (STRUCTURED_FORM /
+    DXF_FILE / DWG_FILE / IFC_FILE) regardless of whether the graph happens
+    to contain openings or columns.  A Channel-A submission that legitimately
+    has no doors and no user-supplied columns is not missing a detector —
+    no detector was ever expected to run.
 
-    1. Whole sections that scored zero (``_score_openings`` / ``_score_columns``
-       emit "No openings detected" or "No column candidates identified").
-    2. Provenance inspection: elements stamped by the CubiCasa hourglass
-       without matching openings from the symbol detector imply the symbol
-       detector did not run, so ``SYMBOL_DETECTOR`` is missing.
+    For Channel C, flags come from two places:
+
+    1. Whole sections that scored zero (``_score_openings`` /
+       ``_score_columns`` emit "No openings detected" or "No column
+       candidates identified").
+    2. Provenance inspection (future): elements stamped by the CubiCasa
+       hourglass without matching openings imply the symbol detector did
+       not run.
 
     The list is human-readable detector-source names (matching the
     :class:`DetectorSource` enum values), which is what the Phase-3
     assumption-confidence adjuster expects.
     """
+
+    if _is_user_authoritative(bg):
+        return []
 
     missing: list[str] = []
     section_scores = report.section_scores

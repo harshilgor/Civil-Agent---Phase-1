@@ -41,6 +41,51 @@ def pytest_collection_modifyitems(config, items):  # noqa: ARG001
             if marker_name in item.keywords:
                 item.add_marker(skip_marker)
 
+
+# ---------------------------------------------------------------------------
+# Celery eager mode + async job store reset.
+#
+# Step 5 introduces real Celery tasks for Channels B and C.  Tests should
+# never touch a live broker — we flip ``task_always_eager`` for the whole
+# session so ``.delay()`` runs inline, and reset the module-level async
+# job store between tests so state doesn't leak.
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture(autouse=True, scope="session")
+def _celery_eager_mode():
+    try:
+        from src.worker.celery_app import celery_app
+    except Exception:
+        yield
+        return
+    if celery_app is None:
+        yield
+        return
+    prev_eager = celery_app.conf.task_always_eager
+    prev_prop = celery_app.conf.task_eager_propagates
+    celery_app.conf.task_always_eager = True
+    celery_app.conf.task_eager_propagates = True
+    try:
+        yield
+    finally:
+        celery_app.conf.task_always_eager = prev_eager
+        celery_app.conf.task_eager_propagates = prev_prop
+
+
+@pytest.fixture(autouse=True)
+def _reset_async_job_store():
+    try:
+        from src.api import async_job_store
+    except Exception:
+        yield
+        return
+    async_job_store._reset_for_tests()
+    try:
+        yield
+    finally:
+        async_job_store._reset_for_tests()
+
 from src.schema.building_graph import (
     Bay,
     BuildingGraph,

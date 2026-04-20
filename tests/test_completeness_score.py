@@ -47,17 +47,33 @@ class TestBuildCompletenessScore:
         assert score.geometry >= 0.85
         assert score.semantics >= 0.85
 
-    def test_channel_a_detector_coverage_low_no_openings(self) -> None:
-        """With zero openings and no cores, detector_coverage should be well below 1.0."""
+    def test_channel_a_detector_coverage_not_penalised(self) -> None:
+        """Channel A has no ML detectors; detector_coverage must stay 1.0.
+
+        Structured-form input is user-authoritative — the user typed every
+        element in themselves.  SYMBOL_DETECTOR and YOLO_SEG were never
+        supposed to run, so flagging their absence as a deficit would
+        incorrectly route clean submissions to the review queue.
+        """
 
         graph = GraphBuilder().from_structured_input(_base_request())
         score = build_completeness_score(graph)
-        assert score.detector_coverage < 1.0
+        assert score.detector_coverage == 1.0
 
-    def test_missing_subsystems_includes_symbol_detector(self) -> None:
+    def test_missing_subsystems_empty_for_channel_a(self) -> None:
+        """Channel A should produce an empty missing_subsystems list."""
+
         graph = GraphBuilder().from_structured_input(_base_request())
         score = build_completeness_score(graph)
-        assert DetectorSource.SYMBOL_DETECTOR.value in score.missing_subsystems
+        assert score.missing_subsystems == []
+        assert DetectorSource.SYMBOL_DETECTOR.value not in score.missing_subsystems
+
+    def test_channel_a_overall_at_or_near_ceiling(self) -> None:
+        """With detector_coverage at 1.0, overall should sit at the ceiling."""
+
+        graph = GraphBuilder().from_structured_input(_base_request())
+        score = build_completeness_score(graph)
+        assert score.overall >= 0.95
 
 
 class TestAnnotateWithCompleteness:

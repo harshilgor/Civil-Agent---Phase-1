@@ -29,16 +29,29 @@ def test_fully_populated_graph_scores_high(sample_building_graph: BuildingGraph)
 
 
 def test_empty_sections_warn_and_lower_score(sample_building_graph: BuildingGraph) -> None:
+    """Channel-C (image) input: stripped detectors must warn and score zero.
+
+    Openings are only penalised on channels where a detector was expected
+    to contribute — Channel A / B are user-authoritative and score 1.0
+    in their absence.  We flip ``input_source`` to ``FLOOR_PLAN_IMAGE``
+    here so the scorer applies its CV-pipeline expectations.
+    """
+
+    channel_c_metadata = sample_building_graph.metadata.model_copy(
+        update={"input_source": InputSource.FLOOR_PLAN_IMAGE}
+    )
     bg = sample_building_graph.model_copy(update={
         "column_candidates": [],
         "openings": [],
         "cores": [],
+        "metadata": channel_c_metadata,
     })
     scorer = CompletenessScorer()
     report = scorer.score(bg)
     assert any("column" in w.lower() for w in report.warnings)
     assert any("opening" in w.lower() for w in report.warnings)
     assert report.section_scores["column_candidates"] == 0.0
+    assert report.section_scores["openings"] == 0.0
 
 
 def test_missing_grid_warns(sample_building_graph: BuildingGraph) -> None:
