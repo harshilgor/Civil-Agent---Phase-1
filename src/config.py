@@ -45,6 +45,13 @@ class Settings(BaseSettings):
     flower_password: str = "changeme"
 
     # --- CV Model paths ---
+    # Authoritative source for every model the perception pipeline can load.
+    # See backend/weights/manifest.py for the schema.
+    weights_manifest_path: Path = _PROJECT_ROOT / "config" / "weights_manifest.yaml"
+
+    # Deprecated direct-path shims retained so the Celery worker (to be
+    # migrated in Step 5) still imports cleanly.  Prefer the weights manifest
+    # + :class:`backend.weights.WeightsLoader` for any new wiring.
     wall_segmenter_weights: Optional[Path] = None
     symbol_detector_weights: Optional[Path] = None
 

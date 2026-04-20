@@ -2,7 +2,44 @@
 
 from __future__ import annotations
 
+import os
+
 import pytest
+
+
+# ---------------------------------------------------------------------------
+# Conditional-skip hooks for infra-dependent markers.
+#
+# Tests that need live infrastructure are marked in-module (e.g. with
+# ``@pytest.mark.requires_redis``).  CI opts in by exporting the matching
+# ``RUN_REQUIRES_*`` env var; local dev runs skip them by default so they
+# never silently block a pytest session.
+# ---------------------------------------------------------------------------
+
+_INFRA_MARKERS = {
+    "requires_redis": (
+        "RUN_REQUIRES_REDIS",
+        "needs a live Redis broker — set RUN_REQUIRES_REDIS=1 to run",
+    ),
+    "requires_gpu": (
+        "RUN_REQUIRES_GPU",
+        "needs a CUDA-capable GPU — set RUN_REQUIRES_GPU=1 to run",
+    ),
+    "requires_weights": (
+        "RUN_REQUIRES_WEIGHTS",
+        "needs real model weights on disk — set RUN_REQUIRES_WEIGHTS=1 to run",
+    ),
+}
+
+
+def pytest_collection_modifyitems(config, items):  # noqa: ARG001
+    for marker_name, (env_var, reason) in _INFRA_MARKERS.items():
+        if os.environ.get(env_var, "").lower() in {"1", "true", "yes"}:
+            continue
+        skip_marker = pytest.mark.skip(reason=reason)
+        for item in items:
+            if marker_name in item.keywords:
+                item.add_marker(skip_marker)
 
 from src.schema.building_graph import (
     Bay,

@@ -82,6 +82,14 @@ include = ["src*", "backend*"]
 pythonpath = ["."]
 testpaths = ["tests"]
 filterwarnings = ["ignore::DeprecationWarning"]
+# --strict-markers fails the run on unregistered markers, which catches typos
+# like ``requires_reids`` before they quietly disable coverage of a real test.
+addopts = ["--strict-markers"]
+markers = [
+    "requires_redis: test requires a live Redis broker (Celery); skipped unless RUN_REQUIRES_REDIS=1",
+    "requires_gpu: test requires a CUDA-capable GPU; skipped unless RUN_REQUIRES_GPU=1",
+    "requires_weights: test requires real model weights on disk; skipped unless RUN_REQUIRES_WEIGHTS=1",
+]
 
 [tool.ruff]
 target-version = "py311"

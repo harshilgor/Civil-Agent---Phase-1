@@ -35,6 +35,11 @@ vendors/**/log/
 vendors/**/log.zip
 vendors/**/checkpoints.zip
 
+# Exception: backend/weights/ is the *source* package for the manifest-driven
+# loader (Python code, not model artefacts) and must stay tracked.
+!backend/weights/
+!backend/weights/**/*.py
+
 # === Compiled extension build artifacts ===
 *.so
 *.o

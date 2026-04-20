@@ -1,0 +1,111 @@
+# Civil Agent — Weights Manifest
+#
+# Single source of truth for every ML model the perception pipeline is willing
+# to load.  See backend/weights/manifest.py for schema definitions.
+#
+# Per Phase 1 Q&A:
+#   * CubiCasa hourglass is the residential-MVP wall segmenter (enabled).
+#   * SMP U-Net entry is shipped disabled; flip `enabled` once the proper
+#     CubiCasa5K-trained checkpoint lands — no code changes required.
+#   * YOLO-Seg and symbol detector slots are shipped disabled.  When they are
+#     off, the completeness scorer records the missing subsystem and the
+#     confidence on affected elements drops.  No stage fails.
+
+schema_version: "1.0.0"
+
+models:
+  wall_segmenter_residential:
+    enabled: true
+    architecture: cubicasa_hg
+    model_id: cubicasa_hg_v1
+    model_version: "1.0.0"
+    filename: cubicasa_hg_v1.pkl
+    # sha256 / size_bytes are populated by scripts/fetch_weights.py --freeze
+    # against the uploaded artefact so we can enforce integrity in CI.
+    sha256: null
+    size_bytes: null
+    num_classes: 44
+    description: >-
+      CubiCasa hourglass trained on CubiCasa5K.  Single residential-MVP wall
+      segmenter.  The loader resizes the head from the 51-class pretraining
+      output to the 44-class inference output.
+    params:
+      bootstrap_n_classes: 51
+      num_classes: 44
+      n_rooms: 12
+      n_icons: 11
+      tta_rotations: 4
+      split_prediction: true
+    source:
+      # Vendored checkpoint path, honoured when the file is bundled in the
+      # working tree (dev convenience).  Not checked into git.
+      local_path: vendors/cubicasa/weights/cubicasa_hg_v1.pkl
+      s3_key: models/wall_segmenter/cubicasa_hg_v1.pkl
+
+  wall_segmenter_commercial:
+    enabled: false
+    architecture: smp_unet
+    model_id: smp_unet_resnet34_cc5k
+    model_version: "0.2.0"
+    filename: smp_unet_resnet34_cc5k_v0_2.pth
+    sha256: null
+    size_bytes: null
+    num_classes: 7
+    description: >-
+      Segmentation-models-pytorch U-Net (ResNet-34 encoder) trained on the
+      commercial subset of CubiCasa5K.  Shipped disabled until the checkpoint
+      is available; when flipped on, the loader dispatches on architecture
+      and no other code changes.
+    params:
+      encoder_name: resnet34
+      encoder_weights: null
+      in_channels: 3
+      classes: 7
+    source:
+      local_path: vendors/smp_unet/weights/smp_unet_resnet34_cc5k_v0_2.pth
+      s3_key: models/wall_segmenter/smp_unet_resnet34_cc5k_v0_2.pth
+
+  yolo_wall_seg:
+    enabled: false
+    architecture: yolov8_seg
+    model_id: yolo_wall_seg
+    model_version: "0.1.0"
+    filename: yolo_wall_seg_v0_1.pt
+    sha256: null
+    size_bytes: null
+    description: >-
+      Fine-tuned YOLOv8-Seg used as a wall-mask fallback when the primary
+      segmenter confidence is low.  Optional — when disabled the completeness
+      scorer drops detector_coverage and wall_detection confidence.
+    params:
+      conf_threshold: 0.25
+      iou_threshold: 0.45
+      imgsz: 1024
+    source:
+      local_path: vendors/yolo_wall_seg/weights/yolo_wall_seg_v0_1.pt
+      s3_key: models/yolo_wall_seg/yolo_wall_seg_v0_1.pt
+
+  symbol_detector:
+    enabled: false
+    architecture: yolov8
+    model_id: symbol_detector
+    model_version: "0.1.0"
+    filename: symbol_detector_v0_1.pt
+    sha256: null
+    size_bytes: null
+    description: >-
+      YOLOv8 symbol detector (doors, windows, stairs, elevators).  Optional;
+      its output feeds the opening_detection confidence score.  When disabled
+      the opening list falls back to heuristic inference from wall gaps.
+    params:
+      conf_threshold: 0.30
+      iou_threshold: 0.50
+      imgsz: 1024
+      classes:
+        - door
+        - window
+        - stair
+        - elevator
+    source:
+      local_path: vendors/symbol_detector/weights/symbol_detector_v0_1.pt
+      s3_key: models/symbol_detector/symbol_detector_v0_1.pt
