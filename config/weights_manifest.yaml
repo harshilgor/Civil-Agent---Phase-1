@@ -24,14 +24,32 @@ models:
     # against the uploaded artefact so we can enforce integrity in CI.
     sha256: null
     size_bytes: null
+    # ``num_classes`` is the INFERENCE-time output width of the head.  The
+    # CubiCasa hourglass checkpoint was pretrained with 51 output classes
+    # (12 room types + 11 icon types + 28 aux channels in the original
+    # upstream recipe).  At inference the aux channels are discarded and
+    # the head is resized down to 44 = 12 room + 11 icon + 21 boundary
+    # logits consumed by split_prediction() in the vendor post-processor.
+    # See ``params.bootstrap_n_classes`` below.
     num_classes: 44
     description: >-
       CubiCasa hourglass trained on CubiCasa5K.  Single residential-MVP wall
       segmenter.  The loader resizes the head from the 51-class pretraining
       output to the 44-class inference output.
     params:
+      # --- Head-resize contract (read by backend.weights.loader._build_cubicasa_hg) ---
+      # The checkpoint's state_dict was saved against a 51-way final conv
+      # (``conv4_`` + ``upsample``); we rebuild those two layers with a
+      # 44-way output before calling ``load_state_dict``, which keeps every
+      # earlier-tensor name matching and discards the 7 aux channels that
+      # the Phase-1 post-processor does not consume.  If you bump this
+      # model to a checkpoint trained at a different width, update BOTH
+      # ``bootstrap_n_classes`` (what the .pkl was saved as) and the
+      # top-level ``num_classes`` (what the vendor post-processor expects).
       bootstrap_n_classes: 51
       num_classes: 44
+      # Room / icon channel counts consumed by split_prediction(); the
+      # remaining 21 channels in the 44-wide head are boundary logits.
       n_rooms: 12
       n_icons: 11
       tta_rotations: 4

@@ -90,15 +90,14 @@ class UnitInferrer:
                 evidence="no dimension strings provided — defaulting to MILLIMETERS",
             )
 
-        # Stage 1 — explicit markers
+        # Stage 1 — explicit markers.  An explicit unit marker on even one
+        # dimension string is authoritative (the docstring contract):
+        # mixed-unit floor plans are real (e.g. imperial wall thicknesses
+        # labelled alongside metric room sizes) and the cross-validator
+        # can't distinguish those from OCR errors without per-string
+        # attribution, so we trust the marker here.
         marker_result = self._detect_explicit_markers(dimension_strings)
         if marker_result is not None:
-            # Cross-validate even the "definitive" answer
-            numeric_values = _extract_numeric(dimension_strings)
-            validated = self._cross_validate(marker_result, numeric_values)
-            if validated is not None:
-                logger.info("unit_inferred", **validated.to_dict())
-                return validated
             logger.info("unit_inferred", **marker_result.to_dict())
             return marker_result
 
