@@ -15,6 +15,7 @@ from src.config import settings
 from .cad_upload import router as cad_router
 from .graph_output import router as graph_router
 from .image_upload import router as image_router
+from .jobs import router as jobs_router
 from .structural_output import router as structural_router
 from .structured_input import router as structured_router
 
@@ -25,6 +26,7 @@ api_router.include_router(cad_router, prefix="/building/upload", tags=["CAD Uplo
 api_router.include_router(image_router, prefix="/building/upload", tags=["Image Upload"])
 api_router.include_router(graph_router, prefix="/building", tags=["Building Graph"])
 api_router.include_router(structural_router, prefix="/building", tags=["Structural Graph"])
+api_router.include_router(jobs_router, prefix="/jobs", tags=["Jobs"])
 
 if settings.phase3_enabled:
     # Lazy import so the Phase 3 module (and its transitive deps) only loads

@@ -7,7 +7,8 @@ data and assembles a fully validated ``BuildingGraph``.
 from __future__ import annotations
 
 import time
-from typing import Any
+import uuid
+from typing import Any, Optional
 
 import structlog
 
@@ -29,6 +30,7 @@ from src.schema.building_graph import (
     WallSegment,
 )
 from src.schema.enums import (
+    BuildingType,
     CoreType,
     InputSource,
     MaterialPreference,
@@ -38,13 +40,44 @@ from src.schema.enums import (
     WallType,
 )
 from src.schema.input_models import StructuredInputRequest
+from src.schema.provenance import ProvenanceRecord
 from src.utils.completeness_scorer import annotate_with_completeness
 from src.utils.geometry import polygon_area_m2, polygon_perimeter_mm, rectangular_polygon_mm
 
+from .assumption_builder import (
+    _DEFAULT_WALL_THICKNESS_MM,
+    StructuredInputAssumptionBuilder,
+)
 from .grid_generator import GridGenerator
+from .provenance_helpers import structured_form_provenance
 from .span_calculator import SpanCalculator
 from .story_generator import StoryGenerator
 from .zone_classifier import ZoneClassifier
+
+
+# ---------------------------------------------------------------------------
+# Channel A helper: occupancy -> coarse BuildingType enum.
+#
+# ``BuildingType`` is the high-level physical family the VLM gap-filler would
+# emit from a CAD / image input; for Channel A we don't have perception at
+# all, so we derive it heuristically from the user-supplied ``OccupancyType``
+# program label.  This is exposed on ``metadata.inferred_building_type`` so
+# the Phase-3 load combinator treats Channel A graphs uniformly with the
+# other channels (it can special-case residential vs commercial without
+# having to branch on input_source).
+# ---------------------------------------------------------------------------
+
+_OCCUPANCY_TO_BUILDING_TYPE: dict[OccupancyType, BuildingType] = {
+    OccupancyType.OFFICE: BuildingType.COMMERCIAL,
+    OccupancyType.RETAIL: BuildingType.COMMERCIAL,
+    OccupancyType.HOSPITALITY: BuildingType.COMMERCIAL,
+    OccupancyType.RESIDENTIAL: BuildingType.RESIDENTIAL,
+    OccupancyType.INDUSTRIAL: BuildingType.INDUSTRIAL,
+    OccupancyType.EDUCATIONAL: BuildingType.INSTITUTIONAL,
+    OccupancyType.HEALTHCARE: BuildingType.INSTITUTIONAL,
+    OccupancyType.MIXED_USE: BuildingType.MIXED_USE,
+    OccupancyType.PARKING: BuildingType.COMMERCIAL,
+}
 
 logger = structlog.get_logger(__name__)
 
@@ -69,10 +102,37 @@ class GraphBuilder:
     # Channel A — structured form input
     # ------------------------------------------------------------------
 
-    def from_structured_input(self, request: StructuredInputRequest) -> BuildingGraph:
-        """Build a complete ``BuildingGraph`` from user-supplied parameters."""
+    def from_structured_input(
+        self,
+        request: StructuredInputRequest,
+        *,
+        run_id: Optional[str] = None,
+        job_id: Optional[str] = None,
+    ) -> BuildingGraph:
+        """Build a complete ``BuildingGraph`` from user-supplied parameters.
+
+        Args:
+            request: Validated structured-form payload.
+            run_id: Stable identifier of the current pipeline run, stamped on
+                every emitted element's :class:`ProvenanceRecord`.  Defaults
+                to ``job_id`` (or a freshly-minted uuid hex when neither is
+                supplied) so the provenance chain is always populated.
+            job_id: Persisted on ``metadata.job_id`` so the
+                ``GET /api/v1/jobs/{job_id}`` endpoint can look this graph
+                up.  Defaults to ``run_id`` when omitted.
+        """
         t0 = time.perf_counter()
-        assumptions: list[str] = []
+        run_id = run_id or job_id or uuid.uuid4().hex
+        job_id = job_id or run_id
+
+        provenance = structured_form_provenance(run_id=run_id)
+        assumption_builder = StructuredInputAssumptionBuilder()
+        assumption_builder.record_all_request_defaults(request)
+
+        # Legacy free-form strings kept populated for backward compatibility
+        # with older consumers; the structured register is the canonical
+        # source going forward.
+        assumptions_legacy: list[str] = []
 
         # 1. Grid
         grid = self.grid_generator.generate(
@@ -85,7 +145,7 @@ class GraphBuilder:
             x_constraints=request.x_constraints,
             y_constraints=request.y_constraints,
         )
-        assumptions.append("Generated regular structural grid from preferred bay sizes")
+        assumptions_legacy.append("Generated regular structural grid from preferred bay sizes")
 
         # 2. Floor area
         floor_area_m2 = (request.length_mm * request.width_mm) / 1_000_000
@@ -102,30 +162,42 @@ class GraphBuilder:
         )
         total_height = sum(s.floor_to_floor_mm for s in stories)
 
-        # 4. Perimeter walls
+        # 4. Perimeter walls (provenance-stamped)
         story_ids = [s.id for s in stories]
         walls = self._generate_perimeter_walls(
             request.length_mm,
             request.width_mm,
             story_ids,
             request.material_preference,
+            provenance=provenance,
         )
-        assumptions.append("Perimeter walls generated as facade type around building footprint")
+        assumption_builder.record_perimeter_wall_thickness(
+            _DEFAULT_WALL_THICKNESS_MM, is_default=True
+        )
+        assumption_builder.record_perimeter_wall_type(WallType.FACADE.value)
+        assumptions_legacy.append("Perimeter walls generated as facade type around building footprint")
 
         # 5. Facade
         facade = self._compute_facade(request.length_mm, request.width_mm)
 
-        # 6. Default room — one open-plan room per floor
+        # 6. Default rooms — provenance-stamped
         rooms = self._generate_default_rooms(
-            request.length_mm, request.width_mm, stories, request.occupancy_type
+            request.length_mm,
+            request.width_mm,
+            stories,
+            request.occupancy_type,
+            provenance=provenance,
         )
-        assumptions.append("Each floor treated as single open-plan zone")
+        assumption_builder.record_single_room_per_floor(request.num_stories)
+        assumptions_legacy.append("Each floor treated as single open-plan zone")
 
         # 7. Column candidates (wall-type aware — Gap 6)
         column_candidates = self.zone_classifier.identify_columns(grid, walls=walls)
+        for c in column_candidates:
+            c.provenance = provenance
 
         # 8. Cores from user placements (if any)
-        cores = self._cores_from_placements(request, story_ids)
+        cores = self._cores_from_placements(request, story_ids, provenance=provenance)
 
         # 9. Assemble project info
         project = ProjectInfo(
@@ -140,10 +212,32 @@ class GraphBuilder:
 
         elapsed = round(time.perf_counter() - t0, 4)
 
+        # Channel A is user-verified input with no ML inference, so every
+        # subsystem that *ran* scores a perfect 1.0.  ``opening_detection``
+        # is left ``None`` (not 0.0 or 1.0) because Channel A never
+        # enumerates doors or windows — the completeness scorer treats
+        # ``None`` as "subsystem did not participate" rather than "ran and
+        # failed".  The scorer then records ``SYMBOL_DETECTOR`` in the
+        # ``missing_subsystems`` list of ``metadata.completeness``.
+        confidence_scores = ConfidenceScores(
+            wall_detection=1.0,
+            room_classification=1.0,
+            grid_detection=1.0,
+            dimension_extraction=1.0,
+            opening_detection=None,
+            column_inference=1.0,
+            overall=1.0,
+        )
+
         metadata = BuildingMetadata(
+            job_id=job_id,
             input_source=InputSource.STRUCTURED_FORM,
-            confidence_scores=ConfidenceScores(overall=1.0),
-            assumptions_made=assumptions,
+            inferred_building_type=_OCCUPANCY_TO_BUILDING_TYPE.get(
+                request.occupancy_type, BuildingType.UNKNOWN
+            ),
+            confidence_scores=confidence_scores,
+            assumptions_made=assumptions_legacy,
+            assumption_register=assumption_builder.records,
             warnings=[],
             processing_time_seconds=elapsed,
         )
@@ -166,9 +260,12 @@ class GraphBuilder:
         logger.info(
             "building_graph_built",
             source="structured_input",
+            run_id=run_id,
+            job_id=job_id,
             stories=len(stories),
             walls=len(walls),
             columns=len(column_candidates),
+            assumptions=len(graph.metadata.assumption_register),
             elapsed_s=elapsed,
             completeness=graph.metadata.confidence_scores.overall,
         )
@@ -401,46 +498,23 @@ class GraphBuilder:
         story_ids: list[str],
         material: MaterialPreference,
         thickness_mm: float = 200,
+        *,
+        provenance: Optional[ProvenanceRecord] = None,
     ) -> list[WallSegment]:
         """Create four perimeter (facade) walls."""
         mat = material.value
+        common = {"thickness_mm": thickness_mm, "stories": story_ids, "material": mat}
+        if provenance is not None:
+            common["provenance"] = provenance
         return [
+            WallSegment(id="wall-S", type=WallType.FACADE, start=[0, 0], end=[length_mm, 0], **common),
             WallSegment(
-                id="wall-S",
-                type=WallType.FACADE,
-                start=[0, 0],
-                end=[length_mm, 0],
-                thickness_mm=thickness_mm,
-                stories=story_ids,
-                material=mat,
+                id="wall-E", type=WallType.FACADE, start=[length_mm, 0], end=[length_mm, width_mm], **common
             ),
             WallSegment(
-                id="wall-E",
-                type=WallType.FACADE,
-                start=[length_mm, 0],
-                end=[length_mm, width_mm],
-                thickness_mm=thickness_mm,
-                stories=story_ids,
-                material=mat,
+                id="wall-N", type=WallType.FACADE, start=[length_mm, width_mm], end=[0, width_mm], **common
             ),
-            WallSegment(
-                id="wall-N",
-                type=WallType.FACADE,
-                start=[length_mm, width_mm],
-                end=[0, width_mm],
-                thickness_mm=thickness_mm,
-                stories=story_ids,
-                material=mat,
-            ),
-            WallSegment(
-                id="wall-W",
-                type=WallType.FACADE,
-                start=[0, width_mm],
-                end=[0, 0],
-                thickness_mm=thickness_mm,
-                stories=story_ids,
-                material=mat,
-            ),
+            WallSegment(id="wall-W", type=WallType.FACADE, start=[0, width_mm], end=[0, 0], **common),
         ]
 
     @staticmethod
@@ -458,6 +532,8 @@ class GraphBuilder:
         width_mm: float,
         stories: list[Story],
         occupancy: OccupancyType,
+        *,
+        provenance: Optional[ProvenanceRecord] = None,
     ) -> list[Room]:
         """One open-plan room per storey covering the full footprint."""
         rooms: list[Room] = []
@@ -484,6 +560,7 @@ class GraphBuilder:
                     area_m2=round(area, 2),
                     story=story.id,
                     perimeter_mm=round(perimeter, 2),
+                    provenance=provenance,
                 )
             )
         return rooms
@@ -513,6 +590,8 @@ class GraphBuilder:
     def _cores_from_placements(
         request: StructuredInputRequest,
         story_ids: list[str],
+        *,
+        provenance: Optional[ProvenanceRecord] = None,
     ) -> list[Core]:
         """Convert user-specified core placements to ``Core`` objects."""
         cores: list[Core] = []
@@ -537,6 +616,7 @@ class GraphBuilder:
                     contains_elevator=cp.contains_elevator,
                     contains_stairs=cp.contains_stairs,
                     stories=story_ids,
+                    provenance=provenance,
                 )
             )
         return cores

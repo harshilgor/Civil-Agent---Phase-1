@@ -34,18 +34,23 @@ from .building_graph import (
     WallSegment,
 )
 from .input_models import (
+    AssumptionOverrideRequest,
+    AssumptionReviewItem,
     BuildingGraphResponse,
     CADUploadResponse,
     CorePlacement,
     GridModificationRequest,
     ImageUploadResponse,
+    JobReviewRequest,
     JobStatusResponse,
     StructuredInputRequest,
 )
 
 __all__ = [
     "SCHEMA_VERSION",
+    "AssumptionOverrideRequest",
     "AssumptionRecord",
+    "AssumptionReviewItem",
     "Bay",
     "BuildingGraph",
     "BuildingGraphResponse",
@@ -66,6 +71,7 @@ __all__ = [
     "GridSystem",
     "ImageUploadResponse",
     "InputSource",
+    "JobReviewRequest",
     "JobStatusResponse",
     "Location",
     "MaterialPreference",

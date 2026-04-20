@@ -131,3 +131,55 @@ class JobStatusResponse(BaseModel):
     progress_percent: float = Field(default=0, ge=0, le=100)
     result_id: Optional[str] = None
     error: Optional[str] = None
+    building_graph: Optional[BuildingGraph] = Field(
+        default=None,
+        description=(
+            "Populated on status=completed so the frontend can fetch "
+            "status and result in one round-trip."
+        ),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Assumption override / review
+# ---------------------------------------------------------------------------
+
+
+class AssumptionOverrideRequest(BaseModel):
+    """Payload for ``POST /api/v1/building/{project_id}/assumptions/{id}/override``."""
+
+    value: object = Field(..., description="Replacement value for the assumption")
+    source: str = Field(
+        ...,
+        min_length=1,
+        max_length=256,
+        description="Who/what is providing the override (e.g. 'reviewer:jdoe').",
+    )
+
+
+class AssumptionReviewItem(BaseModel):
+    """Single entry in the bulk-review payload."""
+
+    assumption_id: str = Field(..., min_length=1)
+    value: object
+    source: str = Field(..., min_length=1, max_length=256)
+
+
+class JobReviewRequest(BaseModel):
+    """Payload for ``POST /api/v1/jobs/{job_id}/review``."""
+
+    overrides: list[AssumptionReviewItem] = Field(
+        ...,
+        min_length=1,
+        description="Non-empty list of assumption overrides to apply.",
+    )
+    reviewer: Optional[str] = Field(
+        default=None,
+        max_length=256,
+        description=(
+            "Optional reviewer identity appended to every override's ``source`` "
+            "field so the audit trail records who approved each change."
+        ),
+    )
+
+

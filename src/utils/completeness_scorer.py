@@ -12,7 +12,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from src.schema.building_graph import BuildingGraph
+from src.schema.building_graph import BuildingGraph, CompletenessScore
+from src.schema.enums import DetectorSource
 from src.utils.geometry import polygon_area_mm2
 
 
@@ -226,14 +227,111 @@ def _walls_form_closed_perimeter(bg: BuildingGraph) -> float:
 HUMAN_REVIEW_THRESHOLD = 0.5
 
 
+# ---------------------------------------------------------------------------
+# CompletenessScore bridge
+#
+# The legacy ``CompletenessReport`` carries a flat ``overall_completeness``
+# scalar plus free-form missing-field / warning lists.  The Step-2 schema
+# upgraded metadata to carry a *structured* :class:`CompletenessScore`
+# (overall / geometry / semantics / detector_coverage + missing_subsystems);
+# this section bridges the two.  We fold the nine section scores into three
+# aggregates the optimiser and review UI actually reason about:
+#
+# * ``geometry``         — grid + walls + facade.  Is the physical shape
+#                          of the building fully reconstructed?
+# * ``semantics``        — rooms + stories + project.  Do the elements have
+#                          the labels and relationships required downstream?
+# * ``detector_coverage`` — openings + columns + cores.  Which optional
+#                          detectors actually ran and produced output for
+#                          this graph?  (YOLO-Seg / symbol detector absence
+#                          lowers this axis without failing the pipeline.)
+# ---------------------------------------------------------------------------
+
+_GEOMETRY_SECTIONS = ("grid", "walls", "facade")
+_SEMANTICS_SECTIONS = ("project_info", "stories", "rooms")
+_DETECTOR_SECTIONS = ("openings", "column_candidates", "cores")
+
+
+def _aggregate(sections: dict[str, float], keys: tuple[str, ...]) -> float:
+    total = 0.0
+    weight = 0.0
+    for k in keys:
+        w = _WEIGHTS.get(k, 0.0)
+        total += sections.get(k, 0.0) * w
+        weight += w
+    return total / weight if weight > 0 else 0.0
+
+
+def _collect_missing_subsystems(bg: BuildingGraph, report: CompletenessReport) -> list[str]:
+    """Flag detector subsystems that produced nothing for this graph.
+
+    These come from two places:
+
+    1. Whole sections that scored zero (``_score_openings`` / ``_score_columns``
+       emit "No openings detected" or "No column candidates identified").
+    2. Provenance inspection: elements stamped by the CubiCasa hourglass
+       without matching openings from the symbol detector imply the symbol
+       detector did not run, so ``SYMBOL_DETECTOR`` is missing.
+
+    The list is human-readable detector-source names (matching the
+    :class:`DetectorSource` enum values), which is what the Phase-3
+    assumption-confidence adjuster expects.
+    """
+
+    missing: list[str] = []
+    section_scores = report.section_scores
+
+    if section_scores.get("openings", 0.0) == 0.0 and not bg.openings:
+        # No openings at all -> neither YOLO nor the symbol detector
+        # contributed to this graph.
+        missing.append(DetectorSource.SYMBOL_DETECTOR.value)
+    if section_scores.get("column_candidates", 0.0) == 0.0 and not bg.column_candidates:
+        missing.append(DetectorSource.YOLO_SEG.value)
+
+    # De-dup while preserving insertion order.
+    seen: set[str] = set()
+    ordered: list[str] = []
+    for name in missing:
+        if name not in seen:
+            seen.add(name)
+            ordered.append(name)
+    return ordered
+
+
+def build_completeness_score(bg: BuildingGraph) -> CompletenessScore:
+    """Fold the nine-section :class:`CompletenessReport` into a
+    :class:`CompletenessScore` suitable for ``BuildingMetadata.completeness``.
+    """
+
+    report = CompletenessScorer().score(bg)
+    sections = report.section_scores
+    return CompletenessScore(
+        overall=report.overall_completeness,
+        geometry=_aggregate(sections, _GEOMETRY_SECTIONS),
+        semantics=_aggregate(sections, _SEMANTICS_SECTIONS),
+        detector_coverage=_aggregate(sections, _DETECTOR_SECTIONS),
+        missing_subsystems=_collect_missing_subsystems(bg, report),
+    )
+
+
 def annotate_with_completeness(bg: BuildingGraph) -> BuildingGraph:
     """Compute completeness and store it on ``bg.metadata``.
 
-    Also toggles a ``requires_human_review`` warning when overall
-    completeness is below ``HUMAN_REVIEW_THRESHOLD``.
+    Populates both the legacy scalar
+    (``metadata.confidence_scores.overall``) and the Step-2 structured
+    :class:`CompletenessScore` (``metadata.completeness``).  Also toggles a
+    ``requires_human_review`` warning when overall completeness is below
+    ``HUMAN_REVIEW_THRESHOLD``.
     """
     report = CompletenessScorer().score(bg)
     bg.metadata.confidence_scores.overall = report.overall_completeness
+    bg.metadata.completeness = CompletenessScore(
+        overall=report.overall_completeness,
+        geometry=_aggregate(report.section_scores, _GEOMETRY_SECTIONS),
+        semantics=_aggregate(report.section_scores, _SEMANTICS_SECTIONS),
+        detector_coverage=_aggregate(report.section_scores, _DETECTOR_SECTIONS),
+        missing_subsystems=_collect_missing_subsystems(bg, report),
+    )
     for w in report.warnings:
         if w not in bg.metadata.warnings:
             bg.metadata.warnings.append(w)
@@ -253,4 +351,5 @@ __all__ = [
     "CompletenessScorer",
     "HUMAN_REVIEW_THRESHOLD",
     "annotate_with_completeness",
+    "build_completeness_score",
 ]
