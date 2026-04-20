@@ -1,0 +1,267 @@
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0&display=swap");
+@import "tailwindcss";
+
+/* Design tokens load from layout.tsx (`colors_and_type.css`) before this file. */
+
+/* next/font CSS variables attach to <html>; merge with design tokens */
+:root {
+  --font-headline: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-label: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
+}
+
+@theme {
+  /* Colors → bg-*, text-*, border-* */
+  --color-surface: var(--surface);
+  --color-surface-bright: var(--surface-bright);
+  --color-surface-dim: var(--surface-dim);
+  --color-surface-container-lowest: var(--surface-container-lowest);
+  --color-surface-container-low: var(--surface-container-low);
+  --color-surface-container: var(--surface-container);
+  --color-surface-container-high: var(--surface-container-high);
+  --color-surface-container-highest: var(--surface-container-highest);
+  --color-surface-variant: var(--surface-variant);
+  --color-inverse-surface: var(--inverse-surface);
+  --color-inverse-on-surface: var(--inverse-on-surface);
+  --color-on-surface: var(--on-surface);
+  --color-on-background: var(--on-background);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-primary: var(--primary);
+  --color-primary-dim: var(--primary-dim);
+  --color-primary-container: var(--primary-container);
+  --color-primary-fixed: var(--primary-fixed);
+  --color-primary-fixed-dim: var(--primary-fixed-dim);
+  --color-on-primary: var(--on-primary);
+  --color-on-primary-container: var(--on-primary-container);
+  --color-on-primary-fixed: var(--on-primary-fixed);
+  --color-on-primary-fixed-variant: var(--on-primary-fixed-variant);
+  --color-secondary: var(--secondary);
+  --color-secondary-dim: var(--secondary-dim);
+  --color-secondary-container: var(--secondary-container);
+  --color-secondary-fixed: var(--secondary-fixed);
+  --color-secondary-fixed-dim: var(--secondary-fixed-dim);
+  --color-on-secondary: var(--on-secondary);
+  --color-on-secondary-container: var(--on-secondary-container);
+  --color-on-secondary-fixed: var(--on-secondary-fixed);
+  --color-on-secondary-fixed-variant: var(--on-secondary-fixed-variant);
+  --color-tertiary: var(--tertiary);
+  --color-tertiary-dim: var(--tertiary-dim);
+  --color-tertiary-container: var(--tertiary-container);
+  --color-tertiary-fixed: var(--tertiary-fixed);
+  --color-tertiary-fixed-dim: var(--tertiary-fixed-dim);
+  --color-on-tertiary: var(--on-tertiary);
+  --color-on-tertiary-container: var(--on-tertiary-container);
+  --color-on-tertiary-fixed: var(--on-tertiary-fixed);
+  --color-on-tertiary-fixed-variant: var(--on-tertiary-fixed-variant);
+  --color-fn-purple: var(--fn-purple);
+  --color-fn-purple-container: var(--fn-purple-container);
+  --color-fn-pink: var(--fn-pink);
+  --color-fn-pink-container: var(--fn-pink-container);
+  --color-fn-coral: var(--fn-coral);
+  --color-fn-coral-container: var(--fn-coral-container);
+  --color-fn-blue: var(--fn-blue);
+  --color-fn-blue-container: var(--fn-blue-container);
+  --color-success: var(--success);
+  --color-success-container: var(--success-container);
+  --color-warning: var(--warning);
+  --color-warning-container: var(--warning-container);
+  --color-error: var(--error);
+  --color-error-dim: var(--error-dim);
+  --color-error-container: var(--error-container);
+  --color-on-error: var(--on-error);
+  --color-on-error-container: var(--on-error-container);
+  --color-outline: var(--outline);
+  --color-outline-variant: var(--outline-variant);
+
+  /* Score classification colors */
+  --color-score-strong: var(--score-strong);
+  --color-score-strong-container: var(--score-strong-container);
+  --color-score-strong-on: var(--score-strong-on);
+  --color-score-secondary: var(--score-secondary);
+  --color-score-secondary-container: var(--score-secondary-container);
+  --color-score-secondary-on: var(--score-secondary-on);
+  --color-score-weak: var(--score-weak);
+  --color-score-weak-container: var(--score-weak-container);
+  --color-score-weak-on: var(--score-weak-on);
+  --color-score-forbidden: var(--score-forbidden);
+  --color-score-forbidden-container: var(--score-forbidden-container);
+  --color-score-forbidden-on: var(--score-forbidden-on);
+
+  /* Utilization */
+  --color-util-0: var(--util-0);
+  --color-util-20: var(--util-20);
+  --color-util-50: var(--util-50);
+  --color-util-70: var(--util-70);
+  --color-util-85: var(--util-85);
+  --color-util-95: var(--util-95);
+
+  /* Zone types */
+  --color-zone-core: var(--zone-core);
+  --color-zone-open-plate: var(--zone-open-plate);
+  --color-zone-corridor: var(--zone-corridor);
+  --color-zone-perimeter: var(--zone-perimeter);
+  --color-zone-transfer-risk: var(--zone-transfer-risk);
+  --color-zone-high-clearance: var(--zone-high-clearance);
+  --color-zone-double-height: var(--zone-double-height);
+
+  /* Gravity systems */
+  --color-sys-rc-flat: var(--sys-rc-flat);
+  --color-sys-rc-beam-slab: var(--sys-rc-beam-slab);
+  --color-sys-rc-one-way: var(--sys-rc-one-way);
+  --color-sys-rc-two-way: var(--sys-rc-two-way);
+  --color-sys-pt-slab: var(--sys-pt-slab);
+  --color-sys-steel-beam-col: var(--sys-steel-beam-col);
+  --color-sys-steel-composite: var(--sys-steel-composite);
+
+  /* Type scale for arbitrary / font-size utilities */
+  --text-display-lg: var(--display-lg);
+  --text-display-md: var(--display-md);
+  --text-display-sm: var(--display-sm);
+  --text-headline-lg: var(--headline-lg);
+  --text-headline-md: var(--headline-md);
+  --text-headline-sm: var(--headline-sm);
+  --text-title-lg: var(--title-lg);
+  --text-title-md: var(--title-md);
+  --text-title-sm: var(--title-sm);
+  --text-body-lg: var(--body-lg);
+  --text-body-md: var(--body-md);
+  --text-body-sm: var(--body-sm);
+  --text-label-lg: var(--label-lg);
+  --text-label-md: var(--label-md);
+  --text-label-sm: var(--label-sm);
+
+  /* Spacing tokens (4/8 baseline) */
+  --spacing-vs-0: var(--space-0);
+  --spacing-vs-1: var(--space-1);
+  --spacing-vs-2: var(--space-2);
+  --spacing-vs-3: var(--space-3);
+  --spacing-vs-4: var(--space-4);
+  --spacing-vs-5: var(--space-5);
+  --spacing-vs-6: var(--space-6);
+  --spacing-vs-8: var(--space-8);
+  --spacing-vs-10: var(--space-10);
+  --spacing-vs-12: var(--space-12);
+  --spacing-vs-16: var(--space-16);
+  --spacing-vs-20: var(--space-20);
+  --spacing-vs-24: var(--space-24);
+
+  /* Shadows */
+  --shadow-elev-0: var(--elev-0);
+  --shadow-elev-1: var(--elev-1);
+  --shadow-elev-2: var(--elev-2);
+  --shadow-elev-3: var(--elev-3);
+  --shadow-elev-floating: var(--elev-floating);
+
+  /* Motion */
+  --ease-draft: var(--ease-draft);
+  --duration-fast: var(--dur-fast);
+  --duration-med: var(--dur-med);
+  --duration-slow: var(--dur-slow);
+
+  /* Body / mono stacks for font-sans / font-mono utilities */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
+}
+
+@utility border-hairline {
+  border: var(--hairline);
+}
+
+@utility border-x-hairline {
+  border-left: var(--hairline);
+  border-right: var(--hairline);
+}
+
+@utility border-y-hairline {
+  border-top: var(--hairline);
+  border-bottom: var(--hairline);
+}
+
+@utility border-t-hairline {
+  border-top: var(--hairline);
+}
+
+@utility border-b-hairline {
+  border-bottom: var(--hairline);
+}
+
+@utility bg-canvas-grid {
+  background-color: var(--surface);
+  background-image: var(--bg-canvas-grid);
+  background-size: var(--bg-canvas-grid-size);
+}
+
+@utility grain-surface {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+@utility tonal-hover {
+  transition-property: background-color, opacity, color;
+  transition-duration: var(--dur-med);
+  transition-timing-function: var(--ease-draft);
+}
+
+@utility font-headline {
+  font-family: var(--font-headline);
+}
+
+@layer utilities {
+  .divide-hairline > :not([hidden]) ~ :not([hidden]) {
+    border-top: var(--hairline);
+  }
+
+  .pressable {
+    transition-property: transform, background-color, color, opacity, border-color;
+    transition-duration: var(--dur-fast);
+    transition-timing-function: var(--ease-draft);
+  }
+
+  .pressable:active {
+    transform: scale(0.95);
+  }
+
+  .dashed-hairline {
+    border: 0.5px dashed rgba(49, 52, 41, 0.28);
+  }
+
+  @keyframes ca-pulse-ring {
+    0%,
+    100% {
+      opacity: 0.7;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.08);
+    }
+  }
+
+  .pulse-ring {
+    animation: ca-pulse-ring 1.6s var(--ease-draft) infinite;
+  }
+
+  @keyframes ca-pulse-dot {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
+    }
+  }
+
+  .pulse-dot {
+    animation: ca-pulse-dot 1.2s var(--ease-draft) infinite;
+  }
+
+  @keyframes ca-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .spin-slow {
+    animation: ca-spin 1.2s linear infinite;
+  }
+}

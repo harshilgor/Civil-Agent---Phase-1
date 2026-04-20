@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SKILL — Vellum Structures Design</title>
+<link rel="stylesheet" href="colors_and_type.css">
+<style>
+  @page { size: letter; margin: 0.75in; }
+  html, body { background: #fbf9f2; color: #313429; }
+  body { margin: 0; padding: 48px 56px; font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1.6; }
+  .eyebrow { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .14em; color: #5e6054; margin: 0 0 10px; }
+  h1 { font-family: 'Space Grotesk', sans-serif; font-size: 38px; font-weight: 700; letter-spacing: -.02em; margin: 0 0 4px; color: #313429; line-height: 1.05; }
+  .sub { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 400; color: #5f5e5e; margin: 0 0 40px; }
+  .rule { border: none; border-top: 0.5px solid rgba(49,52,41,.15); margin: 28px 0; }
+  .grid { display: grid; grid-template-columns: 140px 1fr; gap: 16px 24px; }
+  .grid dt { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .14em; color: #5e6054; padding-top: 2px; }
+  .grid dd { margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #313429; }
+  .grid dd.desc { font-family: 'Inter', sans-serif; }
+  h2 { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 600; margin: 36px 0 12px; color: #313429; letter-spacing: -.005em; }
+  p { margin: 0 0 12px; max-width: 62ch; break-inside: avoid; }
+  .box { background: #f5f4eb; border-left: 2px solid #5f5e5e; padding: 16px 20px; margin: 20px 0; break-inside: avoid; }
+  .box p { margin: 0; }
+  .footer { margin-top: 56px; display: flex; justify-content: space-between; align-items: flex-end; font-family: 'Inter', sans-serif; font-size: 10px; text-transform: uppercase; letter-spacing: .14em; color: #5e6054; }
+  .wordmark { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: -.01em; color: #313429; text-transform: none; }
+  .canvas-strip {
+    height: 32px;
+    background-image:
+      linear-gradient(to right, rgba(49,52,41,.08) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(49,52,41,.08) 1px, transparent 1px);
+    background-size: 32px 32px;
+    margin: 28px 0;
+  }
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0; }
+    .page { page-break-after: avoid; }
+    .box, .grid, h2 { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <p class="eyebrow">Agent Skill · Manifest</p>
+  <h1>vellum-structures-design</h1>
+  <p class="sub">The Digital Vellum — warm drafting paper, precision typography, functional color as data.</p>
+
+  <dl class="grid">
+    <dt>Name</dt>          <dd>vellum-structures-design</dd>
+    <dt>Invocable</dt>     <dd>true</dd>
+    <dt>Scope</dt>         <dd class="desc">Generate well-branded interfaces and assets for Vellum Structures — production code or throwaway prototypes, mocks, slides.</dd>
+  </dl>
+
+  <div class="canvas-strip"></div>
+
+  <h2>Description</h2>
+  <p>Use this skill to generate well-branded interfaces and assets for Vellum Structures, either for production or throwaway prototypes, mocks, etc. Contains essential design guidelines, colors, type, fonts, assets, and UI kit components for prototyping.</p>
+
+  <h2>Behavior</h2>
+  <p>Read the <code>README.md</code> file within this skill, and explore the other available files. If creating visual artifacts (slides, mocks, throwaway prototypes, etc), copy assets out and create static HTML files for the user to view. If working on production code, you can copy assets and read the rules here to become an expert in designing with this brand.</p>
+
+  <div class="box">
+    <p>If the user invokes this skill without any other guidance, ask them what they want to build or design, ask some questions, and act as an expert designer who outputs HTML artifacts <em>or</em> production code, depending on the need.</p>
+  </div>
+
+  <h2>Companion Files</h2>
+  <dl class="grid">
+    <dt>README.md</dt>                                <dd class="desc">Context, content &amp; visual foundations</dd>
+    <dt>colors_and_type.css</dt>                      <dd class="desc">All tokens — color, type, spacing, elevation</dd>
+    <dt>preview/</dt>                                 <dd class="desc">Specimen cards — palette, type, components</dd>
+    <dt>ui_kits/vellum_structures/</dt>               <dd class="desc">Interactive click-through recreation of the app</dd>
+  </dl>
+
+  <hr class="rule">
+  <div class="footer">
+    <span class="wordmark">Vellum Structures · Design System</span>
+    <span>SKILL.md · v1</span>
+  </div>
+</div>
+
+<script>
+  (async () => {
+    try { await document.fonts.ready; } catch(e) {}
+    setTimeout(() => window.print(), 500);
+  })();
+</script>
+</body>
+</html>
