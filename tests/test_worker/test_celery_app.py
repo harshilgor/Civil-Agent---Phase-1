@@ -76,3 +76,38 @@ def test_eager_factory_toggles_always_eager() -> None:
     assert eager_app.conf.task_eager_propagates is True
     # Sanity: the non-eager defaults are unchanged on the fresh app.
     assert eager_app.conf.worker_prefetch_multiplier == 1
+
+
+def test_eager_mode_requires_explicit_env_var(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Eager mode must be OFF by default — production safety gate."""
+
+    from src.worker.celery_app import make_celery
+
+    monkeypatch.delenv("CELERY_TASK_ALWAYS_EAGER", raising=False)
+    default_app = make_celery()
+    assert default_app.conf.task_always_eager is False
+    assert default_app.conf.task_eager_propagates is False
+
+
+def test_eager_mode_opt_in_via_env_var(monkeypatch: pytest.MonkeyPatch) -> None:
+    """CELERY_TASK_ALWAYS_EAGER=1 flips the default factory into eager mode."""
+
+    from src.worker.celery_app import make_celery
+
+    monkeypatch.setenv("CELERY_TASK_ALWAYS_EAGER", "1")
+    app = make_celery()
+    assert app.conf.task_always_eager is True
+    assert app.conf.task_eager_propagates is True
+
+
+def test_eager_mode_rejects_nonopt_in_values(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A permissive cast of the env var would be a foot-gun; test the parser."""
+
+    from src.worker.celery_app import make_celery
+
+    monkeypatch.setenv("CELERY_TASK_ALWAYS_EAGER", "0")
+    assert make_celery().conf.task_always_eager is False
+    monkeypatch.setenv("CELERY_TASK_ALWAYS_EAGER", "")
+    assert make_celery().conf.task_always_eager is False
+    monkeypatch.setenv("CELERY_TASK_ALWAYS_EAGER", "maybe")
+    assert make_celery().conf.task_always_eager is False

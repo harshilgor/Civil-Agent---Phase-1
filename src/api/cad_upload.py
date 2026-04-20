@@ -119,12 +119,35 @@ def _enqueue_cad_task(
 
 
 def _run_inprocess_stub(job_id: str, dest: str, file_type: str) -> None:
-    from src.worker.tasks import run_cad_stub
+    """Run the real CAD pipeline in-process when Celery is unreachable.
+
+    The function name is a historical artefact from Step 5 when every
+    Channel-B payload was synthetic; Step 6 flipped this to the real
+    parser + graph builder so the endpoint doesn't quietly return stub
+    data when a broker outage forces the sync path.  A parse failure
+    surfaces as a ``failed`` job record with a structured error message.
+    """
+
+    from src.worker.tasks import DWGUnsupportedError, run_cad_inprocess
 
     try:
-        payload = run_cad_stub(job_id, dest, file_type)
-    except Exception as exc:  # pragma: no cover
-        async_job_store.mark_failed(job_id, f"stub failed: {exc}")
+        payload = run_cad_inprocess(job_id, dest, file_type)
+    except DWGUnsupportedError as exc:
+        async_job_store.mark_failed(
+            job_id, f"DWG parsing unavailable: {exc}"
+        )
+        return
+    except Exception as exc:
+        logger.error(
+            "cad_inprocess_parse_failed",
+            job_id=job_id,
+            file_type=file_type,
+            error=str(exc),
+            error_type=type(exc).__name__,
+        )
+        async_job_store.mark_failed(
+            job_id, f"{type(exc).__name__}: {exc}"
+        )
         return
     graph = BuildingGraph.model_validate(payload["building_graph"])
     async_job_store.mark_completed(job_id, graph)

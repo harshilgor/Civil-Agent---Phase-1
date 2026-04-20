@@ -77,18 +77,33 @@ class TestTaskDispatch:
         graph = _payload_to_graph(payload)
         assert graph.metadata.input_source == InputSource.FLOOR_PLAN_IMAGE
 
-    def test_cad_task_delay_roundtrips(self) -> None:
+    def test_cad_task_delay_roundtrips(self, tmp_path) -> None:
+        """`.delay()` under eager mode drives the real DXF pipeline now."""
+
+        import ezdxf
+
         from src.worker.tasks import process_cad_file
+
+        doc = ezdxf.new("R2010")
+        msp = doc.modelspace()
+        doc.layers.add("A-WALL")
+        msp.add_line((0, 0), (5000, 0), dxfattribs={"layer": "A-WALL"})
+        msp.add_line((5000, 0), (5000, 4000), dxfattribs={"layer": "A-WALL"})
+        msp.add_line((5000, 4000), (0, 4000), dxfattribs={"layer": "A-WALL"})
+        msp.add_line((0, 4000), (0, 0), dxfattribs={"layer": "A-WALL"})
+        dxf_path = tmp_path / "plan.dxf"
+        doc.saveas(str(dxf_path))
 
         assert process_cad_file is not None
         async_result = process_cad_file.delay(
-            "job-delay-cad", "/tmp/fake.dxf", "DXF"
+            "job-delay-cad", str(dxf_path), "DXF"
         )
         assert async_result.successful()
         payload = async_result.result
         assert payload["file_type"] == "DXF"
         graph = _payload_to_graph(payload)
         assert graph.metadata.input_source == InputSource.DXF_FILE
+        assert len(graph.walls) >= 3
 
 
 # ---------------------------------------------------------------------------

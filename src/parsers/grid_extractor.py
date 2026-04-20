@@ -49,8 +49,12 @@ class GridExtractor:
         result: list[GridLine] = []
         for idx, line in enumerate(lines):
             pos = line["position_mm"]
-            label = self._find_label(line, texts)
-            if label is None:
+            # IFC parsers hand us the AxisTag directly on the grid entry
+            # (``label`` key); respect that before falling back to text
+            # annotation matching or alphabetic / numeric defaults.
+            explicit = line.get("label")
+            label = (explicit or "").strip() or self._find_label(line, texts)
+            if not label:
                 if axis == "x":
                     label = chr(ord("A") + idx) if idx < 26 else f"X{idx + 1}"
                 else:

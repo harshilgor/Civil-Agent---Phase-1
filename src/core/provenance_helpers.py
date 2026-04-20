@@ -11,8 +11,19 @@ from __future__ import annotations
 
 from typing import Optional
 
-from src.schema.enums import DetectorSource
+from src.schema.enums import DetectorSource, InputSource
 from src.schema.provenance import ProvenanceRecord
+
+
+# ---------------------------------------------------------------------------
+# Channel B: CAD-sourced elements
+# ---------------------------------------------------------------------------
+
+_CAD_DETECTOR_FOR_INPUT: dict[InputSource, DetectorSource] = {
+    InputSource.DXF_FILE: DetectorSource.CAD_DIRECT,
+    InputSource.DWG_FILE: DetectorSource.CAD_DIRECT,
+    InputSource.IFC_FILE: DetectorSource.IFC_DIRECT,
+}
 
 
 def structured_form_provenance(
@@ -56,4 +67,38 @@ def user_override_provenance(
     )
 
 
-__all__ = ["structured_form_provenance", "user_override_provenance"]
+def cad_provenance(
+    *,
+    input_source: InputSource,
+    run_id: str,
+    notes: Optional[str] = None,
+) -> ProvenanceRecord:
+    """Provenance stamp for elements parsed directly from a CAD/IFC file.
+
+    DXF and DWG (the latter after ODA conversion) map to
+    ``DetectorSource.CAD_DIRECT``; IFC maps to
+    ``DetectorSource.IFC_DIRECT`` so the review UI can differentiate an
+    IFC submission (authoritative BIM geometry) from a DXF (typically a
+    2D drawing with more inferred structure).
+
+    Channel B runs no ML, so ``model_id`` / ``weights_manifest_hash`` stay
+    ``None`` and ``confidence_from_model`` is set to ``1.0`` — every
+    element is a literal echo of what the source file carried.
+    """
+
+    detector = _CAD_DETECTOR_FOR_INPUT.get(input_source)
+    if detector is None:
+        raise ValueError(
+            f"cad_provenance() does not support input_source={input_source!r}; "
+            f"expected one of {sorted(s.value for s in _CAD_DETECTOR_FOR_INPUT)}."
+        )
+
+    return ProvenanceRecord(
+        detector_source=detector,
+        run_id=run_id,
+        confidence_from_model=1.0,
+        notes=notes,
+    )
+
+
+__all__ = ["cad_provenance", "structured_form_provenance", "user_override_provenance"]

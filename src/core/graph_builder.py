@@ -16,14 +16,11 @@ from src.schema.building_graph import (
     Bay,
     BuildingGraph,
     BuildingMetadata,
-    ColumnCandidate,
     ConfidenceScores,
     Core,
     Facade,
     GridLine,
     GridSystem,
-    Location,
-    Opening,
     ProjectInfo,
     Room,
     Story,
@@ -35,7 +32,6 @@ from src.schema.enums import (
     InputSource,
     MaterialPreference,
     OccupancyType,
-    OpeningType,
     RoomType,
     WallType,
 )
@@ -272,7 +268,7 @@ class GraphBuilder:
         return graph
 
     # ------------------------------------------------------------------
-    # Channel B — CAD data (stub — implemented in Step 4)
+    # Channel B — CAD data (implemented in Step 6 via CadGraphBuilder)
     # ------------------------------------------------------------------
 
     def from_cad_data(
@@ -283,196 +279,36 @@ class GraphBuilder:
         material_preference: MaterialPreference = MaterialPreference.REINFORCED_CONCRETE,
         num_stories: int = 1,
         floor_to_floor_mm: float = 3900,
+        *,
+        input_source: Optional[InputSource] = None,
+        run_id: Optional[str] = None,
+        job_id: Optional[str] = None,
     ) -> BuildingGraph:
         """Map parsed CAD entities to a Building Graph.
+
+        Delegates to :class:`src.core.cad_graph_builder.CadGraphBuilder` so
+        legacy callers (pre-Step 6 tests, benchmarking scripts) continue
+        to work while the production code path (the Celery worker in
+        :mod:`src.worker.tasks`) imports ``CadGraphBuilder`` directly for
+        the richer keyword surface.
 
         *parsed_data* is the dict returned by ``DXFParser.parse()`` or
         ``IFCParser.parse()``.
         """
-        t0 = time.perf_counter()
-        assumptions: list[str] = []
-        warnings: list[str] = []
 
-        # --- Grid ---
-        raw_grid = parsed_data.get("grid_lines", {"x_lines": [], "y_lines": []})
-        x_lines_raw = raw_grid.get("x_lines", [])
-        y_lines_raw = raw_grid.get("y_lines", [])
+        from .cad_graph_builder import CadGraphBuilder
 
-        from src.parsers.grid_extractor import GridExtractor
-        from src.parsers.wall_extractor import WallExtractor
-        from src.parsers.room_extractor import RoomExtractor
-
-        text_annotations = parsed_data.get("text_annotations", [])
-        grid_ext = GridExtractor()
-        grid_data = grid_ext.extract(raw_grid, text_annotations)
-
-        x_gl = grid_data["x_lines"]
-        y_gl = grid_data["y_lines"]
-
-        if len(x_gl) < 2 or len(y_gl) < 2:
-            # Fall back to inferring grid from walls
-            wall_ext = WallExtractor()
-            clean_walls = wall_ext.extract(parsed_data.get("walls", []))
-            if clean_walls:
-                xs = sorted({w["start"][0] for w in clean_walls} | {w["end"][0] for w in clean_walls})
-                ys = sorted({w["start"][1] for w in clean_walls} | {w["end"][1] for w in clean_walls})
-                if len(xs) >= 2:
-                    x_gl = [GridLine(id=chr(65 + i), position_mm=x) for i, x in enumerate(xs[:26])]
-                if len(ys) >= 2:
-                    y_gl = [GridLine(id=str(i + 1), position_mm=y) for i, y in enumerate(ys)]
-                assumptions.append("Grid inferred from wall endpoints (no grid layer in CAD)")
-            else:
-                warnings.append("No grid lines or walls found in CAD file")
-                x_gl = [GridLine(id="A", position_mm=0), GridLine(id="B", position_mm=10000)]
-                y_gl = [GridLine(id="1", position_mm=0), GridLine(id="2", position_mm=10000)]
-
-        # Single wall / collinear walls can yield <2 unique X or Y samples — still degenerate.
-        if len(x_gl) < 2 or len(y_gl) < 2:
-            warnings.append("Degenerate grid after wall inference; using placeholder extents")
-            x_gl = [GridLine(id="A", position_mm=0), GridLine(id="B", position_mm=10000)]
-            y_gl = [GridLine(id="1", position_mm=0), GridLine(id="2", position_mm=10000)]
-
-        bays = self._build_bays_from_lines(x_gl, y_gl)
-        grid = GridSystem(x_lines=x_gl, y_lines=y_gl, bays=bays)
-
-        # --- Walls ---
-        wall_ext = WallExtractor()
-        clean_walls = wall_ext.extract(parsed_data.get("walls", []))
-        story_ids = [f"story-{i}" for i in range(num_stories)]
-
-        wall_segments = [
-            WallSegment(
-                id=f"wall-cad-{i}",
-                type=WallType.STRUCTURAL,
-                start=w["start"],
-                end=w["end"],
-                thickness_mm=w["thickness_mm"],
-                stories=story_ids,
-            )
-            for i, w in enumerate(clean_walls)
-        ]
-
-        # --- Rooms ---
-        room_ext = RoomExtractor()
-        raw_rooms = parsed_data.get("rooms", [])
-        room_dicts = room_ext.extract(raw_rooms, text_annotations, story_id="story-0")
-        rooms = [
-            Room(
-                id=rd["id"],
-                label=rd["label"],
-                type=RoomType(rd["type"]),
-                polygon=rd["polygon"],
-                area_m2=rd["area_m2"],
-                story=rd["story"],
-                perimeter_mm=rd.get("perimeter_mm"),
-            )
-            for rd in room_dicts
-        ]
-
-        # --- Openings ---
-        openings: list[Opening] = []
-        for i, door in enumerate(parsed_data.get("doors", [])):
-            width = door.get("width_mm", 900)
-            openings.append(Opening(
-                id=f"door-{i}",
-                type=OpeningType.DOOR,
-                wall_id=wall_segments[0].id if wall_segments else "unknown",
-                position_mm=0,
-                width_mm=width,
-            ))
-        for i, win in enumerate(parsed_data.get("windows", [])):
-            width = win.get("width_mm", 1200)
-            openings.append(Opening(
-                id=f"window-{i}",
-                type=OpeningType.WINDOW,
-                wall_id=wall_segments[0].id if wall_segments else "unknown",
-                position_mm=0,
-                width_mm=width,
-            ))
-
-        # --- Stories ---
-        length_mm = x_gl[-1].position_mm - x_gl[0].position_mm
-        width_mm = y_gl[-1].position_mm - y_gl[0].position_mm
-        floor_area = (length_mm * width_mm) / 1_000_000
-
-        stories = self.story_generator.generate(
-            num_stories=num_stories,
-            floor_to_floor_mm=floor_to_floor_mm,
-            occupancy_type=occupancy_type,
-            floor_area_m2=floor_area,
-        )
-        total_height = sum(s.floor_to_floor_mm for s in stories)
-
-        # --- Facade ---
-        facade = self._compute_facade(length_mm, width_mm)
-
-        # --- Columns --- (wall-type aware — Gap 6)
-        column_candidates = self.zone_classifier.identify_columns(grid, walls=wall_segments)
-
-        # Add any CAD-detected columns with higher confidence
-        for col in parsed_data.get("columns", []):
-            column_candidates.append(ColumnCandidate(
-                position=col["position"],
-                confidence=0.95,
-                notes="Detected from CAD column layer",
-            ))
-
-        # --- Cores ---
-        cores = self.zone_classifier.identify_cores(grid, rooms, wall_segments)
-
-        # --- Project info ---
-        project = ProjectInfo(
-            name=project_name,
-            location=Location(lat=0, lng=0),
+        return CadGraphBuilder().build(
+            parsed_data,
+            input_source=input_source or InputSource.DXF_FILE,
+            project_name=project_name,
             occupancy_type=occupancy_type,
             material_preference=material_preference,
             num_stories=num_stories,
-            total_height_mm=total_height,
+            floor_to_floor_mm=floor_to_floor_mm,
+            run_id=run_id,
+            job_id=job_id,
         )
-
-        elapsed = round(time.perf_counter() - t0, 4)
-        input_source = InputSource.DXF_FILE
-        units_str = parsed_data.get("units", "mm")
-        if units_str != "mm":
-            assumptions.append(f"Converted from {units_str} to mm")
-
-        metadata = BuildingMetadata(
-            input_source=input_source,
-            confidence_scores=ConfidenceScores(
-                wall_detection=0.85,
-                room_classification=0.7 if rooms else None,
-                grid_detection=0.9 if len(x_gl) > 2 else 0.5,
-                overall=0.8,
-            ),
-            assumptions_made=assumptions,
-            warnings=warnings,
-            processing_time_seconds=elapsed,
-        )
-
-        graph = BuildingGraph(
-            project=project,
-            stories=stories,
-            grid=grid,
-            walls=wall_segments,
-            rooms=rooms if rooms else self._generate_default_rooms(length_mm, width_mm, stories, occupancy_type),
-            openings=openings,
-            column_candidates=column_candidates,
-            cores=cores,
-            facade=facade,
-            metadata=metadata,
-        )
-
-        annotate_with_completeness(graph)
-
-        logger.info(
-            "building_graph_built",
-            source="cad_data",
-            walls=len(wall_segments),
-            rooms=len(rooms),
-            elapsed_s=elapsed,
-            completeness=graph.metadata.confidence_scores.overall,
-        )
-        return graph
 
     # ------------------------------------------------------------------
     # Channel C — CV pipeline output (stub — implemented in Step 9)

@@ -27,6 +27,7 @@ that signal a no-op so the worker starts cleanly on a box without weights.
 
 from __future__ import annotations
 
+import os
 from typing import Any
 
 import structlog
@@ -50,6 +51,30 @@ logger = structlog.get_logger(__name__)
 # ---------------------------------------------------------------------------
 
 
+# ---------------------------------------------------------------------------
+# Eager-mode safety gate
+#
+# ``task_always_eager`` makes every ``.delay()`` call execute synchronously
+# in the calling process.  That is exactly what we want in tests (no
+# broker required, deterministic behaviour) and exactly what we do NOT
+# want in production: a deployment running the API process with eager
+# mode on would silently execute all worker tasks inline, defeating the
+# whole async architecture and holding the event loop on every CV run.
+#
+# To make this auditable we require an explicit opt-in via the
+# ``CELERY_TASK_ALWAYS_EAGER`` environment variable.  Tests set it in
+# :mod:`tests.conftest`; no deployment image should ever set it.  The
+# flag is deliberately a separate env var (not a field on :class:`Settings`)
+# so ``.env`` files cannot accidentally turn it on.
+# ---------------------------------------------------------------------------
+
+_EAGER_ENV_VAR = "CELERY_TASK_ALWAYS_EAGER"
+
+
+def _eager_mode_requested() -> bool:
+    return os.environ.get(_EAGER_ENV_VAR, "").strip().lower() in {"1", "true", "yes"}
+
+
 _DEFAULT_CONF: dict[str, Any] = {
     # Broker / backend resilience.
     "broker_connection_retry_on_startup": True,
@@ -70,16 +95,26 @@ _DEFAULT_CONF: dict[str, Any] = {
 }
 
 
-def make_celery(*, eager: bool = False) -> "Celery":
+def make_celery(*, eager: bool | None = None) -> "Celery":
     """Build the Celery application.
 
     Parameters
     ----------
     eager:
-        When ``True``, tasks execute synchronously in the calling process
-        (``task_always_eager=True``) and result propagation is on.  Used
-        by the test suite so we can exercise the full enqueue → run →
-        poll loop without a live Redis broker.
+        Tri-state: ``None`` (default) consults the
+        ``CELERY_TASK_ALWAYS_EAGER`` environment variable and only turns
+        eager mode on when it is ``1`` / ``true`` / ``yes``.  Passing
+        an explicit ``True`` / ``False`` overrides the env var — used by
+        unit tests that need to rebuild an eager app independently of
+        the session-wide configuration.
+
+    Notes
+    -----
+    Eager mode must never be on in production.  The API process would
+    otherwise execute every enqueued worker task inline, blocking the
+    request handler for the full pipeline duration.  The env-var gate
+    makes accidental enablement a one-line PR diff instead of a silent
+    ``.env`` regression.
     """
 
     if not _HAS_CELERY:
@@ -95,7 +130,17 @@ def make_celery(*, eager: bool = False) -> "Celery":
         include=["src.worker.tasks"],
     )
     app.conf.update(_DEFAULT_CONF)
-    if eager:
+
+    use_eager = _eager_mode_requested() if eager is None else bool(eager)
+    if use_eager:
+        logger.warning(
+            "celery_eager_mode_enabled",
+            reason=(
+                "CELERY_TASK_ALWAYS_EAGER is set"
+                if eager is None
+                else "explicit caller override"
+            ),
+        )
         app.conf.update(
             task_always_eager=True,
             task_eager_propagates=True,

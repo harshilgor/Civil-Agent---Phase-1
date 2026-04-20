@@ -46,10 +46,22 @@ def pytest_collection_modifyitems(config, items):  # noqa: ARG001
 # Celery eager mode + async job store reset.
 #
 # Step 5 introduces real Celery tasks for Channels B and C.  Tests should
-# never touch a live broker — we flip ``task_always_eager`` for the whole
-# session so ``.delay()`` runs inline, and reset the module-level async
-# job store between tests so state doesn't leak.
+# never touch a live broker — we opt in to eager mode via the env-var
+# gate enforced by :mod:`src.worker.celery_app`, and reset the
+# module-level async job store between tests so state doesn't leak.
+#
+# Eager mode is gated on ``CELERY_TASK_ALWAYS_EAGER`` in production code
+# precisely so an accidental production deploy cannot execute worker
+# tasks inline in the API process.  The fixture below sets the env var
+# *before* the Celery app is rebuilt, then flips the already-imported
+# app into eager mode as well so existing bound tasks pick up the
+# change within the session.
 # ---------------------------------------------------------------------------
+
+# Set the env var at module import so any Celery-dependent import that
+# runs before the fixture (e.g. the very first ``from src.worker.celery_app
+# import celery_app``) still sees eager mode.
+os.environ.setdefault("CELERY_TASK_ALWAYS_EAGER", "1")
 
 
 @pytest.fixture(autouse=True, scope="session")

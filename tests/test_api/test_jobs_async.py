@@ -43,8 +43,10 @@ def test_jobs_endpoint_resolves_channel_c_image_job(client: TestClient) -> None:
     assert body["building_graph"]["metadata"]["input_source"] == "FLOOR_PLAN_IMAGE"
 
 
-def test_jobs_endpoint_resolves_channel_b_cad_job(client: TestClient) -> None:
-    files = {"file": ("plan.dxf", b"fake-cad", "application/octet-stream")}
+def test_jobs_endpoint_resolves_channel_b_cad_job(
+    client: TestClient, sample_dxf_bytes: bytes
+) -> None:
+    files = {"file": ("plan.dxf", sample_dxf_bytes, "application/octet-stream")}
     post = client.post("/api/v1/building/upload/cad", files=files)
     job_id = post.json()["job_id"]
 
