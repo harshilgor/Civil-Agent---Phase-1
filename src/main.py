@@ -33,7 +33,7 @@ def create_app() -> FastAPI:
             "Converts architectural inputs (structured form, CAD files, "
             "floor-plan images) into a machine-readable Building Graph."
         ),
-        version="0.2.0",
+        version="0.3.0",
         lifespan=lifespan,
     )
 

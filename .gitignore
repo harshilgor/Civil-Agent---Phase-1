@@ -50,6 +50,11 @@ data/*.ifc
 data/**/*.ifc
 data/*.dwg
 data/*.pdf
+
+# Runtime upload / output staging dirs (created by the FastAPI lifespan)
+data/uploads/
+data/outputs/
+
 # Exception: small JSON samples stay tracked
 !data/samples/
 

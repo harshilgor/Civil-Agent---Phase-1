@@ -61,5 +61,19 @@ class Settings(BaseSettings):
     angle_snap_degrees: float = 3.0
     min_room_area_m2: float = 1.0
 
+    # --- Feature flags ---
+    # Phase 3 (Load & Assumption Engine) is fenced behind a flag so the Phase 1
+    # build is not affected by the larger Phase 3 surface area.  Set
+    # ``PHASE3_ENABLED=true`` in the environment to mount the Phase 3 router.
+    phase3_enabled: bool = False
+
+    # --- Weights backend ---
+    # Selects how perception models resolve their weights at startup.
+    # ``local`` reads from ``weights_dir`` directly and skips all boto3 calls;
+    # ``s3`` resolves via the manifest against the configured S3 bucket.  The
+    # local path is the only one exercised by tests.
+    weights_backend: str = "local"
+    weights_dir: Path = _PROJECT_ROOT / "weights-cache"
+
 
 settings = Settings()

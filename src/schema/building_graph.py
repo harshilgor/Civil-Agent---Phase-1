@@ -10,7 +10,9 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+from .assumptions import AssumptionRecord
 from .enums import (
+    BuildingType,
     CoreType,
     InputSource,
     MaterialPreference,
@@ -19,6 +21,15 @@ from .enums import (
     RoomType,
     WallType,
 )
+from .provenance import ProvenanceRecord
+
+# ---------------------------------------------------------------------------
+# Schema version — bump on any breaking change to BuildingGraph or its sub-
+# models.  Persisted on every emitted graph so downstream consumers can detect
+# version skew and refuse to proceed.
+# ---------------------------------------------------------------------------
+
+SCHEMA_VERSION = "1.0.0"
 
 
 # ---------------------------------------------------------------------------
@@ -114,6 +125,8 @@ class WallSegment(BaseModel):
     height_mm: Optional[float] = Field(default=None, gt=0)
     stories: list[str] = Field(..., min_length=1)
     material: Optional[str] = None
+    confidence: float = Field(default=1.0, ge=0.0, le=1.0)
+    provenance: Optional[ProvenanceRecord] = None
 
 
 class Room(BaseModel):
@@ -126,6 +139,8 @@ class Room(BaseModel):
     area_m2: float = Field(..., ge=0)
     story: str
     perimeter_mm: Optional[float] = Field(default=None, ge=0)
+    confidence: float = Field(default=1.0, ge=0.0, le=1.0)
+    provenance: Optional[ProvenanceRecord] = None
 
     @field_validator("polygon")
     @classmethod
@@ -148,6 +163,8 @@ class Opening(BaseModel):
     width_mm: float = Field(..., gt=0)
     height_mm: Optional[float] = Field(default=None, gt=0)
     sill_height_mm: Optional[float] = Field(default=None, ge=0)
+    confidence: float = Field(default=1.0, ge=0.0, le=1.0)
+    provenance: Optional[ProvenanceRecord] = None
 
 
 class ColumnCandidate(BaseModel):
@@ -158,6 +175,7 @@ class ColumnCandidate(BaseModel):
     confidence: float = Field(default=1.0, ge=0.0, le=1.0)
     is_required: bool = False
     notes: Optional[str] = None
+    provenance: Optional[ProvenanceRecord] = None
 
 
 class Core(BaseModel):
@@ -169,6 +187,8 @@ class Core(BaseModel):
     contains_elevator: bool = False
     contains_stairs: bool = False
     stories: list[str] = Field(default_factory=list)
+    confidence: float = Field(default=1.0, ge=0.0, le=1.0)
+    provenance: Optional[ProvenanceRecord] = None
 
     @field_validator("polygon")
     @classmethod
@@ -197,21 +217,56 @@ class Facade(BaseModel):
 # ---------------------------------------------------------------------------
 
 class ConfidenceScores(BaseModel):
-    """Per-subsystem confidence scores (0.0–1.0)."""
+    """Per-subsystem confidence scores (0.0–1.0).
+
+    These describe *how well* each detection subsystem performed.  Distinct
+    from :class:`CompletenessScore`, which describes *how much* of the
+    expected element budget was actually produced.
+    """
 
     wall_detection: Optional[float] = Field(default=None, ge=0.0, le=1.0)
     room_classification: Optional[float] = Field(default=None, ge=0.0, le=1.0)
     grid_detection: Optional[float] = Field(default=None, ge=0.0, le=1.0)
     dimension_extraction: Optional[float] = Field(default=None, ge=0.0, le=1.0)
+    opening_detection: Optional[float] = Field(default=None, ge=0.0, le=1.0)
+    column_inference: Optional[float] = Field(default=None, ge=0.0, le=1.0)
     overall: Optional[float] = Field(default=None, ge=0.0, le=1.0)
+
+
+class CompletenessScore(BaseModel):
+    """How complete the Building Graph is, expressed as a 0.0–1.0 score.
+
+    The completeness scorer (Phase 1) folds together: presence of grid lines,
+    presence of facade polygon, ratio of openings detected to walls, presence
+    of cores when the building is multi-story, and whether optional but
+    high-value detectors (YOLO-Seg, symbol detector) participated in the run.
+
+    Each field is independently meaningful; ``overall`` is the weighted
+    average and is what the API gateway returns to the frontend.
+    """
+
+    overall: float = Field(..., ge=0.0, le=1.0)
+    geometry: float = Field(..., ge=0.0, le=1.0)
+    semantics: float = Field(..., ge=0.0, le=1.0)
+    detector_coverage: float = Field(..., ge=0.0, le=1.0)
+    missing_subsystems: list[str] = Field(default_factory=list)
 
 
 class BuildingMetadata(BaseModel):
     """Provenance and quality metadata for a Building Graph."""
 
+    job_id: Optional[str] = Field(default=None, max_length=128)
     input_source: InputSource
+    inferred_building_type: Optional[BuildingType] = Field(
+        default=None,
+        description="High-level building family inferred by the VLM gap-filler",
+    )
     confidence_scores: ConfidenceScores = Field(default_factory=ConfidenceScores)
+    completeness: Optional[CompletenessScore] = None
+    # Legacy free-form list — preserved for backward compatibility with
+    # earlier graphs.  New producers SHOULD write to ``assumption_register``.
     assumptions_made: list[str] = Field(default_factory=list)
+    assumption_register: list[AssumptionRecord] = Field(default_factory=list)
     warnings: list[str] = Field(default_factory=list)
     processing_time_seconds: Optional[float] = Field(default=None, ge=0)
 
@@ -227,6 +282,7 @@ class BuildingGraph(BaseModel):
     of truth that all downstream modules consume.
     """
 
+    schema_version: str = Field(default=SCHEMA_VERSION)
     project: ProjectInfo
     stories: list[Story] = Field(..., min_length=1)
     grid: GridSystem

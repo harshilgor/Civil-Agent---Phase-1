@@ -4,6 +4,19 @@ from __future__ import annotations
 
 from enum import Enum
 
+from src.schema.enums import ConfidenceLevel  # re-exported for backward compat
+
+__all__ = [
+    "ConfidenceLevel",
+    "ExposureCategory",
+    "LoadCombinationType",
+    "MaterialFamily",
+    "OccupancyCategory",
+    "RiskCategory",
+    "SeismicDesignCategory",
+    "WarningLevel",
+]
+
 
 class OccupancyCategory(str, Enum):
     """Occupancy classifications per ASCE 7-22 Table 4.3-1 (condensed)."""
@@ -73,14 +86,6 @@ class LoadCombinationType(str, Enum):
     LRFD_5 = "0.9D + 1.0W"
     LRFD_6 = "1.2D + 1.0E + L"
     LRFD_7 = "0.9D + 1.0E"
-
-
-class ConfidenceLevel(str, Enum):
-    """Qualitative confidence bucket derived from a numeric 0.0–1.0 score."""
-
-    HIGH = "high"
-    MEDIUM = "medium"
-    LOW = "low"
 
 
 class WarningLevel(str, Enum):
