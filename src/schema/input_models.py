@@ -7,10 +7,10 @@ These wrap the core Building Graph schema with request-specific metadata
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
+from typing import Any, Literal, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from .building_graph import BuildingGraph, Location
 from .enums import MaterialPreference, OccupancyType, RoofType
@@ -165,13 +165,81 @@ class AssumptionReviewItem(BaseModel):
     source: str = Field(..., min_length=1, max_length=256)
 
 
-class JobReviewRequest(BaseModel):
-    """Payload for ``POST /api/v1/jobs/{job_id}/review``."""
+class ReviewElementCorrection(BaseModel):
+    """A single human correction applied to a :class:`BuildingGraph` element.
 
-    overrides: list[AssumptionReviewItem] = Field(
+    Step 11 extends the review endpoint beyond assumption-register overrides
+    so a reviewer can also fix a concrete element the ML pipeline got wrong
+    — a misclassified wall type, a mislabelled room, a door that the
+    symbol detector put on the wrong wall, etc.
+
+    Each correction identifies:
+
+    * **target** — which collection in the graph the element lives on
+      (``wall`` → ``walls``, ``room`` → ``rooms``, ``opening`` →
+      ``openings``, ``column`` → ``column_candidates``, ``core`` →
+      ``cores``).  Columns are identified by index (they don't have
+      first-class ids); everything else is looked up by ``id``.
+    * **id** — the element id for walls/rooms/openings/cores, or the
+      column-candidates list index (as a string) for columns.
+    * **fields** — a dict of field-name → replacement value.  Only the
+      fields actually supplied are touched; absent fields are left alone.
+      Validation is deferred to the pydantic re-parse inside the service
+      layer so bad values get a 422 before the graph is mutated.
+
+    The service layer stamps every touched element with
+    :func:`src.core.provenance_helpers.user_override_provenance`
+    (``DetectorSource.USER_OVERRIDE``, ``confidence_from_model=1.0``) and
+    sets ``confidence=1.0``, so downstream stages can distinguish human
+    corrections from any surviving ML confidence numbers.
+    """
+
+    target: Literal["wall", "room", "opening", "column", "core"] = Field(
+        ...,
+        description=(
+            "Which Building Graph collection the element lives on.  "
+            "Maps 1:1 to the schema field names."
+        ),
+    )
+    id: str = Field(
         ...,
         min_length=1,
-        description="Non-empty list of assumption overrides to apply.",
+        description=(
+            "Element id (walls/rooms/openings/cores) or stringified "
+            "list index (columns)."
+        ),
+    )
+    fields: dict[str, Any] = Field(
+        ...,
+        min_length=1,
+        description=(
+            "Field replacements.  Keys must correspond to writable fields "
+            "on the target schema; unknown keys raise 422."
+        ),
+    )
+
+
+class JobReviewRequest(BaseModel):
+    """Payload for ``POST /api/v1/jobs/{job_id}/review``.
+
+    Accepts two kinds of human input on the same request:
+
+    * ``overrides`` — assumption-register overrides (Step 4 contract,
+      preserved as-is).
+    * ``corrections`` — element-level edits (Step 11 addition).
+
+    At least one of the two must be non-empty.  Both are applied in
+    order (overrides first, then corrections) so an assumption override
+    can't conflict with a concrete element the reviewer also just edited.
+    """
+
+    overrides: list[AssumptionReviewItem] = Field(
+        default_factory=list,
+        description="Assumption overrides to apply (may be empty when only corrections are supplied).",
+    )
+    corrections: list[ReviewElementCorrection] = Field(
+        default_factory=list,
+        description="Element-level corrections to merge into the graph.",
     )
     reviewer: Optional[str] = Field(
         default=None,
@@ -181,5 +249,115 @@ class JobReviewRequest(BaseModel):
             "field so the audit trail records who approved each change."
         ),
     )
+
+    @model_validator(mode="after")
+    def _at_least_one_change(self) -> "JobReviewRequest":
+        if not self.overrides and not self.corrections:
+            raise ValueError(
+                "JobReviewRequest must contain at least one of "
+                "'overrides' or 'corrections'."
+            )
+        return self
+
+
+# ---------------------------------------------------------------------------
+# Review snapshot (GET /api/v1/jobs/{job_id}/review)
+# ---------------------------------------------------------------------------
+
+
+class LowConfidenceElement(BaseModel):
+    """Compact summary of a single Building Graph element flagged for review.
+
+    Emitted by the review-snapshot endpoint for every wall / room / opening
+    / column / core whose ``confidence`` falls below the review threshold
+    (``0.5`` by default, aligned with
+    :data:`~src.utils.completeness_scorer.HUMAN_REVIEW_THRESHOLD`).  The
+    frontend uses these to highlight the elements a reviewer should look
+    at first; the full element object is still available via the graph.
+    """
+
+    kind: Literal["wall", "room", "opening", "column", "core"]
+    id: str = Field(
+        ...,
+        description="Element id for walls/rooms/openings/cores; stringified index for columns.",
+    )
+    confidence: float = Field(..., ge=0.0, le=1.0)
+    detector_source: Optional[str] = Field(
+        default=None,
+        description="``DetectorSource`` value from the element's provenance record, if present.",
+    )
+    summary: str = Field(
+        ...,
+        max_length=256,
+        description=(
+            "Human-readable tag (e.g. ``'STRUCTURAL wall 3200 mm long'``) "
+            "so the review UI can render a row without re-parsing the graph."
+        ),
+    )
+
+
+class OverrideableAssumption(BaseModel):
+    """Compact projection of an :class:`AssumptionRecord` for the review UI.
+
+    The snapshot endpoint filters the full register down to entries the
+    reviewer can actually act on (``overrideable=True``) and sorts them by
+    confidence ascending, so the most uncertain defaults float to the top.
+    """
+
+    id: str
+    name: str
+    value: Any
+    unit: Optional[str] = None
+    confidence: float = Field(..., ge=0.0, le=1.0)
+    confidence_level: str
+    rationale: str
+    affects_modules: list[str] = Field(default_factory=list)
+    was_overridden: bool = False
+    override_value: Optional[Any] = None
+    override_source: Optional[str] = None
+
+
+class CompletenessSnapshot(BaseModel):
+    """Flat projection of :class:`~src.schema.building_graph.CompletenessScore`."""
+
+    overall: float = Field(..., ge=0.0, le=1.0)
+    geometry: float = Field(..., ge=0.0, le=1.0)
+    semantics: float = Field(..., ge=0.0, le=1.0)
+    detector_coverage: float = Field(..., ge=0.0, le=1.0)
+    missing_subsystems: list[str] = Field(default_factory=list)
+
+
+class ReviewSnapshotResponse(BaseModel):
+    """Response body of ``GET /api/v1/jobs/{job_id}/review``.
+
+    Single round-trip snapshot of everything the review UI needs:
+
+    * ``review_required`` — the completeness gate: ``True`` when overall
+      completeness is below :data:`HUMAN_REVIEW_THRESHOLD` *or* the
+      completeness scorer wrote a ``requires_human_review:`` marker onto
+      ``metadata.warnings``.  The frontend uses this to decide whether
+      to route the job straight to the reviewer queue.
+    * ``completeness`` — the structured score so the UI can show a
+      per-axis breakdown without re-running the scorer.
+    * ``warnings`` — pass-through of ``metadata.warnings``; already
+      includes the completeness scorer's missing-field tags.
+    * ``low_confidence_elements`` — every wall / room / opening / column
+      / core with ``confidence < 0.5``, bucketed so the UI can group
+      them per kind.
+    * ``overrideable_assumptions`` — the subset of the assumption
+      register the reviewer can actually tune, sorted by confidence
+      ascending (weakest first).
+    """
+
+    job_id: str
+    status: str = Field(..., description="Job status at the time the snapshot was taken.")
+    review_required: bool
+    completeness: Optional[CompletenessSnapshot] = Field(
+        default=None,
+        description="``None`` on jobs that haven't finished producing a graph yet.",
+    )
+    warnings: list[str] = Field(default_factory=list)
+    low_confidence_elements: list[LowConfidenceElement] = Field(default_factory=list)
+    overrideable_assumptions: list[OverrideableAssumption] = Field(default_factory=list)
 
 

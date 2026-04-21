@@ -13,6 +13,12 @@ Resolution order:
    live Celery state on every call).
 
 Only when both miss do we return 404.
+
+The ``/review`` sub-endpoint lives here too (both GET and POST) so a
+single router owns the job-level review surface for every channel.
+Step 11 extended POST to apply element-level corrections alongside
+assumption overrides and added GET to surface low-confidence elements
++ the completeness gate in one round-trip.
 """
 
 from __future__ import annotations
@@ -24,10 +30,16 @@ from fastapi import APIRouter, HTTPException
 
 from src.api import async_job_store
 from src.core.assumption_builder import apply_override
+from src.core.review_service import (
+    ReviewCorrectionError,
+    apply_corrections,
+    build_review_snapshot,
+)
 from src.schema.input_models import (
     BuildingGraphResponse,
     JobReviewRequest,
     JobStatusResponse,
+    ReviewSnapshotResponse,
 )
 
 # Local imports from Channel A's module-level store; avoids a circular
@@ -75,43 +87,84 @@ async def get_job_status(job_id: str) -> JobStatusResponse:
     raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
 
 
-@router.post("/{job_id}/review", response_model=BuildingGraphResponse)
-async def submit_review(job_id: str, payload: JobReviewRequest) -> BuildingGraphResponse:
-    """Apply a batch of assumption overrides from the review step.
+def _resolve_job_for_review(job_id: str):
+    """Shared resolver for the review endpoints.
 
-    All overrides are applied in order; the first one that fails (unknown
-    id or ``overrideable=False``) aborts the batch with 422 / 404 and
-    leaves the graph unchanged below that point.  The response reflects
-    whatever overrides landed before the failure so the frontend can
-    diff against its last-known state.
-
-    Works for both Channel A (synchronous, BuildingGraphResponse-backed)
-    and Channels B/C (async, BuildingGraph-backed via
-    :mod:`src.api.async_job_store`).
+    Returns ``(response, async_record, graph, status)`` where exactly one
+    of ``response`` / ``async_record`` is populated and ``graph`` points
+    at the same :class:`BuildingGraph` for both channels.  Raises the
+    same ``404`` / ``409`` the existing submit-review flow did.
     """
 
     response = channel_a._lookup_by_job(job_id)
-    async_record = None
-    if response is None:
-        async_record = async_job_store.refresh(job_id)
-        if async_record is None:
-            raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
-        if async_record.building_graph is None:
-            raise HTTPException(
-                status_code=409,
-                detail=(
-                    f"Job {job_id} is in state {async_record.status!r}; "
-                    "cannot review before the graph is complete."
-                ),
-            )
+    if response is not None:
+        return response, None, response.building_graph, "completed"
 
-    graph = (
-        response.building_graph if response is not None else async_record.building_graph  # type: ignore[union-attr]
-    )
+    async_record = async_job_store.refresh(job_id)
+    if async_record is None:
+        raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
+    if async_record.building_graph is None:
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                f"Job {job_id} is in state {async_record.status!r}; "
+                "cannot review before the graph is complete."
+            ),
+        )
+    return None, async_record, async_record.building_graph, async_record.status
+
+
+@router.get("/{job_id}/review", response_model=ReviewSnapshotResponse)
+async def get_review_snapshot(job_id: str) -> ReviewSnapshotResponse:
+    """Return the review queue payload for a finished job.
+
+    Surfaces (a) the completeness gate — ``review_required`` is ``True``
+    when overall completeness is below
+    :data:`~src.utils.completeness_scorer.HUMAN_REVIEW_THRESHOLD` — and
+    (b) every low-confidence element the reviewer should look at, plus
+    (c) the overrideable slice of the assumption register, sorted
+    weakest-first.  One round-trip, one snapshot — the frontend does
+    not need to walk the graph itself.
+
+    Works for Channel A (synchronous) and Channels B/C (async, via the
+    :mod:`async_job_store`).  Returns 404 on unknown job ids and 409
+    when the target job hasn't produced a graph yet (queued / failed
+    Channel-B or Channel-C).
+    """
+
+    _response, _async_record, graph, status = _resolve_job_for_review(job_id)
+    return build_review_snapshot(job_id=job_id, status=status, bg=graph)
+
+
+@router.post("/{job_id}/review", response_model=BuildingGraphResponse)
+async def submit_review(job_id: str, payload: JobReviewRequest) -> BuildingGraphResponse:
+    """Apply a batch of reviewer inputs — assumption overrides and/or
+    element-level corrections — to a finished job's Building Graph.
+
+    Step 4 shipped this endpoint for assumption overrides only.  Step 11
+    extends it with element-level ``corrections`` that touch walls,
+    rooms, openings, columns, or cores directly.  The request body
+    accepts both and must contain at least one non-empty list.
+
+    Overrides are applied first (they're cheaper and can't invalidate
+    the schema), then corrections.  The first failure aborts the batch
+    with 422 (validation / bad target) or 404 (unknown assumption /
+    element id) and leaves the graph with whatever landed before the
+    failure — same semantics as Step 4 so the frontend can diff against
+    its last-known state.
+
+    Every touched element is stamped with a ``USER_OVERRIDE`` provenance
+    record (``confidence_from_model=1.0``) and its element-level
+    ``confidence`` is clamped to ``1.0`` — human-approved data is
+    authoritative.
+    """
+
+    response, async_record, graph, _status = _resolve_job_for_review(job_id)
     register = graph.metadata.assumption_register
     reviewer_suffix = f":{payload.reviewer}" if payload.reviewer else ""
+    run_id = graph.metadata.job_id or job_id
 
-    applied: list[str] = []
+    applied_overrides: list[str] = []
     for item in payload.overrides:
         try:
             updated = apply_override(
@@ -130,20 +183,34 @@ async def submit_review(job_id: str, payload: JobReviewRequest) -> BuildingGraph
                     f"register for job {job_id}"
                 ),
             )
-        applied.append(item.assumption_id)
+        applied_overrides.append(item.assumption_id)
+
+    applied_corrections: list[str] = []
+    if payload.corrections:
+        try:
+            applied_corrections = apply_corrections(
+                graph,
+                payload.corrections,
+                run_id=run_id,
+                reviewer=payload.reviewer,
+            )
+        except LookupError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except ReviewCorrectionError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     logger.info(
         "job_reviewed",
         job_id=job_id,
         reviewer=payload.reviewer,
-        overrides=applied,
+        overrides=applied_overrides,
+        corrections=applied_corrections,
     )
+
     if response is not None:
         response.updated_at = datetime.utcnow()
         return response
 
-    # Async path: synthesise a BuildingGraphResponse around the stored
-    # graph so the contract stays identical across channels.
     assert async_record is not None and async_record.building_graph is not None
     async_record._touch()  # type: ignore[attr-defined]
     return BuildingGraphResponse(
