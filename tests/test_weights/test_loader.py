@@ -19,7 +19,7 @@ from backend.weights.loader import (
 )
 from backend.weights.manifest import Architecture, WeightsManifest
 from backend.weights.backends import LocalWeightsBackend
-from src.schema.enums import DetectorSource
+from src.schema.enums import BuildingType, DetectorSource
 from src.schema.provenance import ProvenanceRecord
 
 
@@ -239,3 +239,209 @@ class TestFromEnv:
         assert loader.is_available("wall_segmenter_residential")
         rw = loader.resolve("wall_segmenter_residential")
         assert rw.path.is_file()
+
+
+# ---------------------------------------------------------------------------
+# Step 7 — BuildingType-aware slot selection
+# ---------------------------------------------------------------------------
+
+
+def _tagged_manifest_body(local_path: Path, sha: str, size: int) -> str:
+    """Manifest body with ``kind`` + ``building_types`` tags on every slot.
+
+    Covers three interesting shapes:
+      * ``wall_segmenter_residential`` — enabled, RESIDENTIAL + MIXED_USE
+      * ``wall_segmenter_commercial``  — enabled, COMMERCIAL
+      * ``wall_segmenter_universal``   — enabled, no building_types (fallback)
+      * ``wall_segmenter_disabled``    — disabled, INSTITUTIONAL — proves
+        disabled entries are ignored even when tags match
+    """
+
+    return f"""
+schema_version: "1.0.0"
+models:
+  wall_segmenter_residential:
+    enabled: true
+    architecture: cubicasa_hg
+    kind: wall_segmenter
+    building_types: [RESIDENTIAL, MIXED_USE]
+    model_id: cubicasa_hg_v1
+    model_version: "1.0.0"
+    filename: {local_path.name}
+    sha256: {sha}
+    size_bytes: {size}
+    num_classes: 44
+    source:
+      local_path: {local_path.as_posix()}
+
+  wall_segmenter_commercial:
+    enabled: true
+    architecture: smp_unet
+    kind: wall_segmenter
+    building_types: [COMMERCIAL]
+    model_id: smp_unet_cc5k
+    model_version: "0.2.0"
+    filename: smp_unet_cc5k.pth
+    num_classes: 7
+    source:
+      s3_key: models/wall_segmenter/smp_unet_cc5k.pth
+
+  wall_segmenter_universal:
+    enabled: true
+    architecture: yolov8_seg
+    kind: wall_segmenter
+    model_id: yolo_wall_seg
+    model_version: "0.1.0"
+    filename: yolo_wall_seg_v0_1.pt
+    source:
+      s3_key: models/yolo/yolo_wall_seg_v0_1.pt
+
+  wall_segmenter_disabled:
+    enabled: false
+    architecture: yolov8
+    kind: wall_segmenter
+    building_types: [INSTITUTIONAL]
+    model_id: disabled
+    model_version: "0.0.1"
+    filename: disabled.pt
+    source:
+      s3_key: models/wall_segmenter/disabled.pt
+""".lstrip()
+
+
+@pytest.fixture()
+def tagged_loader(tmp_path: Path, tmp_weights_artifact) -> WeightsLoader:
+    """Loader built against a manifest that tags every slot with ``kind``
+    and ``building_types`` — used exclusively by the Step-7 routing
+    tests.  The residential slot's artefact is cached locally so
+    ``resolve_for_building_type`` can actually fetch it."""
+
+    artefact, sha, size = tmp_weights_artifact
+    weights_dir = tmp_path / "weights-cache"
+    weights_dir.mkdir()
+    shutil.copy(artefact, weights_dir / artefact.name)
+
+    manifest_path = tmp_path / "tagged_manifest.yaml"
+    manifest_path.write_text(
+        _tagged_manifest_body(artefact, sha, size), encoding="utf-8"
+    )
+    manifest = WeightsManifest.load(manifest_path)
+    backend = LocalWeightsBackend(weights_dir=weights_dir, repo_root=tmp_path)
+    return WeightsLoader(manifest=manifest, backend=backend)
+
+
+class TestSelectSlotForBuildingType:
+    def test_typed_match_wins_over_universal(self, tagged_loader: WeightsLoader):
+        """RESIDENTIAL → residential slot, never the universal fallback."""
+        slot = tagged_loader.select_slot_for_building_type(
+            kind="wall_segmenter", building_type=BuildingType.RESIDENTIAL
+        )
+        assert slot == "wall_segmenter_residential"
+
+    def test_commercial_matches_commercial_slot(self, tagged_loader: WeightsLoader):
+        slot = tagged_loader.select_slot_for_building_type(
+            kind="wall_segmenter", building_type=BuildingType.COMMERCIAL
+        )
+        assert slot == "wall_segmenter_commercial"
+
+    def test_mixed_use_matches_residential(self, tagged_loader: WeightsLoader):
+        """MIXED_USE is listed on the residential entry's building_types."""
+        slot = tagged_loader.select_slot_for_building_type(
+            kind="wall_segmenter", building_type=BuildingType.MIXED_USE
+        )
+        assert slot == "wall_segmenter_residential"
+
+    def test_unmatched_falls_back_to_universal(self, tagged_loader: WeightsLoader):
+        """INDUSTRIAL isn't on any typed slot → universal fallback."""
+        slot = tagged_loader.select_slot_for_building_type(
+            kind="wall_segmenter", building_type=BuildingType.INDUSTRIAL
+        )
+        assert slot == "wall_segmenter_universal"
+
+    def test_unknown_falls_back_to_universal(self, tagged_loader: WeightsLoader):
+        slot = tagged_loader.select_slot_for_building_type(
+            kind="wall_segmenter", building_type=BuildingType.UNKNOWN
+        )
+        assert slot == "wall_segmenter_universal"
+
+    def test_disabled_slot_ignored_even_when_tagged(
+        self, tagged_loader: WeightsLoader
+    ):
+        """INSTITUTIONAL is on wall_segmenter_disabled only; that entry
+        is disabled, so the universal fallback should be returned."""
+        slot = tagged_loader.select_slot_for_building_type(
+            kind="wall_segmenter", building_type=BuildingType.INSTITUTIONAL
+        )
+        assert slot == "wall_segmenter_universal"
+
+    def test_unknown_kind_returns_none(self, tagged_loader: WeightsLoader):
+        slot = tagged_loader.select_slot_for_building_type(
+            kind="symbol_detector", building_type=BuildingType.COMMERCIAL
+        )
+        assert slot is None
+
+    def test_untagged_legacy_manifest_returns_none(self, loader: WeightsLoader):
+        """The default `loader` fixture's manifest carries no ``kind``
+        tags — resolution for any building type should therefore return
+        ``None`` (backwards compat guarantee)."""
+
+        slot = loader.select_slot_for_building_type(
+            kind="wall_segmenter", building_type=BuildingType.RESIDENTIAL
+        )
+        assert slot is None
+
+
+class TestResolveForBuildingType:
+    def test_resolves_to_cached_artifact(self, tagged_loader: WeightsLoader):
+        rw = tagged_loader.resolve_for_building_type(
+            kind="wall_segmenter", building_type=BuildingType.RESIDENTIAL
+        )
+        assert rw is not None
+        assert rw.name == "wall_segmenter_residential"
+        assert rw.path.is_file()
+
+    def test_no_match_returns_none(self, tagged_loader: WeightsLoader):
+        rw = tagged_loader.resolve_for_building_type(
+            kind="nonexistent_kind", building_type=BuildingType.RESIDENTIAL
+        )
+        assert rw is None
+
+    def test_backend_failure_returns_none(self, tagged_loader: WeightsLoader):
+        """COMMERCIAL slot references an S3-only source with no backend —
+        :meth:`resolve_for_building_type` swallows the fetch failure and
+        returns ``None`` so the worker can continue without a detector."""
+
+        rw = tagged_loader.resolve_for_building_type(
+            kind="wall_segmenter", building_type=BuildingType.COMMERCIAL
+        )
+        assert rw is None
+
+
+class TestWeightsEntryTagValidation:
+    def test_empty_building_types_list_rejected(self, tmp_path: Path) -> None:
+        """An explicit empty list is ambiguous — use ``null`` for universal
+        or list at least one enum member.  The manifest validator must
+        reject this so misconfigured YAMLs fail loudly."""
+
+        from backend.weights.manifest import ManifestError
+
+        manifest_path = tmp_path / "bad.yaml"
+        manifest_path.write_text(
+            """
+schema_version: "1.0.0"
+models:
+  wall_segmenter_residential:
+    enabled: true
+    architecture: cubicasa_hg
+    kind: wall_segmenter
+    building_types: []
+    model_id: cubicasa_hg_v1
+    model_version: "1.0.0"
+    filename: cubicasa_hg_v1.pkl
+    source:
+      s3_key: models/wall_segmenter/cubicasa_hg_v1.pkl
+""".lstrip(),
+            encoding="utf-8",
+        )
+        with pytest.raises(ManifestError, match="building_types"):
+            WeightsManifest.load(manifest_path)

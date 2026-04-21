@@ -1,15 +1,24 @@
-"""Celery tasks — Step-5 stubs for Channel C, **real pipeline** for Channel B.
+"""Celery tasks — real pipelines for Channels B & C (Stage-1/2 only on C).
 
-Channel B (CAD / IFC uploads) lands in Step 6 and is wired end-to-end
+Channel B (CAD / IFC uploads) shipped in Step 6 and is wired end-to-end
 here: :func:`process_cad_file` drives :class:`src.parsers.dxf_parser.DXFParser`
 or :class:`src.parsers.ifc_parser.IFCParser`, hands the parsed payload to
 :class:`src.core.cad_graph_builder.CadGraphBuilder`, and returns the
 validated :class:`BuildingGraph` via the task result backend.
 
-Channel C (floor-plan images) is still a synthetic stub — the real CV
-pipeline arrives in Step 9.  The stub is preserved so the async plumbing
-end-to-end tests keep running until the detectors slot in behind the
-same task name (``civil_agent.process_floor_plan``).
+Channel C (floor-plan images) lands Stage 1 + Stage 2 in Step 7:
+
+* **Stage 1** (:mod:`src.cv.preprocessor`) normalises orientation /
+  DPI / size for a round-trip to Claude vision.
+* **Stage 2** (:mod:`src.cv.building_type_classifier`) asks the VLM to
+  classify the plan into a :class:`BuildingType`; the output drives
+  weights-manifest selection
+  (:meth:`backend.weights.loader.WeightsLoader.select_slot_for_building_type`).
+
+Stages 3+ (the actual detectors) still emit the Step-5 synthetic
+scaffold, marked as such in the returned payload (``stub: True``,
+``stage_completed: "stage_2_vlm_classification"``).  That scaffold
+disappears in Step 9 once the real detectors are wired in.
 
 Channel B failure modes are explicit:
 
@@ -113,9 +122,14 @@ def _parse_dwg(dwg_path: Path) -> dict[str, Any]:
     Raises :class:`DWGUnsupportedError` if the ODA converter is not
     available — that's the normal state in CI and on developer
     machines without the proprietary tool installed.
+
+    The intermediate DXF file that ``DWGConverter`` writes next to the
+    source (``dwg_path.with_suffix('.dxf')``) is deleted in a ``finally``
+    block regardless of parse outcome so a worker processing many files
+    does not silently accumulate ``.dxf`` siblings next to every upload.
     """
 
-    from src.parsers.dwg_converter import DWGConverter, DWGConversionError
+    from src.parsers.dwg_converter import DWGConversionError, DWGConverter
     from src.parsers.dxf_parser import DXFParser
 
     converter = DWGConverter()
@@ -128,7 +142,196 @@ def _parse_dwg(dwg_path: Path) -> dict[str, Any]:
             "src.parsers.dwg_converter for details."
         ) from exc
 
-    return DXFParser().parse(dxf_path)
+    try:
+        return DXFParser().parse(dxf_path)
+    finally:
+        # Best-effort cleanup.  A failure here (permission denied, file
+        # already gone, etc.) must not mask a parse error or succeed
+        # loudly — just log at debug so the worker keeps going.
+        try:
+            dxf_path.unlink(missing_ok=True)
+        except OSError as cleanup_exc:  # pragma: no cover - platform dep.
+            logger.debug(
+                "dwg_intermediate_dxf_cleanup_failed",
+                path=str(dxf_path),
+                error=str(cleanup_exc),
+            )
+
+
+# ---------------------------------------------------------------------------
+# Channel C — Stage 1 preprocessing + Stage 2 VLM classification
+# (Stage 3+ detectors still emit the synthetic scaffold until Step 9)
+# ---------------------------------------------------------------------------
+
+
+def _run_image_pipeline(job_id: str, image_path: str) -> dict[str, Any]:
+    """Run Channel C's Stages 1 and 2 against a floor-plan image.
+
+    Steps:
+
+    1. Stage 1: normalise the image for a multimodal-LLM round-trip
+       (``Preprocessor.prepare_for_vlm``).
+    2. Stage 2: classify the plan's ``BuildingType`` via Claude vision
+       (``BuildingTypeClassifier.classify``); graceful fallback when no
+       API key is configured keeps CI green.
+    3. Use the classified type to pick a manifest slot (advisory — the
+       Stage-3 detectors arrive in Step 9, but the slot is recorded on
+       the graph so the reviewer can see which model *would* have run).
+    4. Build the synthetic Stage-3 scaffold and overlay the VLM
+       decision on ``metadata.inferred_building_type``; record the
+       classification + selected slot as ``AssumptionRecord`` entries
+       so the ``POST /review`` endpoint can override them.
+
+    Returns the Celery-task payload shape
+    (``status``, ``job_id``, ``channel``, ``stub``, ``building_graph``)
+    plus Step-7 extensions (``classification``, ``selected_slot``,
+    ``stage_completed``) for the endpoint to surface.
+    """
+
+    from src.config import settings
+    from src.cv.building_type_classifier import BuildingTypeClassifier
+    from src.cv.preprocessor import Preprocessor
+    from src.schema.assumptions import AssumptionRecord
+    from src.schema.enums import DetectorSource, InputSource
+    from src.utils.completeness_scorer import annotate_with_completeness
+
+    resolved = Path(image_path)
+    if not resolved.exists():
+        raise FileNotFoundError(f"image file not found: {resolved}")
+
+    # --- Stage 1 -------------------------------------------------------
+    vlm_payload = Preprocessor().prepare_for_vlm(resolved)
+
+    # --- Stage 2 -------------------------------------------------------
+    classifier = BuildingTypeClassifier(api_key=settings.anthropic_api_key)
+    classification = classifier.classify(vlm_payload.png_bytes)
+
+    # --- Manifest slot selection (advisory for Step 7) ----------------
+    selected_slot = _select_wall_segmenter_slot(classification.building_type)
+
+    # --- Stage 3+ scaffold (synthetic until Step 9) -------------------
+    graph = _build_synthetic_graph(
+        job_id,
+        input_source=InputSource.FLOOR_PLAN_IMAGE,
+        source_detector=DetectorSource.HEURISTIC,
+    )
+
+    # Overlay VLM output on the metadata.  A fallback classification
+    # (no API key, parse failure, etc.) leaves the occupancy-derived
+    # value that ``_build_synthetic_graph`` already set.
+    if not classification.is_fallback:
+        graph.metadata.inferred_building_type = classification.building_type
+
+    register = graph.metadata.assumption_register
+    register.append(
+        AssumptionRecord.quick(
+            id="channel_c_vlm_building_type",
+            name="VLM-inferred building type",
+            value=classification.building_type.value,
+            source="src.cv.building_type_classifier",
+            rationale=(
+                classification.rationale
+                if not classification.is_fallback
+                else "VLM unavailable — falling back to occupancy-derived "
+                "building type.  Override if the classification is wrong."
+            ),
+            confidence=classification.confidence,
+            overrideable=True,
+            affects_modules=[
+                "weights_manifest_selection",
+                "phase3.design",
+            ],
+        )
+    )
+    register.append(
+        AssumptionRecord.quick(
+            id="channel_c_vlm_image_preprocess",
+            name="VLM image preprocessing",
+            value={
+                "encoded_width": vlm_payload.width,
+                "encoded_height": vlm_payload.height,
+                "original_width": vlm_payload.original_width,
+                "original_height": vlm_payload.original_height,
+                "dpi": vlm_payload.dpi,
+                "dpi_source": vlm_payload.dpi_source,
+                "was_rotated": vlm_payload.was_rotated,
+                "was_downscaled": vlm_payload.was_downscaled,
+            },
+            source="src.cv.preprocessor.prepare_for_vlm",
+            rationale=(
+                "Image normalised for VLM round-trip: EXIF orientation "
+                "applied, downscaled to ≤1568 px longest edge, PNG-encoded "
+                "under Claude's 5 MB ceiling."
+            ),
+            confidence=1.0,
+            overrideable=False,
+            affects_modules=["channel_c.stage_1"],
+        )
+    )
+    if selected_slot is not None:
+        register.append(
+            AssumptionRecord.quick(
+                id="channel_c_wall_segmenter_slot",
+                name="Selected wall-segmenter slot",
+                value=selected_slot,
+                source="backend.weights.loader",
+                rationale=(
+                    f"Slot resolved via kind=wall_segmenter + "
+                    f"building_type={classification.building_type.value}. "
+                    "Stage-3 detector will consume this slot in Step 9; "
+                    "until then the wall list is the synthetic scaffold."
+                ),
+                confidence=1.0,
+                overrideable=False,
+                affects_modules=["stage3.wall_segmentation"],
+            )
+        )
+
+    # Completeness must be recomputed now that we mutated the register.
+    graph = annotate_with_completeness(graph)
+
+    return {
+        "status": "ok",
+        "job_id": job_id,
+        "channel": "image",
+        "stub": True,  # Stage 3+ detectors still synthetic (Step 9 lands them)
+        "stage_completed": "stage_2_vlm_classification",
+        "classification": {
+            "building_type": classification.building_type.value,
+            "confidence": classification.confidence,
+            "model_id": classification.model_id,
+            "rationale": classification.rationale,
+            "is_fallback": classification.is_fallback,
+        },
+        "selected_slot": selected_slot,
+        "building_graph": _dump_graph(graph),
+    }
+
+
+def _select_wall_segmenter_slot(building_type) -> Optional[str]:
+    """Resolve the ``wall_segmenter`` slot for *building_type*.
+
+    Keeps the loader import + exception handling out of the hot path in
+    :func:`_run_image_pipeline`.  Any failure to load the manifest
+    (missing YAML, environment mis-configuration) is logged at warning
+    level and treated as "no slot selected" — Channel C's Stage 2 is
+    still useful even if Stage 3 can't be staged yet.
+    """
+
+    try:
+        from backend.weights.loader import WeightsLoader
+
+        loader = WeightsLoader.from_env()
+        return loader.select_slot_for_building_type(
+            kind="wall_segmenter", building_type=building_type
+        )
+    except Exception as exc:  # manifest load errors, settings issues, …
+        logger.warning(
+            "manifest_slot_selection_failed",
+            building_type=getattr(building_type, "value", building_type),
+            error=str(exc),
+        )
+        return None
 
 
 # ---------------------------------------------------------------------------
@@ -206,43 +409,38 @@ if celery_app is not None:
 
     @celery_app.task(bind=True, name="civil_agent.process_floor_plan")
     def process_floor_plan(self, job_id: str, image_path: str) -> dict[str, Any]:
-        """Stub Channel-C task: pretend to run the CV pipeline."""
+        """Channel-C task: Stage 1 preprocess + Stage 2 VLM classification.
 
-        from src.schema.enums import DetectorSource, InputSource
+        Stage 3+ (real detectors) arrive in Step 9; until then the
+        returned graph is still the synthetic scaffold with VLM-driven
+        ``metadata.inferred_building_type``.
+        """
 
         logger.info(
-            "stub_process_floor_plan_start",
+            "process_floor_plan_start",
             task_id=self.request.id,
             job_id=job_id,
             image_path=image_path,
         )
         t0 = time.perf_counter()
         try:
-            graph = _build_synthetic_graph(
-                job_id,
-                input_source=InputSource.FLOOR_PLAN_IMAGE,
-                source_detector=DetectorSource.HEURISTIC,
-            )
-            payload = _dump_graph(graph)
+            result = _run_image_pipeline(job_id, image_path)
             logger.info(
-                "stub_process_floor_plan_complete",
+                "process_floor_plan_complete",
                 task_id=self.request.id,
                 job_id=job_id,
+                classification=result["classification"]["building_type"],
+                selected_slot=result["selected_slot"],
                 elapsed_ms=round((time.perf_counter() - t0) * 1000, 2),
             )
-            return {
-                "status": "ok",
-                "job_id": job_id,
-                "channel": "image",
-                "stub": True,
-                "building_graph": payload,
-            }
+            return result
         except Exception as exc:
             logger.error(
-                "stub_process_floor_plan_failed",
+                "process_floor_plan_failed",
                 task_id=self.request.id,
                 job_id=job_id,
                 error=str(exc),
+                error_type=type(exc).__name__,
             )
             raise
 
@@ -291,8 +489,31 @@ else:  # pragma: no cover — Celery not installed
 # ---------------------------------------------------------------------------
 
 
-def run_floor_plan_stub(job_id: str, image_path: Optional[str] = None) -> dict[str, Any]:
-    """Synchronous twin of :func:`process_floor_plan` (still a stub)."""
+def run_image_inprocess(job_id: str, image_path: str) -> dict[str, Any]:
+    """Synchronous twin of :func:`process_floor_plan` — runs the real
+    Stage-1/Stage-2 pipeline.
+
+    Used by the ``/image`` endpoint when Celery can't be reached so the
+    user still gets a VLM-classified :class:`BuildingGraph` back inside
+    the HTTP response — at the cost of running the classification
+    inline on the API process.  Acceptable for one-off uploads;
+    production should always have a healthy worker.
+    """
+
+    return _run_image_pipeline(job_id, image_path)
+
+
+def run_floor_plan_stub(
+    job_id: str, image_path: Optional[str] = None
+) -> dict[str, Any]:
+    """Synthetic Channel-C payload — kept for legacy tests that don't
+    supply a real image path.
+
+    Unlike :func:`run_image_inprocess`, this never touches the
+    filesystem and always returns the fixed synthetic graph (no
+    Stage-1/Stage-2).  Production endpoints route through
+    :func:`run_image_inprocess` instead.
+    """
 
     from src.schema.enums import DetectorSource, InputSource
 
@@ -366,9 +587,11 @@ __all__ = [
     "DWGUnsupportedError",
     "_build_synthetic_graph",
     "_run_cad_pipeline",
+    "_run_image_pipeline",
     "process_cad_file",
     "process_floor_plan",
     "run_cad_inprocess",
     "run_cad_stub",
     "run_floor_plan_stub",
+    "run_image_inprocess",
 ]

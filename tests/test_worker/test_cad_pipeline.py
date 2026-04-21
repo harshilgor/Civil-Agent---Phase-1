@@ -242,6 +242,71 @@ class TestDwgFailure:
             process_cad_file.delay("job-dwg-2", str(dwg_path), "DWG").get()
 
 
+class TestDwgIntermediateCleanup:
+    """The ODA converter writes a sibling .dxf next to the source.  That
+    intermediate has to be removed after parsing or a worker processing
+    many files will silently fill the staging volume.
+    """
+
+    def test_intermediate_dxf_removed_on_success(
+        self, tmp_path, monkeypatch
+    ) -> None:
+        """Stub out ``DWGConverter.convert`` so the test doesn't require
+        the proprietary ODA binary.  Simulate a successful conversion by
+        writing a valid DXF next to the source, then confirm
+        ``_parse_dwg`` deletes it once parsing completes."""
+
+        import ezdxf
+
+        from src.parsers import dwg_converter
+        from src.worker import tasks as worker_tasks
+
+        dwg_path = tmp_path / "plan.dwg"
+        dwg_path.write_bytes(b"fake-dwg-bytes")
+        sibling_dxf = dwg_path.with_suffix(".dxf")
+
+        def fake_convert(self, src):  # noqa: ARG001
+            doc = ezdxf.new("R2010")
+            msp = doc.modelspace()
+            doc.layers.add("A-WALL")
+            msp.add_line((0, 0), (5000, 0), dxfattribs={"layer": "A-WALL"})
+            doc.saveas(str(sibling_dxf))
+            return sibling_dxf
+
+        monkeypatch.setattr(dwg_converter.DWGConverter, "convert", fake_convert)
+
+        parsed = worker_tasks._parse_dwg(dwg_path)
+        assert "walls" in parsed
+        assert not sibling_dxf.exists(), (
+            "intermediate DXF must be removed after a successful parse"
+        )
+
+    def test_intermediate_dxf_removed_on_parse_failure(
+        self, tmp_path, monkeypatch
+    ) -> None:
+        """If DXFParser raises, the cleanup still has to run."""
+
+        from src.parsers import dwg_converter
+        from src.worker import tasks as worker_tasks
+
+        dwg_path = tmp_path / "plan.dwg"
+        dwg_path.write_bytes(b"fake-dwg-bytes")
+        sibling_dxf = dwg_path.with_suffix(".dxf")
+
+        def fake_convert(self, src):  # noqa: ARG001
+            # Produce bytes that ezdxf won't accept so DXFParser raises.
+            sibling_dxf.write_bytes(b"not-a-dxf")
+            return sibling_dxf
+
+        monkeypatch.setattr(dwg_converter.DWGConverter, "convert", fake_convert)
+
+        with pytest.raises(Exception):
+            worker_tasks._parse_dwg(dwg_path)
+        assert not sibling_dxf.exists(), (
+            "intermediate DXF must be removed even when parsing fails"
+        )
+
+
 # ---------------------------------------------------------------------------
 # Bad input propagates as task failure (not a silent stub)
 # ---------------------------------------------------------------------------

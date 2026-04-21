@@ -101,4 +101,40 @@ def cad_provenance(
     )
 
 
-__all__ = ["cad_provenance", "structured_form_provenance", "user_override_provenance"]
+def vlm_provenance(
+    *,
+    run_id: str,
+    model_id: str,
+    confidence: Optional[float] = None,
+    notes: Optional[str] = None,
+) -> ProvenanceRecord:
+    """Provenance stamp for elements (or classifications) produced by a VLM.
+
+    Channel C's Stage-2 building-type classifier is the first consumer:
+    Claude vision emits a :class:`~src.schema.enums.BuildingType` plus a
+    self-reported confidence, and every element whose classification
+    depends on that call (today just ``metadata.inferred_building_type``,
+    in Step 9 also room labels / wall disambiguations that couldn't be
+    resolved by the deterministic detectors) carries a record with
+    ``detector_source=DetectorSource.VLM_GAP_FILL``.
+
+    ``model_id`` captures the exact Claude model string
+    (e.g. ``"claude-sonnet-4-20250514"``) so the manifest-selection audit
+    trail can tie a classification back to the inference that produced it.
+    """
+
+    return ProvenanceRecord(
+        detector_source=DetectorSource.VLM_GAP_FILL,
+        run_id=run_id,
+        model_id=model_id,
+        confidence_from_model=confidence,
+        notes=notes,
+    )
+
+
+__all__ = [
+    "cad_provenance",
+    "structured_form_provenance",
+    "user_override_provenance",
+    "vlm_provenance",
+]

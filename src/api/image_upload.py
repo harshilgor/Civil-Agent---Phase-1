@@ -123,14 +123,32 @@ def _enqueue_image_task(job_id: str, dest: str, *, filename: str) -> None:
 
 
 def _run_inprocess_stub(job_id: str, dest: str) -> None:
-    """Final fallback: run the synthetic stub in the request process."""
+    """Run the real Stage-1/Stage-2 pipeline in-process when Celery is
+    unreachable.
 
-    from src.worker.tasks import run_floor_plan_stub
+    Step 7 flipped this from the synthetic ``run_floor_plan_stub`` to
+    :func:`run_image_inprocess`, so a broker outage no longer silently
+    downgrades the output to a placeholder — the user gets a real VLM
+    classification and the correct ``inferred_building_type`` even on
+    the fallback path.  Stage 3+ detectors remain synthetic (Step 9
+    adds them).  Preprocess / classification failures surface as a
+    structured ``failed`` job record with a human-readable error.
+    """
+
+    from src.worker.tasks import run_image_inprocess
 
     try:
-        payload = run_floor_plan_stub(job_id, dest)
-    except Exception as exc:  # pragma: no cover
-        async_job_store.mark_failed(job_id, f"stub failed: {exc}")
+        payload = run_image_inprocess(job_id, dest)
+    except Exception as exc:
+        logger.error(
+            "image_inprocess_pipeline_failed",
+            job_id=job_id,
+            error=str(exc),
+            error_type=type(exc).__name__,
+        )
+        async_job_store.mark_failed(
+            job_id, f"{type(exc).__name__}: {exc}"
+        )
         return
     graph = BuildingGraph.model_validate(payload["building_graph"])
     async_job_store.mark_completed(job_id, graph)

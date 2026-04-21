@@ -67,15 +67,32 @@ class TestSyncTwins:
 
 
 class TestTaskDispatch:
-    def test_floor_plan_task_delay_roundtrips(self) -> None:
+    def test_floor_plan_task_delay_roundtrips(self, tmp_path) -> None:
+        """``.delay()`` under eager mode drives the real Stage-1/Stage-2
+        pipeline now.  The VLM classifier short-circuits to the
+        "unavailable" fallback when no ``ANTHROPIC_API_KEY`` is set
+        (CI default), so we don't need to mock Claude here — the
+        synchronous twin keeps returning a valid BuildingGraph either
+        way."""
+
+        from PIL import Image
+
         from src.worker.tasks import process_floor_plan
 
+        png_path = tmp_path / "plan.png"
+        Image.new("RGB", (256, 192), color=(255, 255, 255)).save(
+            str(png_path), format="PNG"
+        )
+
         assert process_floor_plan is not None
-        async_result = process_floor_plan.delay("job-delay-img", "/tmp/fake.png")
+        async_result = process_floor_plan.delay("job-delay-img", str(png_path))
         assert async_result.successful()
         payload = async_result.result
         graph = _payload_to_graph(payload)
         assert graph.metadata.input_source == InputSource.FLOOR_PLAN_IMAGE
+        # Pipeline completed Stage 2 even without a real API key —
+        # the classification just carries the fallback sentinel.
+        assert payload["stage_completed"] == "stage_2_vlm_classification"
 
     def test_cad_task_delay_roundtrips(self, tmp_path) -> None:
         """`.delay()` under eager mode drives the real DXF pipeline now."""

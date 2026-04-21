@@ -25,7 +25,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional
 
-from src.schema.enums import DetectorSource
+from src.schema.enums import BuildingType, DetectorSource
 from src.schema.provenance import ProvenanceRecord
 
 from .backends import WeightsBackend, WeightsBackendError, get_backend
@@ -215,6 +215,63 @@ class WeightsLoader:
         """
 
         if not self.is_enabled(name):
+            return None
+        try:
+            return self.resolve(name)
+        except WeightsLoaderError:
+            return None
+
+    # -- Kind + BuildingType routing ---------------------------------------
+
+    def select_slot_for_building_type(
+        self, *, kind: str, building_type: BuildingType
+    ) -> Optional[str]:
+        """Pick the enabled manifest slot that best matches ``(kind, building_type)``.
+
+        Resolution order:
+
+        1. An enabled entry with ``kind == <kind>`` whose ``building_types``
+           list contains ``building_type``.
+        2. An enabled entry with ``kind == <kind>`` and
+           ``building_types is None`` (universal fallback).
+        3. ``None`` — caller decides whether that is a hard error or an
+           optional-detector miss.
+
+        Deterministic tie-break: alphabetical on slot name so two
+        equally-matched entries always resolve the same way across runs.
+        """
+
+        typed: list[str] = []
+        universal: list[str] = []
+        for name, entry in self.manifest.models.items():
+            if entry.kind != kind or not entry.enabled:
+                continue
+            if entry.building_types is None:
+                universal.append(name)
+            elif building_type in entry.building_types:
+                typed.append(name)
+        if typed:
+            return sorted(typed)[0]
+        if universal:
+            return sorted(universal)[0]
+        return None
+
+    def resolve_for_building_type(
+        self, *, kind: str, building_type: BuildingType
+    ) -> Optional[ResolvedWeights]:
+        """Resolve a slot selected by :meth:`select_slot_for_building_type`.
+
+        Returns ``None`` when no slot matches *or* when the matched slot
+        cannot be fetched (disabled at runtime, backend unreachable).
+        This is the shape Channel C's Stage-2 classifier consumes: a
+        missing detector must only ding the completeness score, not
+        abort the worker.
+        """
+
+        name = self.select_slot_for_building_type(
+            kind=kind, building_type=building_type
+        )
+        if name is None:
             return None
         try:
             return self.resolve(name)

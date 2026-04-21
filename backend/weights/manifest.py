@@ -37,6 +37,8 @@ from typing import Any, Optional
 import yaml
 from pydantic import BaseModel, Field, field_validator
 
+from src.schema.enums import BuildingType
+
 MANIFEST_SCHEMA_VERSION = "1.0.0"
 
 
@@ -79,10 +81,24 @@ class WeightsSource(BaseModel):
 
 
 class WeightsEntry(BaseModel):
-    """A single model slot in the manifest."""
+    """A single model slot in the manifest.
+
+    ``kind`` groups slots that fill the same role — e.g. every wall
+    segmenter declares ``kind: wall_segmenter`` regardless of which
+    architecture backs it, and the VLM-driven selector
+    (:meth:`WeightsLoader.select_slot_for_building_type`) picks the
+    right variant at runtime.  ``building_types`` further narrows a slot
+    to specific building families; a slot with ``building_types: null``
+    is treated as universal and used as a fallback when no typed entry
+    matches.  Both fields are optional for backwards compatibility: a
+    manifest that predates the Step-7 tagging keeps resolving by name as
+    before.
+    """
 
     enabled: bool = True
     architecture: Architecture
+    kind: Optional[str] = Field(default=None, max_length=64)
+    building_types: Optional[list[BuildingType]] = None
     model_id: str = Field(..., min_length=1, max_length=128)
     model_version: str = Field(..., pattern=r"^\d+\.\d+\.\d+(?:[-+][A-Za-z0-9.]+)?$")
     filename: str = Field(..., min_length=1, max_length=256)
@@ -98,6 +114,18 @@ class WeightsEntry(BaseModel):
     def _at_least_one_source(cls, v: WeightsSource) -> WeightsSource:
         if v.local_path is None and v.s3_key is None:
             raise ValueError("source must define at least one of local_path or s3_key")
+        return v
+
+    @field_validator("building_types")
+    @classmethod
+    def _non_empty_if_set(
+        cls, v: Optional[list[BuildingType]]
+    ) -> Optional[list[BuildingType]]:
+        if v is not None and len(v) == 0:
+            raise ValueError(
+                "building_types must either be null (universal) or a "
+                "non-empty list of BuildingType values"
+            )
         return v
 
 

@@ -17,6 +17,12 @@ models:
   wall_segmenter_residential:
     enabled: true
     architecture: cubicasa_hg
+    # Step 7 — Channel C's Stage-2 VLM classifier dispatches to a wall
+    # segmenter by ``kind`` + ``building_types``.  This slot handles
+    # RESIDENTIAL and MIXED_USE plans (the CubiCasa5K training corpus is
+    # dominated by apartments and town-houses).
+    kind: wall_segmenter
+    building_types: [RESIDENTIAL, MIXED_USE]
     model_id: cubicasa_hg_v1
     model_version: "1.0.0"
     filename: cubicasa_hg_v1.pkl
@@ -63,6 +69,13 @@ models:
   wall_segmenter_commercial:
     enabled: false
     architecture: smp_unet
+    # Flip enabled:true once the commercial checkpoint lands.  Covers
+    # commercial / industrial / institutional plans; MIXED_USE falls
+    # through to the residential slot above because the CubiCasa head
+    # handles the residential portion of a mixed-use floor plate better
+    # than a commercial-only U-Net handles the residential portion.
+    kind: wall_segmenter
+    building_types: [COMMERCIAL, INDUSTRIAL, INSTITUTIONAL]
     model_id: smp_unet_resnet34_cc5k
     model_version: "0.2.0"
     filename: smp_unet_resnet34_cc5k_v0_2.pth
