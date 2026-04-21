@@ -139,3 +139,34 @@ class TestPrepareForVlm:
             small_floor_plan_png, max_edge_px=800
         )
         assert max(payload.width, payload.height) <= 800
+
+    def test_does_not_mutate_source_file_for_stage3(
+        self, small_floor_plan_png: Path
+    ):
+        """Regression: the VLM path must not touch the source file on disk.
+
+        Stage 3's U-Net / YOLO-Seg path re-reads the original upload at
+        full resolution via :meth:`Preprocessor.preprocess`; if
+        :meth:`prepare_for_vlm` rewrote the file (e.g. by saving the
+        downscaled PNG back to ``image_path``) the segmenter would
+        silently consume the 1568-px downsample and produce lower-quality
+        masks.  Confirmed here by asserting:
+
+        1. The on-disk file is byte-identical after ``prepare_for_vlm``.
+        2. ``preprocess(path)`` returns the original 2400x1800 buffer
+           (not the 1568-capped VLM payload dimensions).
+        """
+        pre = Preprocessor()
+
+        original_bytes = small_floor_plan_png.read_bytes()
+        payload = pre.prepare_for_vlm(small_floor_plan_png)
+        assert payload.was_downscaled is True  # fixture is > 1568 px
+        assert small_floor_plan_png.read_bytes() == original_bytes
+
+        full_res = pre.preprocess(small_floor_plan_png)
+        h, w = full_res["original"].shape[:2]
+        assert (w, h) == (2400, 1800)
+        # And the VLM payload is demonstrably smaller than what Stage 3
+        # sees, so the two paths are not pointing at the same buffer.
+        assert max(payload.width, payload.height) <= 1568
+        assert max(w, h) > 1568

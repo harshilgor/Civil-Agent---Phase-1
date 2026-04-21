@@ -23,6 +23,20 @@ models:
     # dominated by apartments and town-houses).
     kind: wall_segmenter
     building_types: [RESIDENTIAL, MIXED_USE]
+    # Step-8 MLEngine primary-vs-fallback threshold.  Compared against
+    # the *mean wall-heatmap score over pixels classified as walls*
+    # (see CubiCasaHgWallAdapter docstring) — NOT the wall-pixel
+    # fraction, which is a geometric property of the plan, not a
+    # trust signal.
+    #
+    # PLACEHOLDER.  The 0.20 value has not been calibrated against a
+    # production sample of CubiCasa outputs.  To retune: collect
+    # mean-heatmap-score / wall-quality pairs from the first production
+    # cohort (or a held-out CubiCasa5K val split), find the score at
+    # which visually poor masks begin dominating, and set this field
+    # to that value.  Do not bump the :data:`DEFAULT_PRIMARY_CONFIDENCE_
+    # THRESHOLD` module constant — per-model thresholds belong here.
+    confidence_threshold: 0.20
     model_id: cubicasa_hg_v1
     model_version: "1.0.0"
     filename: cubicasa_hg_v1.pkl
@@ -76,6 +90,15 @@ models:
     # than a commercial-only U-Net handles the residential portion.
     kind: wall_segmenter
     building_types: [COMMERCIAL, INDUSTRIAL, INSTITUTIONAL]
+    # Confidence semantics differ from the CubiCasa hourglass: the SMP
+    # head emits per-class softmax probabilities, so the adapter
+    # reports the mean winning-class probability over wall pixels
+    # (range roughly [0.5, 0.95] on trained weights).  MLStructFP is
+    # noisier than CubiCasa5K and the operating point is expected to
+    # be higher than the residential slot's.  Left unset here because
+    # the checkpoint does not yet exist; set when weights land and
+    # keep the value segregated from the residential one.
+    # confidence_threshold: 0.55
     model_id: smp_unet_resnet34_cc5k
     model_version: "0.2.0"
     filename: smp_unet_resnet34_cc5k_v0_2.pth
@@ -99,6 +122,12 @@ models:
   yolo_wall_seg:
     enabled: false
     architecture: yolov8_seg
+    # Step 8 — MLEngine dispatches fallback wall segmenters by ``kind``.
+    # ``wall_fallback`` is a distinct role from ``wall_segmenter`` because
+    # the engine only consults it when the primary is unavailable or
+    # returns a low-confidence mask.  No ``building_types`` means it is
+    # universal — usable behind any primary, regardless of plan kind.
+    kind: wall_fallback
     model_id: yolo_wall_seg
     model_version: "0.1.0"
     filename: yolo_wall_seg_v0_1.pt
@@ -119,6 +148,10 @@ models:
   symbol_detector:
     enabled: false
     architecture: yolov8
+    # Step 8 — MLEngine dispatches symbol detectors by ``kind``.  Universal
+    # across building types; per-type symbol checkpoints can be added later
+    # by cloning this slot and setting ``building_types``.
+    kind: symbol_detector
     model_id: symbol_detector
     model_version: "0.1.0"
     filename: symbol_detector_v0_1.pt

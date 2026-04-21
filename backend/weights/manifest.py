@@ -105,6 +105,18 @@ class WeightsEntry(BaseModel):
     sha256: Optional[str] = Field(default=None, pattern=r"^[0-9a-fA-F]{64}$")
     size_bytes: Optional[int] = Field(default=None, ge=0)
     num_classes: Optional[int] = Field(default=None, ge=1)
+    # Step-8 MLEngine threshold knob.  Meaningful only on slots that act
+    # as a *primary* wall segmenter (``kind = wall_segmenter``); other
+    # slots ignore it.  When the primary returns a confidence below this
+    # value, the engine engages the fallback (``kind = wall_fallback``).
+    # Deliberately per-entry because different checkpoints produce
+    # different confidence distributions — the CubiCasa hourglass emits
+    # raw heatmap scores (non-softmaxed), while an SMP U-Net head emits
+    # softmaxed class probabilities.  Leave unset to fall back to the
+    # engine-level default.
+    confidence_threshold: Optional[float] = Field(
+        default=None, ge=0.0, le=1.0
+    )
     params: dict[str, Any] = Field(default_factory=dict)
     source: WeightsSource
     description: Optional[str] = Field(default=None, max_length=512)
