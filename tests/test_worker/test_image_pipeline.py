@@ -1,9 +1,21 @@
-"""End-to-end integration tests for Channel C's Stage-1/Stage-2 pipeline.
+"""End-to-end integration tests for Channel C's Stage-1 through Stage-10 pipeline.
 
 These tests drive :func:`src.worker.tasks._run_image_pipeline` (and the
 Celery task + in-process twin that wrap it) against real PNG fixtures,
 with the Anthropic client monkey-patched so the VLM call never leaves
 the test process.
+
+The production weights manifest points to checkpoint files that don't
+exist in CI (``cubicasa_hg_v1.pkl`` etc.), so the ML engine fails to
+resolve and the :class:`ImageGraphBuilder` falls through to the
+*degraded* path.  That's the correct behaviour — the graph is
+schema-valid with a loud ``channel_c_degraded_placeholder`` assumption
+record so a reviewer can see exactly why the pipeline collapsed.
+
+Happy-path tests (wall mask → real walls → real building graph) are in
+``tests/test_core/test_image_graph_builder.py``; they inject a fake
+:class:`MLEngine` that produces a synthetic wall mask and exercise the
+full Stage 3-10 flow without needing torch or any real weights.
 """
 
 from __future__ import annotations
@@ -94,8 +106,13 @@ class TestImagePipelineHappyPath:
 
         assert result["status"] == "ok"
         assert result["channel"] == "image"
-        assert result["stage_completed"] == "stage_2_vlm_classification"
-        assert result["stub"] is True  # Stage 3+ still synthetic
+        # Step 10 landed the full pipeline — under CI the weights are
+        # unresolvable so we hit the degraded placeholder path, not the
+        # happy path.  The string must still announce Stage 10 completion
+        # (not a "we stopped at Stage 2" marker) so the reviewer sees the
+        # run was attempted end-to-end.
+        assert result["stage_completed"].startswith("stage_10_")
+        assert result["stub"] is True  # degraded: no walls resolvable in CI
 
         cls = result["classification"]
         assert cls["building_type"] == "RESIDENTIAL"
@@ -121,11 +138,27 @@ class TestImagePipelineHappyPath:
         assert preproc["overrideable"] is False
         assert preproc["value"]["dpi_source"] in {"exif", "fallback", "pdf"}
 
-    def test_slot_selection_uses_building_type(
+        # The degraded-placeholder assumption must fire and be
+        # overrideable — the reviewer can re-run with a different scale
+        # / manifest if they know why the first pass collapsed.
+        degraded = next(
+            r for r in register if r["id"] == "channel_c_degraded_placeholder"
+        )
+        assert degraded["overrideable"] is True
+        assert degraded["value"]["reason"] == "zero_walls_after_geometry_post_processor"
+
+    def test_slot_selection_is_advisory_in_ci(
         self, tmp_path: Path, mock_anthropic: MagicMock
     ):
-        """When the VLM returns RESIDENTIAL the loader should pick
-        ``wall_segmenter_residential`` from the production manifest."""
+        """In CI the residential weights don't exist on disk, so
+        :meth:`MLEngine.from_loader` fails to resolve them and
+        ``selected_slot`` reports ``None`` — the honest answer ("no
+        weights loaded") rather than the aspirational one.
+
+        The VLM classification itself must still land correctly on the
+        graph so the reviewer sees the building type even when the
+        downstream detector is missing.
+        """
 
         from src.worker.tasks import _run_image_pipeline
 
@@ -134,23 +167,20 @@ class TestImagePipelineHappyPath:
         )
         png = _make_png(tmp_path / "plan.png")
         result = _run_image_pipeline("job-c-2", str(png))
-        assert result["selected_slot"] == "wall_segmenter_residential"
-
-        register = result["building_graph"]["metadata"]["assumption_register"]
-        slot_record = next(
-            r for r in register if r["id"] == "channel_c_wall_segmenter_slot"
-        )
-        assert slot_record["value"] == "wall_segmenter_residential"
-        assert slot_record["overrideable"] is False
+        # Weights unresolvable in CI -> no slot actually loaded.
+        assert result["selected_slot"] is None
+        assert result["building_graph"]["metadata"]["inferred_building_type"] == "RESIDENTIAL"
 
     def test_commercial_classification_no_enabled_slot(
         self, tmp_path: Path, mock_anthropic: MagicMock
     ):
-        """COMMERCIAL has no enabled slot in the production manifest yet
-        (wall_segmenter_commercial ships disabled until the SMP U-Net
-        checkpoint lands).  The pipeline must still return successfully
-        with ``selected_slot=None`` so the reviewer can see the VLM
-        classification even when the downstream detector is missing."""
+        """COMMERCIAL has no enabled slot in the production manifest
+        yet (wall_segmenter_commercial ships disabled until the SMP
+        U-Net checkpoint lands).  The pipeline must still return
+        successfully — ``selected_slot=None``, the VLM classification
+        on the graph — so the reviewer sees the attempt even when the
+        downstream detector is missing.
+        """
 
         from src.worker.tasks import _run_image_pipeline
 
@@ -260,7 +290,7 @@ class TestProcessFloorPlanTask:
         png = _make_png(tmp_path / "plan.png")
         payload = run_image_inprocess("job-inproc-1", str(png))
         assert payload["channel"] == "image"
-        assert payload["stage_completed"] == "stage_2_vlm_classification"
+        assert payload["stage_completed"].startswith("stage_10_")
         assert "classification" in payload
 
     def test_task_failure_propagates(

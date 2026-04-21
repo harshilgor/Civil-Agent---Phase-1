@@ -66,7 +66,17 @@ def test_status_404_on_unknown_job(client: TestClient) -> None:
 
 
 def test_eager_run_produces_building_graph(client: TestClient) -> None:
-    """Eager-mode Celery should hand back a full graph on the first poll."""
+    """Eager-mode Celery should hand back a full graph on the first poll.
+
+    The test fixture is a 16x16 blank PNG and CI has no ML weights, so
+    Channel C's Stage 3-9 pipeline produces nothing to vectorise.  The
+    builder degrades gracefully to a placeholder graph — schema-valid,
+    marked with ``channel_c_degraded_placeholder`` so the review UI
+    will flag it for human triage.  The happy-path (real walls, real
+    building graph) is exercised in
+    ``tests/test_core/test_image_graph_builder.py`` with an injected
+    fake ML engine.
+    """
 
     files = {"file": ("plan.png", _tiny_png_bytes(), "image/png")}
     post = client.post("/api/v1/building/upload/image", files=files)
@@ -83,4 +93,12 @@ def test_eager_run_produces_building_graph(client: TestClient) -> None:
     assert body["building_graph"] is not None
     bg = body["building_graph"]
     assert bg["metadata"]["input_source"] == "FLOOR_PLAN_IMAGE"
-    assert len(bg["walls"]) >= 1
+    # Degraded placeholder: schema is still valid (one story, a
+    # synthetic single-room polygon), but the degradation is
+    # surfaced loudly on the assumption register.
+    register_ids = {a["id"] for a in bg["metadata"]["assumption_register"]}
+    if not bg["walls"]:
+        assert "channel_c_degraded_placeholder" in register_ids
+        assert "image_pipeline_produced_no_walls" in bg["metadata"]["warnings"]
+    assert len(bg["stories"]) >= 1
+    assert bg["facade"]["perimeter_length_mm"] > 0

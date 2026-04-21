@@ -90,9 +90,11 @@ class TestTaskDispatch:
         payload = async_result.result
         graph = _payload_to_graph(payload)
         assert graph.metadata.input_source == InputSource.FLOOR_PLAN_IMAGE
-        # Pipeline completed Stage 2 even without a real API key —
-        # the classification just carries the fallback sentinel.
-        assert payload["stage_completed"] == "stage_2_vlm_classification"
+        # Pipeline ran end-to-end (Stage 10) even without a real API
+        # key or resolvable ML weights — Channel C degrades to a
+        # placeholder graph rather than aborting so the user still
+        # gets a reviewable BuildingGraph back.
+        assert payload["stage_completed"].startswith("stage_10_")
 
     def test_cad_task_delay_roundtrips(self, tmp_path) -> None:
         """`.delay()` under eager mode drives the real DXF pipeline now."""

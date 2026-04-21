@@ -1,4 +1,4 @@
-"""Celery tasks — real pipelines for Channels B & C (Stage-1/2 only on C).
+"""Celery tasks — end-to-end pipelines for Channels B & C.
 
 Channel B (CAD / IFC uploads) shipped in Step 6 and is wired end-to-end
 here: :func:`process_cad_file` drives :class:`src.parsers.dxf_parser.DXFParser`
@@ -6,29 +6,41 @@ or :class:`src.parsers.ifc_parser.IFCParser`, hands the parsed payload to
 :class:`src.core.cad_graph_builder.CadGraphBuilder`, and returns the
 validated :class:`BuildingGraph` via the task result backend.
 
-Channel C (floor-plan images) lands Stage 1 + Stage 2 in Step 7:
+Channel C (floor-plan images) has shipped every stage by Step 10:
 
 * **Stage 1** (:mod:`src.cv.preprocessor`) normalises orientation /
-  DPI / size for a round-trip to Claude vision.
+  DPI / size for a round-trip to Claude vision; the full-resolution
+  BGR image flows separately into Stage 3.
 * **Stage 2** (:mod:`src.cv.building_type_classifier`) asks the VLM to
   classify the plan into a :class:`BuildingType`; the output drives
   weights-manifest selection
   (:meth:`backend.weights.loader.WeightsLoader.select_slot_for_building_type`).
-
-Stages 3+ (the actual detectors) still emit the Step-5 synthetic
-scaffold, marked as such in the returned payload (``stub: True``,
-``stage_completed: "stage_2_vlm_classification"``).  That scaffold
-disappears in Step 9 once the real detectors are wired in.
+* **Stage 3** (:mod:`src.cv.ml_engine`) runs the U-Net / CubiCasa-HG
+  primary wall segmenter with a YOLO-Seg fallback and the YOLOv8
+  symbol detector, all resolved from the manifest.
+* **Stage 4** (:mod:`src.cv.vectorizer`) vectorises the wall mask
+  into scale-aware mm segments.
+* **Stages 5-9** (:mod:`src.core.geometry`) clean the geometry
+  (orthogonal snap, corner resolution, room extraction, grid
+  inference, column scoring, core detection).
+* **Stage 10** (:mod:`src.core.image_graph_builder`) assembles the
+  :class:`BuildingGraph` with full provenance, confidence scoring,
+  the assumption register, and the completeness gate.
 
 Channel B failure modes are explicit:
 
-*   ``DXF`` / ``IFC`` parse failure  → raise, Celery marks FAILURE, the
+*   ``DXF`` / ``IFC`` parse failure  -> raise, Celery marks FAILURE, the
     API endpoint reconciles the async job record to ``failed`` with a
     structured error string.
-*   ``DWG`` file without an ODA converter configured  → raise
+*   ``DWG`` file without an ODA converter configured  -> raise
     :class:`DWGUnsupportedError`; the endpoint surfaces it as a
     user-actionable failure rather than silently falling back to a
     stub (a silent stub in prod would be worse than a clear error).
+
+Channel C degrades rather than aborting — the orchestrator inside
+:class:`src.core.image_graph_builder.ImageGraphBuilder` emits a
+schema-valid *degraded* graph when the ML stack produces no walls,
+so the reviewer always has something to open.
 
 The in-process twins (:func:`run_cad_inprocess`, :func:`run_cad_stub`,
 :func:`run_floor_plan_stub`) exist for the endpoint's graceful
@@ -159,143 +171,62 @@ def _parse_dwg(dwg_path: Path) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
-# Channel C — Stage 1 preprocessing + Stage 2 VLM classification
-# (Stage 3+ detectors still emit the synthetic scaffold until Step 9)
+# Channel C — end-to-end image pipeline (Stages 1-10)
 # ---------------------------------------------------------------------------
 
 
-def _run_image_pipeline(job_id: str, image_path: str) -> dict[str, Any]:
-    """Run Channel C's Stages 1 and 2 against a floor-plan image.
+def _run_image_pipeline(
+    job_id: str,
+    image_path: str,
+    *,
+    builder: Optional[Any] = None,
+) -> dict[str, Any]:
+    """Run Channel C end-to-end against a floor-plan image.
 
-    Steps:
+    Delegates to :class:`src.core.image_graph_builder.ImageGraphBuilder`
+    which owns the full Stage 1-10 orchestration: preprocess, VLM
+    classify, ML segment + detect, vectorise, geometric post-process,
+    assemble :class:`BuildingGraph`.  The ``builder`` kwarg is a
+    testing seam — tests inject a pre-configured builder with mock
+    components so the pipeline runs without touching the real Claude
+    API or real ML weights.
 
-    1. Stage 1: normalise the image for a multimodal-LLM round-trip
-       (``Preprocessor.prepare_for_vlm``).
-    2. Stage 2: classify the plan's ``BuildingType`` via Claude vision
-       (``BuildingTypeClassifier.classify``); graceful fallback when no
-       API key is configured keeps CI green.
-    3. Use the classified type to pick a manifest slot (advisory — the
-       Stage-3 detectors arrive in Step 9, but the slot is recorded on
-       the graph so the reviewer can see which model *would* have run).
-    4. Build the synthetic Stage-3 scaffold and overlay the VLM
-       decision on ``metadata.inferred_building_type``; record the
-       classification + selected slot as ``AssumptionRecord`` entries
-       so the ``POST /review`` endpoint can override them.
+    Returns the Celery-task payload shape:
 
-    Returns the Celery-task payload shape
-    (``status``, ``job_id``, ``channel``, ``stub``, ``building_graph``)
-    plus Step-7 extensions (``classification``, ``selected_slot``,
-    ``stage_completed``) for the endpoint to surface.
+    *   ``status``, ``job_id``, ``channel`` — routing identifiers.
+    *   ``stub`` — ``True`` only when the builder emitted a degraded
+        placeholder (no walls produced); ``False`` on the happy path.
+    *   ``stage_completed`` — marker for the endpoint to display.
+    *   ``classification`` — a compact projection of the Stage-2
+        result so the endpoint can surface it without re-parsing the
+        assumption register.
+    *   ``selected_slot`` — the manifest slot the ML engine actually
+        used, or ``None`` when no slot resolved.
+    *   ``building_graph`` — the validated BuildingGraph.
+    *   ``notes`` — non-fatal warnings collected by the engine (e.g.
+        "primary confidence below threshold, fallback engaged").
     """
 
-    from src.config import settings
-    from src.cv.building_type_classifier import BuildingTypeClassifier
-    from src.cv.preprocessor import Preprocessor
-    from src.schema.assumptions import AssumptionRecord
-    from src.schema.enums import DetectorSource, InputSource
-    from src.utils.completeness_scorer import annotate_with_completeness
+    from src.core.image_graph_builder import ImageGraphBuilder
 
     resolved = Path(image_path)
     if not resolved.exists():
         raise FileNotFoundError(f"image file not found: {resolved}")
 
-    # --- Stage 1 -------------------------------------------------------
-    vlm_payload = Preprocessor().prepare_for_vlm(resolved)
+    builder = builder or ImageGraphBuilder()
+    build_result = builder.build(resolved, job_id=job_id, run_id=job_id)
 
-    # --- Stage 2 -------------------------------------------------------
-    classifier = BuildingTypeClassifier(api_key=settings.anthropic_api_key)
-    classification = classifier.classify(vlm_payload.png_bytes)
-
-    # --- Manifest slot selection (advisory for Step 7) ----------------
-    selected_slot = _select_wall_segmenter_slot(classification.building_type)
-
-    # --- Stage 3+ scaffold (synthetic until Step 9) -------------------
-    graph = _build_synthetic_graph(
-        job_id,
-        input_source=InputSource.FLOOR_PLAN_IMAGE,
-        source_detector=DetectorSource.HEURISTIC,
-    )
-
-    # Overlay VLM output on the metadata.  A fallback classification
-    # (no API key, parse failure, etc.) leaves the occupancy-derived
-    # value that ``_build_synthetic_graph`` already set.
-    if not classification.is_fallback:
-        graph.metadata.inferred_building_type = classification.building_type
-
-    register = graph.metadata.assumption_register
-    register.append(
-        AssumptionRecord.quick(
-            id="channel_c_vlm_building_type",
-            name="VLM-inferred building type",
-            value=classification.building_type.value,
-            source="src.cv.building_type_classifier",
-            rationale=(
-                classification.rationale
-                if not classification.is_fallback
-                else "VLM unavailable — falling back to occupancy-derived "
-                "building type.  Override if the classification is wrong."
-            ),
-            confidence=classification.confidence,
-            overrideable=True,
-            affects_modules=[
-                "weights_manifest_selection",
-                "phase3.design",
-            ],
-        )
-    )
-    register.append(
-        AssumptionRecord.quick(
-            id="channel_c_vlm_image_preprocess",
-            name="VLM image preprocessing",
-            value={
-                "encoded_width": vlm_payload.width,
-                "encoded_height": vlm_payload.height,
-                "original_width": vlm_payload.original_width,
-                "original_height": vlm_payload.original_height,
-                "dpi": vlm_payload.dpi,
-                "dpi_source": vlm_payload.dpi_source,
-                "was_rotated": vlm_payload.was_rotated,
-                "was_downscaled": vlm_payload.was_downscaled,
-            },
-            source="src.cv.preprocessor.prepare_for_vlm",
-            rationale=(
-                "Image normalised for VLM round-trip: EXIF orientation "
-                "applied, downscaled to ≤1568 px longest edge, PNG-encoded "
-                "under Claude's 5 MB ceiling."
-            ),
-            confidence=1.0,
-            overrideable=False,
-            affects_modules=["channel_c.stage_1"],
-        )
-    )
-    if selected_slot is not None:
-        register.append(
-            AssumptionRecord.quick(
-                id="channel_c_wall_segmenter_slot",
-                name="Selected wall-segmenter slot",
-                value=selected_slot,
-                source="backend.weights.loader",
-                rationale=(
-                    f"Slot resolved via kind=wall_segmenter + "
-                    f"building_type={classification.building_type.value}. "
-                    "Stage-3 detector will consume this slot in Step 9; "
-                    "until then the wall list is the synthetic scaffold."
-                ),
-                confidence=1.0,
-                overrideable=False,
-                affects_modules=["stage3.wall_segmentation"],
-            )
-        )
-
-    # Completeness must be recomputed now that we mutated the register.
-    graph = annotate_with_completeness(graph)
-
+    classification = build_result.classification
     return {
         "status": "ok",
         "job_id": job_id,
         "channel": "image",
-        "stub": True,  # Stage 3+ detectors still synthetic (Step 9 lands them)
-        "stage_completed": "stage_2_vlm_classification",
+        "stub": build_result.degraded,
+        "stage_completed": (
+            "stage_10_degraded_placeholder"
+            if build_result.degraded
+            else "stage_10_building_graph"
+        ),
         "classification": {
             "building_type": classification.building_type.value,
             "confidence": classification.confidence,
@@ -303,35 +234,13 @@ def _run_image_pipeline(job_id: str, image_path: str) -> dict[str, Any]:
             "rationale": classification.rationale,
             "is_fallback": classification.is_fallback,
         },
-        "selected_slot": selected_slot,
-        "building_graph": _dump_graph(graph),
+        "selected_slot": build_result.selected_slot,
+        "used_fallback_segmenter": build_result.used_fallback_segmenter,
+        "wall_count": build_result.wall_count,
+        "symbol_count": build_result.symbol_count,
+        "notes": list(build_result.notes),
+        "building_graph": _dump_graph(build_result.graph),
     }
-
-
-def _select_wall_segmenter_slot(building_type) -> Optional[str]:
-    """Resolve the ``wall_segmenter`` slot for *building_type*.
-
-    Keeps the loader import + exception handling out of the hot path in
-    :func:`_run_image_pipeline`.  Any failure to load the manifest
-    (missing YAML, environment mis-configuration) is logged at warning
-    level and treated as "no slot selected" — Channel C's Stage 2 is
-    still useful even if Stage 3 can't be staged yet.
-    """
-
-    try:
-        from backend.weights.loader import WeightsLoader
-
-        loader = WeightsLoader.from_env()
-        return loader.select_slot_for_building_type(
-            kind="wall_segmenter", building_type=building_type
-        )
-    except Exception as exc:  # manifest load errors, settings issues, …
-        logger.warning(
-            "manifest_slot_selection_failed",
-            building_type=getattr(building_type, "value", building_type),
-            error=str(exc),
-        )
-        return None
 
 
 # ---------------------------------------------------------------------------

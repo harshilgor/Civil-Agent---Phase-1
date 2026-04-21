@@ -62,12 +62,38 @@ def resolve_corners(
         return []
 
     segs = _drop_stubs(segs, config.stub_wall_mm)
-    # Order matters: the perpendicular clip runs *first* so L-junctions
-    # where both walls fall short of the corner are snapped to their
-    # true infinite-line intersection.  If we ran the endpoint-to-wall
-    # extension first, each endpoint would get clamped to the nearest
-    # vertex of the other wall — which is near the corner but not on
-    # it, so the extension's own fixed point becomes the joint.
+
+    # ======================================================================
+    # INVARIANT: pass ordering is fixed — DO NOT refactor this sequence
+    # without understanding the geometric consequence.
+    #
+    # Perpendicular-pair clip MUST run before endpoint-to-wall extension.
+    #
+    # Why:
+    # Consider an L-junction where the horizontal wall ends at
+    # (4970, 0) and the vertical wall starts at (5000, 30); both fall
+    # 30 mm short of the true corner at (5000, 0).
+    #
+    #   * Extension-first would project (4970, 0) onto the vertical
+    #     wall: the foot clips to the wall's near vertex (5000, 30)
+    #     because the projection parameter t is outside [0, 1].  The
+    #     horizontal wall's end is thus welded to (5000, 30) —
+    #     visually "close" but not on the true corner.  The second
+    #     wall's endpoint is similarly pulled to (5000, 30).  A
+    #     perpendicular-pair pass that runs afterwards sees zero
+    #     endpoint-to-endpoint distance and refuses to move either
+    #     wall, so the joint settles at the wrong point.
+    #
+    #   * Clip-first computes the infinite-line intersection of the
+    #     two walls, (5000, 0), and snaps both short endpoints there
+    #     in one operation.  The subsequent endpoint-to-wall extension
+    #     has nothing left to do (both endpoints are already on each
+    #     other's segments), which is the correct no-op.
+    #
+    # The `TestPerpendicularClip::test_l_junction_both_short_clips_
+    # to_intersection` test in tests/test_core/test_geometry/
+    # test_corners.py is the regression gate for this ordering.
+    # ======================================================================
     _clip_perpendicular_pairs(
         segs,
         junction_radius=config.junction_radius_mm,

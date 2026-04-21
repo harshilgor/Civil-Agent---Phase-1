@@ -103,6 +103,70 @@ class GeometryPostProcessor:
         walls = snap_orthogonal(inputs.walls, self.config.snap)
         walls = resolve_corners(walls, self.config.corners)
 
+        # Surface the snap/corners *policy* as explicit, overrideable
+        # assumptions so a reviewer who knows the building has genuine
+        # non-orthogonal geometry (30°/60° walls in some industrial or
+        # curved-facade buildings) can disable them without a code
+        # change.  AssumptionRecord.overrideable defaults to True in
+        # :meth:`AssumptionRecord.quick`; we spell it out here because
+        # these two records are the canonical "reviewer can change the
+        # behaviour of Step 9" hooks.
+        assumptions.append(
+            _quick_assumption(
+                id_="geometry.orthogonality_policy",
+                name="Walls assumed orthogonal within angular tolerance",
+                value=self.config.snap.angular_tolerance_deg,
+                unit="deg",
+                rationale=(
+                    "Wall segments whose angle to the nearest cardinal "
+                    "axis is within this tolerance are rotated onto the "
+                    "axis during the snap pass.  Buildings with genuine "
+                    "non-orthogonal geometry (industrial sheds with "
+                    "angled walls, curved-facade towers, atria with "
+                    "chamfered corners) should override this to a "
+                    "smaller value — or to 0.0 to disable orthogonal "
+                    "snapping entirely."
+                ),
+                confidence=0.75,
+                overrideable=True,
+            )
+        )
+        assumptions.append(
+            _quick_assumption(
+                id_="geometry.snap_weld_radius",
+                name="Endpoint-weld radius for wall joints",
+                value=self.config.snap.endpoint_weld_mm,
+                unit="mm",
+                rationale=(
+                    "Two wall endpoints closer than this distance are "
+                    "welded to a single vertex during the snap pass.  "
+                    "Default 50 mm matches typical residential wall "
+                    "thickness.  Increase for scans of heavy-construction "
+                    "plans with thicker walls; decrease when the "
+                    "vectoriser is known to produce tight endpoints."
+                ),
+                confidence=0.8,
+                overrideable=True,
+            )
+        )
+        assumptions.append(
+            _quick_assumption(
+                id_="geometry.corner_junction_radius",
+                name="Junction radius for corner resolution",
+                value=self.config.corners.junction_radius_mm,
+                unit="mm",
+                rationale=(
+                    "Dangling endpoints within this radius of another "
+                    "wall are extended / clipped to meet it.  Values "
+                    "smaller than endpoint_weld_mm leave T-junctions "
+                    "unresolved; values much larger pull distant walls "
+                    "together and produce spurious joints."
+                ),
+                confidence=0.8,
+                overrideable=True,
+            )
+        )
+
         # Pass 3 — rooms.  Preserve if Channel B already provided them.
         if inputs.rooms is not None:
             rooms = list(inputs.rooms)
@@ -258,18 +322,29 @@ def _quick_assumption(
     value,
     rationale: str,
     confidence: float = 0.8,
+    unit: Optional[str] = None,
+    overrideable: bool = True,
 ) -> AssumptionRecord:
     """Thin wrapper around :meth:`AssumptionRecord.quick` that stamps
     every geometry-pipeline assumption with the same source string so
-    downstream consumers can filter for them."""
+    downstream consumers can filter for them.
+
+    All records emitted here default to ``overrideable=True``: a
+    reviewer who knows the building violates one of our geometric
+    priors (orthogonality, junction tolerance, service-room cluster
+    definition) should be able to flag the assumption via the Phase 3
+    review UI and re-run without a code change.
+    """
 
     return AssumptionRecord.quick(
         id=id_,
         name=name,
         value=value,
+        unit=unit,
         source=_GEOMETRY_SOURCE,
         rationale=rationale,
         confidence=confidence,
+        overrideable=overrideable,
         affects_modules=["Phase 1 / Step 9 geometry"],
     )
 
