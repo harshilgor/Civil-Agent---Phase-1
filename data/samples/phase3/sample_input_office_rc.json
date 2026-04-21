@@ -1,0 +1,2790 @@
+{
+  "building_graph": {
+    "project": {
+      "name": "sample_office_rc",
+      "location": {
+        "lat": 41.88,
+        "lng": -87.63,
+        "city": "Chicago",
+        "state": "IL"
+      },
+      "occupancy_type": "office",
+      "material_preference": "reinforced_concrete",
+      "num_stories": 8,
+      "total_height_mm": 28800.0,
+      "building_code": "ASCE 7-22"
+    },
+    "stories": [
+      {
+        "id": "S1",
+        "level": 1,
+        "floor_to_floor_mm": 3600.0,
+        "elevation_mm": 0.0,
+        "floor_area_gross_m2": 864.0,
+        "usage": "office"
+      },
+      {
+        "id": "S2",
+        "level": 2,
+        "floor_to_floor_mm": 3600.0,
+        "elevation_mm": 3600.0,
+        "floor_area_gross_m2": 864.0,
+        "usage": "office"
+      },
+      {
+        "id": "S3",
+        "level": 3,
+        "floor_to_floor_mm": 3600.0,
+        "elevation_mm": 7200.0,
+        "floor_area_gross_m2": 864.0,
+        "usage": "office"
+      },
+      {
+        "id": "S4",
+        "level": 4,
+        "floor_to_floor_mm": 3600.0,
+        "elevation_mm": 10800.0,
+        "floor_area_gross_m2": 864.0,
+        "usage": "office"
+      },
+      {
+        "id": "S5",
+        "level": 5,
+        "floor_to_floor_mm": 3600.0,
+        "elevation_mm": 14400.0,
+        "floor_area_gross_m2": 864.0,
+        "usage": "office"
+      },
+      {
+        "id": "S6",
+        "level": 6,
+        "floor_to_floor_mm": 3600.0,
+        "elevation_mm": 18000.0,
+        "floor_area_gross_m2": 864.0,
+        "usage": "office"
+      },
+      {
+        "id": "S7",
+        "level": 7,
+        "floor_to_floor_mm": 3600.0,
+        "elevation_mm": 21600.0,
+        "floor_area_gross_m2": 864.0,
+        "usage": "office"
+      },
+      {
+        "id": "S8",
+        "level": 8,
+        "floor_to_floor_mm": 3600.0,
+        "elevation_mm": 25200.0,
+        "floor_area_gross_m2": 864.0,
+        "usage": "roof_inaccessible"
+      }
+    ],
+    "grid": {
+      "x_lines": [
+        {
+          "id": "X0",
+          "position_mm": 0.0
+        },
+        {
+          "id": "X1",
+          "position_mm": 9000.0
+        },
+        {
+          "id": "X2",
+          "position_mm": 18000.0
+        },
+        {
+          "id": "X3",
+          "position_mm": 27000.0
+        },
+        {
+          "id": "X4",
+          "position_mm": 36000.0
+        }
+      ],
+      "y_lines": [
+        {
+          "id": "Y0",
+          "position_mm": 0.0
+        },
+        {
+          "id": "Y1",
+          "position_mm": 8000.0
+        },
+        {
+          "id": "Y2",
+          "position_mm": 16000.0
+        },
+        {
+          "id": "Y3",
+          "position_mm": 24000.0
+        }
+      ],
+      "bays": []
+    },
+    "walls": [],
+    "rooms": [],
+    "openings": [],
+    "column_candidates": [
+      {
+        "position": [
+          0.0,
+          0.0
+        ],
+        "grid_intersection": "G-0",
+        "confidence": 1.0,
+        "is_required": false
+      },
+      {
+        "position": [
+          9000.0,
+          0.0
+        ],
+        "grid_intersection": "G-1",
+        "confidence": 1.0,
+        "is_required": false
+      },
+      {
+        "position": [
+          18000.0,
+          0.0
+        ],
+        "grid_intersection": "G-2",
+        "confidence": 1.0,
+        "is_required": false
+      },
+      {
+        "position": [
+          27000.0,
+          0.0
+        ],
+        "grid_intersection": "G-3",
+        "confidence": 1.0,
+        "is_required": false
+      },
+      {
+        "position": [
+          36000.0,
+          0.0
+        ],
+        "grid_intersection": "G-4",
+        "confidence": 1.0,
+        "is_required": false
+      },
+      {
+        "position": [
+          0.0,
+          8000.0
+        ],
+        "grid_intersection": "G-5",
+        "confidence": 1.0,
+        "is_required": false
+      },
+      {
+        "position": [
+          9000.0,
+          8000.0
+        ],
+        "grid_intersection": "G-6",
+        "confidence": 1.0,
+        "is_required": false
+      },
+      {
+        "position": [
+          18000.0,
+          8000.0
+        ],
+        "grid_intersection": "G-7",
+        "confidence": 1.0,
+        "is_required": false
+      },
+      {
+        "position": [
+          27000.0,
+          8000.0
+        ],
+        "grid_intersection": "G-8",
+        "confidence": 1.0,
+        "is_required": false
+      },
+      {
+        "position": [
+          36000.0,
+          8000.0
+        ],
+        "grid_intersection": "G-9",
+        "confidence": 1.0,
+        "is_required": false
+      },
+      {
+        "position": [
+          0.0,
+          16000.0
+        ],
+        "grid_intersection": "G-10",
+        "confidence": 1.0,
+        "is_required": false
+      },
+      {
+        "position": [
+          9000.0,
+          16000.0
+        ],
+        "grid_intersection": "G-11",
+        "confidence": 1.0,
+        "is_required": false
+      },
+      {
+        "position": [
+          18000.0,
+          16000.0
+        ],
+        "grid_intersection": "G-12",
+        "confidence": 1.0,
+        "is_required": false
+      },
+      {
+        "position": [
+          27000.0,
+          16000.0
+        ],
+        "grid_intersection": "G-13",
+        "confidence": 1.0,
+        "is_required": false
+      },
+      {
+        "position": [
+          36000.0,
+          16000.0
+        ],
+        "grid_intersection": "G-14",
+        "confidence": 1.0,
+        "is_required": false
+      },
+      {
+        "position": [
+          0.0,
+          24000.0
+        ],
+        "grid_intersection": "G-15",
+        "confidence": 1.0,
+        "is_required": false
+      },
+      {
+        "position": [
+          9000.0,
+          24000.0
+        ],
+        "grid_intersection": "G-16",
+        "confidence": 1.0,
+        "is_required": false
+      },
+      {
+        "position": [
+          18000.0,
+          24000.0
+        ],
+        "grid_intersection": "G-17",
+        "confidence": 1.0,
+        "is_required": false
+      },
+      {
+        "position": [
+          27000.0,
+          24000.0
+        ],
+        "grid_intersection": "G-18",
+        "confidence": 1.0,
+        "is_required": false
+      },
+      {
+        "position": [
+          36000.0,
+          24000.0
+        ],
+        "grid_intersection": "G-19",
+        "confidence": 1.0,
+        "is_required": false
+      }
+    ],
+    "cores": [],
+    "facade": {
+      "perimeter_polygon": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          36000.0,
+          0.0
+        ],
+        [
+          36000.0,
+          24000.0
+        ],
+        [
+          0.0,
+          24000.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ],
+      "perimeter_length_mm": 120000.0
+    },
+    "metadata": {
+      "input_source": "structured_form",
+      "confidence_scores": {
+        "overall": 0.9
+      },
+      "assumptions_made": [],
+      "warnings": []
+    }
+  },
+  "structural_design_graph": {
+    "building_graph_id": "sample_office_rc",
+    "zones": [],
+    "support_candidates": [
+      {
+        "id": "S0-S1",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "story": "S1",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-0",
+        "is_stacked": true,
+        "stack_group_id": "G-0"
+      },
+      {
+        "id": "S1-S1",
+        "position": [
+          9000.0,
+          0.0
+        ],
+        "story": "S1",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-1",
+        "is_stacked": true,
+        "stack_group_id": "G-1"
+      },
+      {
+        "id": "S2-S1",
+        "position": [
+          18000.0,
+          0.0
+        ],
+        "story": "S1",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-2",
+        "is_stacked": true,
+        "stack_group_id": "G-2"
+      },
+      {
+        "id": "S3-S1",
+        "position": [
+          27000.0,
+          0.0
+        ],
+        "story": "S1",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-3",
+        "is_stacked": true,
+        "stack_group_id": "G-3"
+      },
+      {
+        "id": "S4-S1",
+        "position": [
+          36000.0,
+          0.0
+        ],
+        "story": "S1",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-4",
+        "is_stacked": true,
+        "stack_group_id": "G-4"
+      },
+      {
+        "id": "S5-S1",
+        "position": [
+          0.0,
+          8000.0
+        ],
+        "story": "S1",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-5",
+        "is_stacked": true,
+        "stack_group_id": "G-5"
+      },
+      {
+        "id": "S6-S1",
+        "position": [
+          9000.0,
+          8000.0
+        ],
+        "story": "S1",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-6",
+        "is_stacked": true,
+        "stack_group_id": "G-6"
+      },
+      {
+        "id": "S7-S1",
+        "position": [
+          18000.0,
+          8000.0
+        ],
+        "story": "S1",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-7",
+        "is_stacked": true,
+        "stack_group_id": "G-7"
+      },
+      {
+        "id": "S8-S1",
+        "position": [
+          27000.0,
+          8000.0
+        ],
+        "story": "S1",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-8",
+        "is_stacked": true,
+        "stack_group_id": "G-8"
+      },
+      {
+        "id": "S9-S1",
+        "position": [
+          36000.0,
+          8000.0
+        ],
+        "story": "S1",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-9",
+        "is_stacked": true,
+        "stack_group_id": "G-9"
+      },
+      {
+        "id": "S10-S1",
+        "position": [
+          0.0,
+          16000.0
+        ],
+        "story": "S1",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-10",
+        "is_stacked": true,
+        "stack_group_id": "G-10"
+      },
+      {
+        "id": "S11-S1",
+        "position": [
+          9000.0,
+          16000.0
+        ],
+        "story": "S1",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-11",
+        "is_stacked": true,
+        "stack_group_id": "G-11"
+      },
+      {
+        "id": "S12-S1",
+        "position": [
+          18000.0,
+          16000.0
+        ],
+        "story": "S1",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-12",
+        "is_stacked": true,
+        "stack_group_id": "G-12"
+      },
+      {
+        "id": "S13-S1",
+        "position": [
+          27000.0,
+          16000.0
+        ],
+        "story": "S1",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-13",
+        "is_stacked": true,
+        "stack_group_id": "G-13"
+      },
+      {
+        "id": "S14-S1",
+        "position": [
+          36000.0,
+          16000.0
+        ],
+        "story": "S1",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-14",
+        "is_stacked": true,
+        "stack_group_id": "G-14"
+      },
+      {
+        "id": "S15-S1",
+        "position": [
+          0.0,
+          24000.0
+        ],
+        "story": "S1",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-15",
+        "is_stacked": true,
+        "stack_group_id": "G-15"
+      },
+      {
+        "id": "S16-S1",
+        "position": [
+          9000.0,
+          24000.0
+        ],
+        "story": "S1",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-16",
+        "is_stacked": true,
+        "stack_group_id": "G-16"
+      },
+      {
+        "id": "S17-S1",
+        "position": [
+          18000.0,
+          24000.0
+        ],
+        "story": "S1",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-17",
+        "is_stacked": true,
+        "stack_group_id": "G-17"
+      },
+      {
+        "id": "S18-S1",
+        "position": [
+          27000.0,
+          24000.0
+        ],
+        "story": "S1",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-18",
+        "is_stacked": true,
+        "stack_group_id": "G-18"
+      },
+      {
+        "id": "S19-S1",
+        "position": [
+          36000.0,
+          24000.0
+        ],
+        "story": "S1",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-19",
+        "is_stacked": true,
+        "stack_group_id": "G-19"
+      },
+      {
+        "id": "S20-S2",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "story": "S2",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-0",
+        "is_stacked": true,
+        "stack_group_id": "G-0"
+      },
+      {
+        "id": "S21-S2",
+        "position": [
+          9000.0,
+          0.0
+        ],
+        "story": "S2",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-1",
+        "is_stacked": true,
+        "stack_group_id": "G-1"
+      },
+      {
+        "id": "S22-S2",
+        "position": [
+          18000.0,
+          0.0
+        ],
+        "story": "S2",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-2",
+        "is_stacked": true,
+        "stack_group_id": "G-2"
+      },
+      {
+        "id": "S23-S2",
+        "position": [
+          27000.0,
+          0.0
+        ],
+        "story": "S2",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-3",
+        "is_stacked": true,
+        "stack_group_id": "G-3"
+      },
+      {
+        "id": "S24-S2",
+        "position": [
+          36000.0,
+          0.0
+        ],
+        "story": "S2",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-4",
+        "is_stacked": true,
+        "stack_group_id": "G-4"
+      },
+      {
+        "id": "S25-S2",
+        "position": [
+          0.0,
+          8000.0
+        ],
+        "story": "S2",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-5",
+        "is_stacked": true,
+        "stack_group_id": "G-5"
+      },
+      {
+        "id": "S26-S2",
+        "position": [
+          9000.0,
+          8000.0
+        ],
+        "story": "S2",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-6",
+        "is_stacked": true,
+        "stack_group_id": "G-6"
+      },
+      {
+        "id": "S27-S2",
+        "position": [
+          18000.0,
+          8000.0
+        ],
+        "story": "S2",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-7",
+        "is_stacked": true,
+        "stack_group_id": "G-7"
+      },
+      {
+        "id": "S28-S2",
+        "position": [
+          27000.0,
+          8000.0
+        ],
+        "story": "S2",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-8",
+        "is_stacked": true,
+        "stack_group_id": "G-8"
+      },
+      {
+        "id": "S29-S2",
+        "position": [
+          36000.0,
+          8000.0
+        ],
+        "story": "S2",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-9",
+        "is_stacked": true,
+        "stack_group_id": "G-9"
+      },
+      {
+        "id": "S30-S2",
+        "position": [
+          0.0,
+          16000.0
+        ],
+        "story": "S2",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-10",
+        "is_stacked": true,
+        "stack_group_id": "G-10"
+      },
+      {
+        "id": "S31-S2",
+        "position": [
+          9000.0,
+          16000.0
+        ],
+        "story": "S2",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-11",
+        "is_stacked": true,
+        "stack_group_id": "G-11"
+      },
+      {
+        "id": "S32-S2",
+        "position": [
+          18000.0,
+          16000.0
+        ],
+        "story": "S2",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-12",
+        "is_stacked": true,
+        "stack_group_id": "G-12"
+      },
+      {
+        "id": "S33-S2",
+        "position": [
+          27000.0,
+          16000.0
+        ],
+        "story": "S2",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-13",
+        "is_stacked": true,
+        "stack_group_id": "G-13"
+      },
+      {
+        "id": "S34-S2",
+        "position": [
+          36000.0,
+          16000.0
+        ],
+        "story": "S2",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-14",
+        "is_stacked": true,
+        "stack_group_id": "G-14"
+      },
+      {
+        "id": "S35-S2",
+        "position": [
+          0.0,
+          24000.0
+        ],
+        "story": "S2",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-15",
+        "is_stacked": true,
+        "stack_group_id": "G-15"
+      },
+      {
+        "id": "S36-S2",
+        "position": [
+          9000.0,
+          24000.0
+        ],
+        "story": "S2",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-16",
+        "is_stacked": true,
+        "stack_group_id": "G-16"
+      },
+      {
+        "id": "S37-S2",
+        "position": [
+          18000.0,
+          24000.0
+        ],
+        "story": "S2",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-17",
+        "is_stacked": true,
+        "stack_group_id": "G-17"
+      },
+      {
+        "id": "S38-S2",
+        "position": [
+          27000.0,
+          24000.0
+        ],
+        "story": "S2",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-18",
+        "is_stacked": true,
+        "stack_group_id": "G-18"
+      },
+      {
+        "id": "S39-S2",
+        "position": [
+          36000.0,
+          24000.0
+        ],
+        "story": "S2",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-19",
+        "is_stacked": true,
+        "stack_group_id": "G-19"
+      },
+      {
+        "id": "S40-S3",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "story": "S3",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-0",
+        "is_stacked": true,
+        "stack_group_id": "G-0"
+      },
+      {
+        "id": "S41-S3",
+        "position": [
+          9000.0,
+          0.0
+        ],
+        "story": "S3",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-1",
+        "is_stacked": true,
+        "stack_group_id": "G-1"
+      },
+      {
+        "id": "S42-S3",
+        "position": [
+          18000.0,
+          0.0
+        ],
+        "story": "S3",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-2",
+        "is_stacked": true,
+        "stack_group_id": "G-2"
+      },
+      {
+        "id": "S43-S3",
+        "position": [
+          27000.0,
+          0.0
+        ],
+        "story": "S3",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-3",
+        "is_stacked": true,
+        "stack_group_id": "G-3"
+      },
+      {
+        "id": "S44-S3",
+        "position": [
+          36000.0,
+          0.0
+        ],
+        "story": "S3",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-4",
+        "is_stacked": true,
+        "stack_group_id": "G-4"
+      },
+      {
+        "id": "S45-S3",
+        "position": [
+          0.0,
+          8000.0
+        ],
+        "story": "S3",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-5",
+        "is_stacked": true,
+        "stack_group_id": "G-5"
+      },
+      {
+        "id": "S46-S3",
+        "position": [
+          9000.0,
+          8000.0
+        ],
+        "story": "S3",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-6",
+        "is_stacked": true,
+        "stack_group_id": "G-6"
+      },
+      {
+        "id": "S47-S3",
+        "position": [
+          18000.0,
+          8000.0
+        ],
+        "story": "S3",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-7",
+        "is_stacked": true,
+        "stack_group_id": "G-7"
+      },
+      {
+        "id": "S48-S3",
+        "position": [
+          27000.0,
+          8000.0
+        ],
+        "story": "S3",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-8",
+        "is_stacked": true,
+        "stack_group_id": "G-8"
+      },
+      {
+        "id": "S49-S3",
+        "position": [
+          36000.0,
+          8000.0
+        ],
+        "story": "S3",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-9",
+        "is_stacked": true,
+        "stack_group_id": "G-9"
+      },
+      {
+        "id": "S50-S3",
+        "position": [
+          0.0,
+          16000.0
+        ],
+        "story": "S3",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-10",
+        "is_stacked": true,
+        "stack_group_id": "G-10"
+      },
+      {
+        "id": "S51-S3",
+        "position": [
+          9000.0,
+          16000.0
+        ],
+        "story": "S3",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-11",
+        "is_stacked": true,
+        "stack_group_id": "G-11"
+      },
+      {
+        "id": "S52-S3",
+        "position": [
+          18000.0,
+          16000.0
+        ],
+        "story": "S3",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-12",
+        "is_stacked": true,
+        "stack_group_id": "G-12"
+      },
+      {
+        "id": "S53-S3",
+        "position": [
+          27000.0,
+          16000.0
+        ],
+        "story": "S3",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-13",
+        "is_stacked": true,
+        "stack_group_id": "G-13"
+      },
+      {
+        "id": "S54-S3",
+        "position": [
+          36000.0,
+          16000.0
+        ],
+        "story": "S3",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-14",
+        "is_stacked": true,
+        "stack_group_id": "G-14"
+      },
+      {
+        "id": "S55-S3",
+        "position": [
+          0.0,
+          24000.0
+        ],
+        "story": "S3",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-15",
+        "is_stacked": true,
+        "stack_group_id": "G-15"
+      },
+      {
+        "id": "S56-S3",
+        "position": [
+          9000.0,
+          24000.0
+        ],
+        "story": "S3",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-16",
+        "is_stacked": true,
+        "stack_group_id": "G-16"
+      },
+      {
+        "id": "S57-S3",
+        "position": [
+          18000.0,
+          24000.0
+        ],
+        "story": "S3",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-17",
+        "is_stacked": true,
+        "stack_group_id": "G-17"
+      },
+      {
+        "id": "S58-S3",
+        "position": [
+          27000.0,
+          24000.0
+        ],
+        "story": "S3",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-18",
+        "is_stacked": true,
+        "stack_group_id": "G-18"
+      },
+      {
+        "id": "S59-S3",
+        "position": [
+          36000.0,
+          24000.0
+        ],
+        "story": "S3",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-19",
+        "is_stacked": true,
+        "stack_group_id": "G-19"
+      },
+      {
+        "id": "S60-S4",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "story": "S4",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-0",
+        "is_stacked": true,
+        "stack_group_id": "G-0"
+      },
+      {
+        "id": "S61-S4",
+        "position": [
+          9000.0,
+          0.0
+        ],
+        "story": "S4",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-1",
+        "is_stacked": true,
+        "stack_group_id": "G-1"
+      },
+      {
+        "id": "S62-S4",
+        "position": [
+          18000.0,
+          0.0
+        ],
+        "story": "S4",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-2",
+        "is_stacked": true,
+        "stack_group_id": "G-2"
+      },
+      {
+        "id": "S63-S4",
+        "position": [
+          27000.0,
+          0.0
+        ],
+        "story": "S4",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-3",
+        "is_stacked": true,
+        "stack_group_id": "G-3"
+      },
+      {
+        "id": "S64-S4",
+        "position": [
+          36000.0,
+          0.0
+        ],
+        "story": "S4",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-4",
+        "is_stacked": true,
+        "stack_group_id": "G-4"
+      },
+      {
+        "id": "S65-S4",
+        "position": [
+          0.0,
+          8000.0
+        ],
+        "story": "S4",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-5",
+        "is_stacked": true,
+        "stack_group_id": "G-5"
+      },
+      {
+        "id": "S66-S4",
+        "position": [
+          9000.0,
+          8000.0
+        ],
+        "story": "S4",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-6",
+        "is_stacked": true,
+        "stack_group_id": "G-6"
+      },
+      {
+        "id": "S67-S4",
+        "position": [
+          18000.0,
+          8000.0
+        ],
+        "story": "S4",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-7",
+        "is_stacked": true,
+        "stack_group_id": "G-7"
+      },
+      {
+        "id": "S68-S4",
+        "position": [
+          27000.0,
+          8000.0
+        ],
+        "story": "S4",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-8",
+        "is_stacked": true,
+        "stack_group_id": "G-8"
+      },
+      {
+        "id": "S69-S4",
+        "position": [
+          36000.0,
+          8000.0
+        ],
+        "story": "S4",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-9",
+        "is_stacked": true,
+        "stack_group_id": "G-9"
+      },
+      {
+        "id": "S70-S4",
+        "position": [
+          0.0,
+          16000.0
+        ],
+        "story": "S4",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-10",
+        "is_stacked": true,
+        "stack_group_id": "G-10"
+      },
+      {
+        "id": "S71-S4",
+        "position": [
+          9000.0,
+          16000.0
+        ],
+        "story": "S4",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-11",
+        "is_stacked": true,
+        "stack_group_id": "G-11"
+      },
+      {
+        "id": "S72-S4",
+        "position": [
+          18000.0,
+          16000.0
+        ],
+        "story": "S4",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-12",
+        "is_stacked": true,
+        "stack_group_id": "G-12"
+      },
+      {
+        "id": "S73-S4",
+        "position": [
+          27000.0,
+          16000.0
+        ],
+        "story": "S4",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-13",
+        "is_stacked": true,
+        "stack_group_id": "G-13"
+      },
+      {
+        "id": "S74-S4",
+        "position": [
+          36000.0,
+          16000.0
+        ],
+        "story": "S4",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-14",
+        "is_stacked": true,
+        "stack_group_id": "G-14"
+      },
+      {
+        "id": "S75-S4",
+        "position": [
+          0.0,
+          24000.0
+        ],
+        "story": "S4",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-15",
+        "is_stacked": true,
+        "stack_group_id": "G-15"
+      },
+      {
+        "id": "S76-S4",
+        "position": [
+          9000.0,
+          24000.0
+        ],
+        "story": "S4",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-16",
+        "is_stacked": true,
+        "stack_group_id": "G-16"
+      },
+      {
+        "id": "S77-S4",
+        "position": [
+          18000.0,
+          24000.0
+        ],
+        "story": "S4",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-17",
+        "is_stacked": true,
+        "stack_group_id": "G-17"
+      },
+      {
+        "id": "S78-S4",
+        "position": [
+          27000.0,
+          24000.0
+        ],
+        "story": "S4",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-18",
+        "is_stacked": true,
+        "stack_group_id": "G-18"
+      },
+      {
+        "id": "S79-S4",
+        "position": [
+          36000.0,
+          24000.0
+        ],
+        "story": "S4",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-19",
+        "is_stacked": true,
+        "stack_group_id": "G-19"
+      },
+      {
+        "id": "S80-S5",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "story": "S5",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-0",
+        "is_stacked": true,
+        "stack_group_id": "G-0"
+      },
+      {
+        "id": "S81-S5",
+        "position": [
+          9000.0,
+          0.0
+        ],
+        "story": "S5",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-1",
+        "is_stacked": true,
+        "stack_group_id": "G-1"
+      },
+      {
+        "id": "S82-S5",
+        "position": [
+          18000.0,
+          0.0
+        ],
+        "story": "S5",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-2",
+        "is_stacked": true,
+        "stack_group_id": "G-2"
+      },
+      {
+        "id": "S83-S5",
+        "position": [
+          27000.0,
+          0.0
+        ],
+        "story": "S5",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-3",
+        "is_stacked": true,
+        "stack_group_id": "G-3"
+      },
+      {
+        "id": "S84-S5",
+        "position": [
+          36000.0,
+          0.0
+        ],
+        "story": "S5",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-4",
+        "is_stacked": true,
+        "stack_group_id": "G-4"
+      },
+      {
+        "id": "S85-S5",
+        "position": [
+          0.0,
+          8000.0
+        ],
+        "story": "S5",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-5",
+        "is_stacked": true,
+        "stack_group_id": "G-5"
+      },
+      {
+        "id": "S86-S5",
+        "position": [
+          9000.0,
+          8000.0
+        ],
+        "story": "S5",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-6",
+        "is_stacked": true,
+        "stack_group_id": "G-6"
+      },
+      {
+        "id": "S87-S5",
+        "position": [
+          18000.0,
+          8000.0
+        ],
+        "story": "S5",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-7",
+        "is_stacked": true,
+        "stack_group_id": "G-7"
+      },
+      {
+        "id": "S88-S5",
+        "position": [
+          27000.0,
+          8000.0
+        ],
+        "story": "S5",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-8",
+        "is_stacked": true,
+        "stack_group_id": "G-8"
+      },
+      {
+        "id": "S89-S5",
+        "position": [
+          36000.0,
+          8000.0
+        ],
+        "story": "S5",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-9",
+        "is_stacked": true,
+        "stack_group_id": "G-9"
+      },
+      {
+        "id": "S90-S5",
+        "position": [
+          0.0,
+          16000.0
+        ],
+        "story": "S5",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-10",
+        "is_stacked": true,
+        "stack_group_id": "G-10"
+      },
+      {
+        "id": "S91-S5",
+        "position": [
+          9000.0,
+          16000.0
+        ],
+        "story": "S5",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-11",
+        "is_stacked": true,
+        "stack_group_id": "G-11"
+      },
+      {
+        "id": "S92-S5",
+        "position": [
+          18000.0,
+          16000.0
+        ],
+        "story": "S5",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-12",
+        "is_stacked": true,
+        "stack_group_id": "G-12"
+      },
+      {
+        "id": "S93-S5",
+        "position": [
+          27000.0,
+          16000.0
+        ],
+        "story": "S5",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-13",
+        "is_stacked": true,
+        "stack_group_id": "G-13"
+      },
+      {
+        "id": "S94-S5",
+        "position": [
+          36000.0,
+          16000.0
+        ],
+        "story": "S5",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-14",
+        "is_stacked": true,
+        "stack_group_id": "G-14"
+      },
+      {
+        "id": "S95-S5",
+        "position": [
+          0.0,
+          24000.0
+        ],
+        "story": "S5",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-15",
+        "is_stacked": true,
+        "stack_group_id": "G-15"
+      },
+      {
+        "id": "S96-S5",
+        "position": [
+          9000.0,
+          24000.0
+        ],
+        "story": "S5",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-16",
+        "is_stacked": true,
+        "stack_group_id": "G-16"
+      },
+      {
+        "id": "S97-S5",
+        "position": [
+          18000.0,
+          24000.0
+        ],
+        "story": "S5",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-17",
+        "is_stacked": true,
+        "stack_group_id": "G-17"
+      },
+      {
+        "id": "S98-S5",
+        "position": [
+          27000.0,
+          24000.0
+        ],
+        "story": "S5",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-18",
+        "is_stacked": true,
+        "stack_group_id": "G-18"
+      },
+      {
+        "id": "S99-S5",
+        "position": [
+          36000.0,
+          24000.0
+        ],
+        "story": "S5",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-19",
+        "is_stacked": true,
+        "stack_group_id": "G-19"
+      },
+      {
+        "id": "S100-S6",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "story": "S6",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-0",
+        "is_stacked": true,
+        "stack_group_id": "G-0"
+      },
+      {
+        "id": "S101-S6",
+        "position": [
+          9000.0,
+          0.0
+        ],
+        "story": "S6",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-1",
+        "is_stacked": true,
+        "stack_group_id": "G-1"
+      },
+      {
+        "id": "S102-S6",
+        "position": [
+          18000.0,
+          0.0
+        ],
+        "story": "S6",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-2",
+        "is_stacked": true,
+        "stack_group_id": "G-2"
+      },
+      {
+        "id": "S103-S6",
+        "position": [
+          27000.0,
+          0.0
+        ],
+        "story": "S6",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-3",
+        "is_stacked": true,
+        "stack_group_id": "G-3"
+      },
+      {
+        "id": "S104-S6",
+        "position": [
+          36000.0,
+          0.0
+        ],
+        "story": "S6",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-4",
+        "is_stacked": true,
+        "stack_group_id": "G-4"
+      },
+      {
+        "id": "S105-S6",
+        "position": [
+          0.0,
+          8000.0
+        ],
+        "story": "S6",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-5",
+        "is_stacked": true,
+        "stack_group_id": "G-5"
+      },
+      {
+        "id": "S106-S6",
+        "position": [
+          9000.0,
+          8000.0
+        ],
+        "story": "S6",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-6",
+        "is_stacked": true,
+        "stack_group_id": "G-6"
+      },
+      {
+        "id": "S107-S6",
+        "position": [
+          18000.0,
+          8000.0
+        ],
+        "story": "S6",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-7",
+        "is_stacked": true,
+        "stack_group_id": "G-7"
+      },
+      {
+        "id": "S108-S6",
+        "position": [
+          27000.0,
+          8000.0
+        ],
+        "story": "S6",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-8",
+        "is_stacked": true,
+        "stack_group_id": "G-8"
+      },
+      {
+        "id": "S109-S6",
+        "position": [
+          36000.0,
+          8000.0
+        ],
+        "story": "S6",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-9",
+        "is_stacked": true,
+        "stack_group_id": "G-9"
+      },
+      {
+        "id": "S110-S6",
+        "position": [
+          0.0,
+          16000.0
+        ],
+        "story": "S6",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-10",
+        "is_stacked": true,
+        "stack_group_id": "G-10"
+      },
+      {
+        "id": "S111-S6",
+        "position": [
+          9000.0,
+          16000.0
+        ],
+        "story": "S6",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-11",
+        "is_stacked": true,
+        "stack_group_id": "G-11"
+      },
+      {
+        "id": "S112-S6",
+        "position": [
+          18000.0,
+          16000.0
+        ],
+        "story": "S6",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-12",
+        "is_stacked": true,
+        "stack_group_id": "G-12"
+      },
+      {
+        "id": "S113-S6",
+        "position": [
+          27000.0,
+          16000.0
+        ],
+        "story": "S6",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-13",
+        "is_stacked": true,
+        "stack_group_id": "G-13"
+      },
+      {
+        "id": "S114-S6",
+        "position": [
+          36000.0,
+          16000.0
+        ],
+        "story": "S6",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-14",
+        "is_stacked": true,
+        "stack_group_id": "G-14"
+      },
+      {
+        "id": "S115-S6",
+        "position": [
+          0.0,
+          24000.0
+        ],
+        "story": "S6",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-15",
+        "is_stacked": true,
+        "stack_group_id": "G-15"
+      },
+      {
+        "id": "S116-S6",
+        "position": [
+          9000.0,
+          24000.0
+        ],
+        "story": "S6",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-16",
+        "is_stacked": true,
+        "stack_group_id": "G-16"
+      },
+      {
+        "id": "S117-S6",
+        "position": [
+          18000.0,
+          24000.0
+        ],
+        "story": "S6",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-17",
+        "is_stacked": true,
+        "stack_group_id": "G-17"
+      },
+      {
+        "id": "S118-S6",
+        "position": [
+          27000.0,
+          24000.0
+        ],
+        "story": "S6",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-18",
+        "is_stacked": true,
+        "stack_group_id": "G-18"
+      },
+      {
+        "id": "S119-S6",
+        "position": [
+          36000.0,
+          24000.0
+        ],
+        "story": "S6",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-19",
+        "is_stacked": true,
+        "stack_group_id": "G-19"
+      },
+      {
+        "id": "S120-S7",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "story": "S7",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-0",
+        "is_stacked": true,
+        "stack_group_id": "G-0"
+      },
+      {
+        "id": "S121-S7",
+        "position": [
+          9000.0,
+          0.0
+        ],
+        "story": "S7",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-1",
+        "is_stacked": true,
+        "stack_group_id": "G-1"
+      },
+      {
+        "id": "S122-S7",
+        "position": [
+          18000.0,
+          0.0
+        ],
+        "story": "S7",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-2",
+        "is_stacked": true,
+        "stack_group_id": "G-2"
+      },
+      {
+        "id": "S123-S7",
+        "position": [
+          27000.0,
+          0.0
+        ],
+        "story": "S7",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-3",
+        "is_stacked": true,
+        "stack_group_id": "G-3"
+      },
+      {
+        "id": "S124-S7",
+        "position": [
+          36000.0,
+          0.0
+        ],
+        "story": "S7",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-4",
+        "is_stacked": true,
+        "stack_group_id": "G-4"
+      },
+      {
+        "id": "S125-S7",
+        "position": [
+          0.0,
+          8000.0
+        ],
+        "story": "S7",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-5",
+        "is_stacked": true,
+        "stack_group_id": "G-5"
+      },
+      {
+        "id": "S126-S7",
+        "position": [
+          9000.0,
+          8000.0
+        ],
+        "story": "S7",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-6",
+        "is_stacked": true,
+        "stack_group_id": "G-6"
+      },
+      {
+        "id": "S127-S7",
+        "position": [
+          18000.0,
+          8000.0
+        ],
+        "story": "S7",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-7",
+        "is_stacked": true,
+        "stack_group_id": "G-7"
+      },
+      {
+        "id": "S128-S7",
+        "position": [
+          27000.0,
+          8000.0
+        ],
+        "story": "S7",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-8",
+        "is_stacked": true,
+        "stack_group_id": "G-8"
+      },
+      {
+        "id": "S129-S7",
+        "position": [
+          36000.0,
+          8000.0
+        ],
+        "story": "S7",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-9",
+        "is_stacked": true,
+        "stack_group_id": "G-9"
+      },
+      {
+        "id": "S130-S7",
+        "position": [
+          0.0,
+          16000.0
+        ],
+        "story": "S7",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-10",
+        "is_stacked": true,
+        "stack_group_id": "G-10"
+      },
+      {
+        "id": "S131-S7",
+        "position": [
+          9000.0,
+          16000.0
+        ],
+        "story": "S7",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-11",
+        "is_stacked": true,
+        "stack_group_id": "G-11"
+      },
+      {
+        "id": "S132-S7",
+        "position": [
+          18000.0,
+          16000.0
+        ],
+        "story": "S7",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-12",
+        "is_stacked": true,
+        "stack_group_id": "G-12"
+      },
+      {
+        "id": "S133-S7",
+        "position": [
+          27000.0,
+          16000.0
+        ],
+        "story": "S7",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-13",
+        "is_stacked": true,
+        "stack_group_id": "G-13"
+      },
+      {
+        "id": "S134-S7",
+        "position": [
+          36000.0,
+          16000.0
+        ],
+        "story": "S7",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-14",
+        "is_stacked": true,
+        "stack_group_id": "G-14"
+      },
+      {
+        "id": "S135-S7",
+        "position": [
+          0.0,
+          24000.0
+        ],
+        "story": "S7",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-15",
+        "is_stacked": true,
+        "stack_group_id": "G-15"
+      },
+      {
+        "id": "S136-S7",
+        "position": [
+          9000.0,
+          24000.0
+        ],
+        "story": "S7",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-16",
+        "is_stacked": true,
+        "stack_group_id": "G-16"
+      },
+      {
+        "id": "S137-S7",
+        "position": [
+          18000.0,
+          24000.0
+        ],
+        "story": "S7",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-17",
+        "is_stacked": true,
+        "stack_group_id": "G-17"
+      },
+      {
+        "id": "S138-S7",
+        "position": [
+          27000.0,
+          24000.0
+        ],
+        "story": "S7",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-18",
+        "is_stacked": true,
+        "stack_group_id": "G-18"
+      },
+      {
+        "id": "S139-S7",
+        "position": [
+          36000.0,
+          24000.0
+        ],
+        "story": "S7",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-19",
+        "is_stacked": true,
+        "stack_group_id": "G-19"
+      },
+      {
+        "id": "S140-S8",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "story": "S8",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-0",
+        "is_stacked": true,
+        "stack_group_id": "G-0"
+      },
+      {
+        "id": "S141-S8",
+        "position": [
+          9000.0,
+          0.0
+        ],
+        "story": "S8",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-1",
+        "is_stacked": true,
+        "stack_group_id": "G-1"
+      },
+      {
+        "id": "S142-S8",
+        "position": [
+          18000.0,
+          0.0
+        ],
+        "story": "S8",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-2",
+        "is_stacked": true,
+        "stack_group_id": "G-2"
+      },
+      {
+        "id": "S143-S8",
+        "position": [
+          27000.0,
+          0.0
+        ],
+        "story": "S8",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-3",
+        "is_stacked": true,
+        "stack_group_id": "G-3"
+      },
+      {
+        "id": "S144-S8",
+        "position": [
+          36000.0,
+          0.0
+        ],
+        "story": "S8",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-4",
+        "is_stacked": true,
+        "stack_group_id": "G-4"
+      },
+      {
+        "id": "S145-S8",
+        "position": [
+          0.0,
+          8000.0
+        ],
+        "story": "S8",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-5",
+        "is_stacked": true,
+        "stack_group_id": "G-5"
+      },
+      {
+        "id": "S146-S8",
+        "position": [
+          9000.0,
+          8000.0
+        ],
+        "story": "S8",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-6",
+        "is_stacked": true,
+        "stack_group_id": "G-6"
+      },
+      {
+        "id": "S147-S8",
+        "position": [
+          18000.0,
+          8000.0
+        ],
+        "story": "S8",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-7",
+        "is_stacked": true,
+        "stack_group_id": "G-7"
+      },
+      {
+        "id": "S148-S8",
+        "position": [
+          27000.0,
+          8000.0
+        ],
+        "story": "S8",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-8",
+        "is_stacked": true,
+        "stack_group_id": "G-8"
+      },
+      {
+        "id": "S149-S8",
+        "position": [
+          36000.0,
+          8000.0
+        ],
+        "story": "S8",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-9",
+        "is_stacked": true,
+        "stack_group_id": "G-9"
+      },
+      {
+        "id": "S150-S8",
+        "position": [
+          0.0,
+          16000.0
+        ],
+        "story": "S8",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-10",
+        "is_stacked": true,
+        "stack_group_id": "G-10"
+      },
+      {
+        "id": "S151-S8",
+        "position": [
+          9000.0,
+          16000.0
+        ],
+        "story": "S8",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-11",
+        "is_stacked": true,
+        "stack_group_id": "G-11"
+      },
+      {
+        "id": "S152-S8",
+        "position": [
+          18000.0,
+          16000.0
+        ],
+        "story": "S8",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-12",
+        "is_stacked": true,
+        "stack_group_id": "G-12"
+      },
+      {
+        "id": "S153-S8",
+        "position": [
+          27000.0,
+          16000.0
+        ],
+        "story": "S8",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-13",
+        "is_stacked": true,
+        "stack_group_id": "G-13"
+      },
+      {
+        "id": "S154-S8",
+        "position": [
+          36000.0,
+          16000.0
+        ],
+        "story": "S8",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-14",
+        "is_stacked": true,
+        "stack_group_id": "G-14"
+      },
+      {
+        "id": "S155-S8",
+        "position": [
+          0.0,
+          24000.0
+        ],
+        "story": "S8",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-15",
+        "is_stacked": true,
+        "stack_group_id": "G-15"
+      },
+      {
+        "id": "S156-S8",
+        "position": [
+          9000.0,
+          24000.0
+        ],
+        "story": "S8",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-16",
+        "is_stacked": true,
+        "stack_group_id": "G-16"
+      },
+      {
+        "id": "S157-S8",
+        "position": [
+          18000.0,
+          24000.0
+        ],
+        "story": "S8",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-17",
+        "is_stacked": true,
+        "stack_group_id": "G-17"
+      },
+      {
+        "id": "S158-S8",
+        "position": [
+          27000.0,
+          24000.0
+        ],
+        "story": "S8",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-18",
+        "is_stacked": true,
+        "stack_group_id": "G-18"
+      },
+      {
+        "id": "S159-S8",
+        "position": [
+          36000.0,
+          24000.0
+        ],
+        "story": "S8",
+        "classification": "preferred",
+        "score": 0.9,
+        "reasons": [],
+        "penalties": [],
+        "grid_intersection": "G-19",
+        "is_stacked": true,
+        "stack_group_id": "G-19"
+      }
+    ],
+    "forbidden_regions": [],
+    "vertical_alignment_groups": [],
+    "span_map": {
+      "spans": [],
+      "max_span_mm": 9000.0,
+      "min_span_mm": 6000.0,
+      "typical_span_mm": 8000.0,
+      "span_regularity": 1.0
+    },
+    "framing_zones": [],
+    "gravity_system_candidates": [],
+    "lateral_system_candidates": [],
+    "constraints": [],
+    "metadata": {
+      "processing_time_seconds": 0.1,
+      "assumptions_made": [],
+      "warnings": [],
+      "confidence_overall": 0.85,
+      "building_regularity": "regular",
+      "recommended_review_items": []
+    }
+  },
+  "location": {
+    "latitude": 41.88,
+    "longitude": -87.63,
+    "city": "Chicago",
+    "state_or_region": "IL",
+    "country": "US",
+    "elevation_m": 181.0
+  },
+  "material_family": "reinforced_concrete",
+  "risk_category": "II",
+  "exposure_category": "B",
+  "basic_wind_speed_m_per_s": 44.7,
+  "site_class": "D",
+  "Ss": 0.2,
+  "S1": 0.09,
+  "overrides": [],
+  "building_code": "ASCE 7-22"
+}

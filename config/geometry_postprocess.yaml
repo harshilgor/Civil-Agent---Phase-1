@@ -1,0 +1,128 @@
+# -----------------------------------------------------------------------------
+# Phase 1 Step 9 — Geometry post-processor configuration.
+#
+# Consumed by :class:`src.core.geometry.config.GeometryPostProcessConfig.load`.
+# Every knob here is an explicit engineering decision documented inline — bumps
+# to these values should be accompanied by a regression test demonstrating the
+# new behaviour on a synthetic wall graph.
+#
+# All lengths are in millimetres; angles in degrees; areas in square metres.
+# The post-processor reasons in the SAME unit system as BuildingGraph (mm) to
+# avoid unit conversions at call sites.
+# -----------------------------------------------------------------------------
+
+schema_version: "1.0.0"
+
+snap:
+  # A wall is considered orthogonal if its angle to the nearest cardinal
+  # axis is within this tolerance.  5° is generous enough to absorb
+  # scan rotation and vectoriser drift without collapsing legitimately
+  # angled walls (atria, chamfers) onto the axes.
+  angular_tolerance_deg: 5.0
+  # Endpoints closer than this distance along the orthogonal axis are
+  # welded to a common rail.  Matches the typical residential wall
+  # thickness — anything closer than one wall thickness is, by
+  # construction, the same joint.
+  endpoint_weld_mm: 50.0
+  # Axis clustering bandwidth.  Vertical walls whose snapped X
+  # coordinates fall within this tolerance collapse onto a single rail;
+  # same for horizontal walls along Y.  Larger than endpoint_weld_mm
+  # because it covers parallel-but-offset walls that should share a
+  # gridline (e.g. two sides of a stud wall).
+  axis_cluster_mm: 75.0
+  # Non-orthogonal walls (angled atria, ramps) are left alone when True.
+  # Flip to False for pure-orthogonal plans if you want to force all
+  # geometry onto a grid — almost never what you want.
+  preserve_diagonals: true
+
+corners:
+  # Endpoints within this distance of another wall are considered part
+  # of a joint and get extended/clipped to meet.  Bigger than
+  # endpoint_weld_mm because this also covers T-junctions where the
+  # stem does not already touch the crossbar.
+  junction_radius_mm: 150.0
+  # Walls shorter than this after snapping and corner resolution are
+  # treated as noise and dropped.  150mm is below a typical door frame
+  # width — any real wall segment is longer than this.
+  stub_wall_mm: 150.0
+  # When two walls meet, their endpoints are moved by at most this much
+  # to close the joint.  Prevents the corner pass from pulling distant
+  # walls together due to a single mis-snapped endpoint.
+  max_endpoint_shift_mm: 250.0
+
+rooms:
+  # Faces smaller than this after polygonisation are dropped as noise —
+  # duct chases, pipe shafts, vectoriser artefacts.  One square metre
+  # is below any habitable or code-required space.
+  minimum_area_m2: 1.0
+  # Faces smaller than this *when enclosed by another face* are treated
+  # as holes (courtyards, voids, vertical service cores).  Separate
+  # knob so tiny enclosed rooms still count as rooms.
+  hole_threshold_m2: 0.5
+  # Polygon simplification tolerance applied to every extracted room
+  # ring.  50mm is well below the resolution of any practical floor
+  # plan and removes redundant colinear vertices from the polygonise
+  # output without altering shape.
+  simplification_mm: 50.0
+
+grid:
+  # Minimum number of walls that must share an axis for it to count as
+  # a candidate grid line.  Three walls on a line is the smallest
+  # evidence a structural grid is actually there.
+  minimum_support_walls: 3
+  # Minimum total wall length (sum of supporting wall lengths) for a
+  # candidate gridline.  Filters out accidental collinearity of a few
+  # short partition walls.
+  minimum_support_length_mm: 2000.0
+  # Clustering tolerance along each axis — positions within this
+  # distance collapse into a single candidate gridline.
+  cluster_tolerance_mm: 250.0
+  # Candidate gridlines whose bay spacing to the nearest neighbour is
+  # smaller than this are merged; avoids emitting two gridlines for a
+  # single doubled-up wall pair.
+  min_bay_span_mm: 1500.0
+
+columns:
+  # Wall endpoints within this distance of a grid intersection
+  # contribute to the intersection's score as evidence of a column.
+  grid_proximity_mm: 300.0
+  # A "short wall" here is a stump of wall sitting at a grid
+  # intersection — frequently a column drawn as a short thick wall in
+  # the floor plan.
+  short_wall_max_mm: 500.0
+  # A CAD-sourced column within this distance of a grid intersection
+  # is promoted to is_required=True (authoritative geometry).
+  cad_promotion_mm: 150.0
+  # Minimum combined score for a grid intersection to be emitted as a
+  # column candidate.  Tunable.
+  required_score: 0.5
+  # Relative contribution of each signal to the combined score.  They
+  # need not sum to 1.0; the score is clamped to [0, 1] after mixing.
+  signal_weights:
+    # Two wall endpoints saturate the endpoint signal (a T-junction at
+    # a grid intersection is the canonical column signal).  Weight is
+    # set so saturated endpoint alone crosses required_score=0.5 with
+    # headroom — so an unambiguous T-column lights up without needing
+    # a stub or CAD corroboration.
+    wall_endpoint: 0.55
+    short_wall: 0.35
+    cad_column: 1.00   # intentionally = 1.0 so any CAD match alone crosses the threshold
+
+cores:
+  # Room types that seed a core cluster.  Sourced from BuildingGraph's
+  # RoomType enum — adding a type here is how you expand core coverage.
+  seed_room_types:
+    - STAIRWELL
+    - ELEVATOR
+    - BATHROOM
+    - MECHANICAL
+  # Rooms whose bounding boxes are within this distance are merged into
+  # the same core.  Matches stud-wall thickness so adjacent cores
+  # separated by a single wall still cluster together.
+  adjacency_tolerance_mm: 100.0
+  # Cluster polygons smaller than this are dropped — single-room cores
+  # are fine, but a cluster smaller than this is likely noise.
+  minimum_cluster_area_m2: 2.0
+  # Polygon of the core is the convex hull of the union of its member
+  # rooms' polygons, simplified by this tolerance.
+  simplification_mm: 50.0

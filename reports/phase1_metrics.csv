@@ -1,0 +1,25 @@
+building_graph_completeness,case_id,category,confidence_score,grid_detection_accuracy_proxy,grid_detection_confidence,llm_budget_used_fraction,llm_reconciliation_calls,note,ocr_character_accuracy,phase1_ok,room_classification_confidence,room_count_accuracy_proxy,room_polygon_closure_rate,wall_detection_confidence,wall_iou,warning_count
+0.9,hp_office_struct,happy_path,0.9,,,,,,,True,,,,,,1
+0.9,hp_duplex_struct,happy_path,0.9,,,,,,,True,,,,,,1
+0.9,hp_clinic_struct,happy_path,0.9,,,,,,,True,,,,,,1
+0.9,hp_barracks_struct,happy_path,0.9,,,,,,,True,,,,,,1
+0.84,ifc_office_s,happy_path,0.84,,0.9,,not_wired_in_pipeline,,,True,,,,0.85,,1
+0.94,ifc_office_a,happy_path,0.94,,0.9,,not_wired_in_pipeline,,,True,,,,0.85,,0
+0.94,ifc_clinic_arch,happy_path,0.94,,0.9,,not_wired_in_pipeline,,,True,,,,0.85,,0
+0.84,dxf_synthetic_baseline,happy_path,0.84,,0.9,,,,,True,,,,0.85,,1
+0.84,raster_office_clean,cross_input,0.84,1.0,0.5,0.0,0,CVPipeline does not invoke BudgetedLLMReconciler; counts are zero by design unless wired.,0.8571,True,0.7,0.5,1.0,0.85,0.7149,2
+0.84,raster_office_blur,robustness,0.84,1.0,0.9,0.0,0,CVPipeline does not invoke BudgetedLLMReconciler; counts are zero by design unless wired.,0.0,True,0.7,0.5,1.0,0.85,,1
+0.84,raster_office_skew,robustness,0.84,1.0,0.9,0.0,0,CVPipeline does not invoke BudgetedLLMReconciler; counts are zero by design unless wired.,1.0,True,0.7,0.5,1.0,0.85,,1
+0.84,raster_office_crop,robustness,0.84,1.0,0.5,0.0,0,CVPipeline does not invoke BudgetedLLMReconciler; counts are zero by design unless wired.,0.0,True,0.7,1.0,1.0,0.85,,3
+0.84,raster_compressed_scan,robustness,0.84,1.0,0.5,0.0,0,CVPipeline does not invoke BudgetedLLMReconciler; counts are zero by design unless wired.,0.8571,True,0.7,0.5,1.0,0.85,,2
+0.84,raster_low_resolution,robustness,0.84,1.0,0.9,0.0,0,CVPipeline does not invoke BudgetedLLMReconciler; counts are zero by design unless wired.,0.8571,True,0.7,0.5,1.0,0.85,,1
+0.84,raster_missing_dimension_labels,robustness,0.84,1.0,0.5,0.0,0,CVPipeline does not invoke BudgetedLLMReconciler; counts are zero by design unless wired.,0.0,True,0.7,0.5,1.0,0.85,0.7149,2
+0.84,raster_ambiguous_unit_labels,robustness,0.84,1.0,0.5,0.0,0,CVPipeline does not invoke BudgetedLLMReconciler; counts are zero by design unless wired.,0.0,True,0.7,0.5,1.0,0.85,0.7149,2
+0.84,raster_no_grid_labels,robustness,0.84,1.0,0.5,0.0,0,CVPipeline does not invoke BudgetedLLMReconciler; counts are zero by design unless wired.,1.0,True,0.7,0.5,1.0,0.85,0.7149,2
+0.9,adv_open_lobby_struct,adversarial,0.9,,,,,,,True,,,,,,1
+0.9,adv_atrium_struct,adversarial,0.9,,,,,,,True,,,,,,1
+0.9,adv_broken_stack_struct,adversarial,0.9,,,,,,,True,,,,,,1
+0.9,adv_irregular_struct,adversarial,0.9,,,,,,,True,,,,,,1
+,cross_duplex_ifc_pdf,consistency,,,,,,,,False,,,,,,
+,cross_clinic_pdf,consistency,,,,,,,,False,,,,,,
+,cross_office_pdf,consistency,,,,,,,,False,,,,,,

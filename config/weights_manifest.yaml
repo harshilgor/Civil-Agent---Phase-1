@@ -1,0 +1,175 @@
+# Civil Agent — Weights Manifest
+#
+# Single source of truth for every ML model the perception pipeline is willing
+# to load.  See backend/weights/manifest.py for schema definitions.
+#
+# Per Phase 1 Q&A:
+#   * CubiCasa hourglass is the residential-MVP wall segmenter (enabled).
+#   * SMP U-Net entry is shipped disabled; flip `enabled` once the proper
+#     CubiCasa5K-trained checkpoint lands — no code changes required.
+#   * YOLO-Seg and symbol detector slots are shipped disabled.  When they are
+#     off, the completeness scorer records the missing subsystem and the
+#     confidence on affected elements drops.  No stage fails.
+
+schema_version: "1.0.0"
+
+models:
+  wall_segmenter_residential:
+    enabled: true
+    architecture: cubicasa_hg
+    # Step 7 — Channel C's Stage-2 VLM classifier dispatches to a wall
+    # segmenter by ``kind`` + ``building_types``.  This slot handles
+    # RESIDENTIAL and MIXED_USE plans (the CubiCasa5K training corpus is
+    # dominated by apartments and town-houses).
+    kind: wall_segmenter
+    building_types: [RESIDENTIAL, MIXED_USE]
+    # Step-8 MLEngine primary-vs-fallback threshold.  Compared against
+    # the *mean wall-heatmap score over pixels classified as walls*
+    # (see CubiCasaHgWallAdapter docstring) — NOT the wall-pixel
+    # fraction, which is a geometric property of the plan, not a
+    # trust signal.
+    #
+    # PLACEHOLDER.  The 0.20 value has not been calibrated against a
+    # production sample of CubiCasa outputs.  To retune: collect
+    # mean-heatmap-score / wall-quality pairs from the first production
+    # cohort (or a held-out CubiCasa5K val split), find the score at
+    # which visually poor masks begin dominating, and set this field
+    # to that value.  Do not bump the :data:`DEFAULT_PRIMARY_CONFIDENCE_
+    # THRESHOLD` module constant — per-model thresholds belong here.
+    confidence_threshold: 0.20
+    model_id: cubicasa_hg_v1
+    model_version: "1.0.0"
+    filename: cubicasa_hg_v1.pkl
+    # sha256 / size_bytes are populated by scripts/fetch_weights.py --freeze
+    # against the uploaded artefact so we can enforce integrity in CI.
+    sha256: null
+    size_bytes: null
+    # ``num_classes`` is the INFERENCE-time output width of the head.  The
+    # CubiCasa hourglass checkpoint was pretrained with 51 output classes
+    # (12 room types + 11 icon types + 28 aux channels in the original
+    # upstream recipe).  At inference the aux channels are discarded and
+    # the head is resized down to 44 = 12 room + 11 icon + 21 boundary
+    # logits consumed by split_prediction() in the vendor post-processor.
+    # See ``params.bootstrap_n_classes`` below.
+    num_classes: 44
+    description: >-
+      CubiCasa hourglass trained on CubiCasa5K.  Single residential-MVP wall
+      segmenter.  The loader resizes the head from the 51-class pretraining
+      output to the 44-class inference output.
+    params:
+      # --- Head-resize contract (read by backend.weights.loader._build_cubicasa_hg) ---
+      # The checkpoint's state_dict was saved against a 51-way final conv
+      # (``conv4_`` + ``upsample``); we rebuild those two layers with a
+      # 44-way output before calling ``load_state_dict``, which keeps every
+      # earlier-tensor name matching and discards the 7 aux channels that
+      # the Phase-1 post-processor does not consume.  If you bump this
+      # model to a checkpoint trained at a different width, update BOTH
+      # ``bootstrap_n_classes`` (what the .pkl was saved as) and the
+      # top-level ``num_classes`` (what the vendor post-processor expects).
+      bootstrap_n_classes: 51
+      num_classes: 44
+      # Room / icon channel counts consumed by split_prediction(); the
+      # remaining 21 channels in the 44-wide head are boundary logits.
+      n_rooms: 12
+      n_icons: 11
+      tta_rotations: 4
+      split_prediction: true
+    source:
+      # Vendored checkpoint path, honoured when the file is bundled in the
+      # working tree (dev convenience).  Not checked into git.
+      local_path: vendors/cubicasa/weights/cubicasa_hg_v1.pkl
+      s3_key: models/wall_segmenter/cubicasa_hg_v1.pkl
+
+  wall_segmenter_commercial:
+    enabled: false
+    architecture: smp_unet
+    # Flip enabled:true once the commercial checkpoint lands.  Covers
+    # commercial / industrial / institutional plans; MIXED_USE falls
+    # through to the residential slot above because the CubiCasa head
+    # handles the residential portion of a mixed-use floor plate better
+    # than a commercial-only U-Net handles the residential portion.
+    kind: wall_segmenter
+    building_types: [COMMERCIAL, INDUSTRIAL, INSTITUTIONAL]
+    # Confidence semantics differ from the CubiCasa hourglass: the SMP
+    # head emits per-class softmax probabilities, so the adapter
+    # reports the mean winning-class probability over wall pixels
+    # (range roughly [0.5, 0.95] on trained weights).  MLStructFP is
+    # noisier than CubiCasa5K and the operating point is expected to
+    # be higher than the residential slot's.  Left unset here because
+    # the checkpoint does not yet exist; set when weights land and
+    # keep the value segregated from the residential one.
+    # confidence_threshold: 0.55
+    model_id: smp_unet_resnet34_cc5k
+    model_version: "0.2.0"
+    filename: smp_unet_resnet34_cc5k_v0_2.pth
+    sha256: null
+    size_bytes: null
+    num_classes: 7
+    description: >-
+      Segmentation-models-pytorch U-Net (ResNet-34 encoder) trained on the
+      commercial subset of CubiCasa5K.  Shipped disabled until the checkpoint
+      is available; when flipped on, the loader dispatches on architecture
+      and no other code changes.
+    params:
+      encoder_name: resnet34
+      encoder_weights: null
+      in_channels: 3
+      classes: 7
+    source:
+      local_path: vendors/smp_unet/weights/smp_unet_resnet34_cc5k_v0_2.pth
+      s3_key: models/wall_segmenter/smp_unet_resnet34_cc5k_v0_2.pth
+
+  yolo_wall_seg:
+    enabled: false
+    architecture: yolov8_seg
+    # Step 8 — MLEngine dispatches fallback wall segmenters by ``kind``.
+    # ``wall_fallback`` is a distinct role from ``wall_segmenter`` because
+    # the engine only consults it when the primary is unavailable or
+    # returns a low-confidence mask.  No ``building_types`` means it is
+    # universal — usable behind any primary, regardless of plan kind.
+    kind: wall_fallback
+    model_id: yolo_wall_seg
+    model_version: "0.1.0"
+    filename: yolo_wall_seg_v0_1.pt
+    sha256: null
+    size_bytes: null
+    description: >-
+      Fine-tuned YOLOv8-Seg used as a wall-mask fallback when the primary
+      segmenter confidence is low.  Optional — when disabled the completeness
+      scorer drops detector_coverage and wall_detection confidence.
+    params:
+      conf_threshold: 0.25
+      iou_threshold: 0.45
+      imgsz: 1024
+    source:
+      local_path: vendors/yolo_wall_seg/weights/yolo_wall_seg_v0_1.pt
+      s3_key: models/yolo_wall_seg/yolo_wall_seg_v0_1.pt
+
+  symbol_detector:
+    enabled: false
+    architecture: yolov8
+    # Step 8 — MLEngine dispatches symbol detectors by ``kind``.  Universal
+    # across building types; per-type symbol checkpoints can be added later
+    # by cloning this slot and setting ``building_types``.
+    kind: symbol_detector
+    model_id: symbol_detector
+    model_version: "0.1.0"
+    filename: symbol_detector_v0_1.pt
+    sha256: null
+    size_bytes: null
+    description: >-
+      YOLOv8 symbol detector (doors, windows, stairs, elevators).  Optional;
+      its output feeds the opening_detection confidence score.  When disabled
+      the opening list falls back to heuristic inference from wall gaps.
+    params:
+      conf_threshold: 0.30
+      iou_threshold: 0.50
+      imgsz: 1024
+      classes:
+        - door
+        - window
+        - stair
+        - elevator
+    source:
+      local_path: vendors/symbol_detector/weights/symbol_detector_v0_1.pt
+      s3_key: models/symbol_detector/symbol_detector_v0_1.pt

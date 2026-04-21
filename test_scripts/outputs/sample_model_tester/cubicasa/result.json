@@ -2,9 +2,11 @@
   "model": "cubicasa",
   "loaded": true,
   "predicted": true,
+  "errors": [],
+  "traceback": null,
   "artifacts": {
-    "saved_rooms": "C:\\Phase 1 - Civil agent\\test_scripts\\outputs\\sample_model_tester\\cubicasa\\rooms.png",
-    "saved_walls": "C:\\Phase 1 - Civil agent\\test_scripts\\outputs\\sample_model_tester\\cubicasa\\walls.png",
+    "saved_rooms": "rooms.png",
+    "saved_walls": "walls.png",
     "detected_room_classes": [
       0,
       1,
@@ -16,17 +18,22 @@
       7,
       8,
       9,
+      10,
       11
     ],
     "room_logits_shape": [
       12,
       512,
-      672
+      704
     ],
     "boundary_logits_shape": [
       21,
       512,
-      672
+      704
     ]
-  }
+  },
+  "artifact_files": [
+    "rooms.png",
+    "walls.png"
+  ]
 }

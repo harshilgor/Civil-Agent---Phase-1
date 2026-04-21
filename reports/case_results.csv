@@ -1,0 +1,25 @@
+case_id,category,building_type,input_type,input_path,phase1_ok,phase2_ok,completeness,confidence_p1,warnings_count,human_review_flag,support_notes,structural_sanity_notes,failure_reason
+hp_office_struct,happy_path,office,structured_form,(synthetic request),True,True,0.9,0.9,1,False,candidates=192 forbidden_regions=0,no_automated_flags,
+hp_duplex_struct,happy_path,residential_duplex,structured_form,(synthetic request),True,True,0.9,0.9,1,False,candidates=24 forbidden_regions=0,no_automated_flags,
+hp_clinic_struct,happy_path,healthcare_clinic,structured_form,(synthetic request),True,True,0.9,0.9,1,False,candidates=63 forbidden_regions=0,no_automated_flags,
+hp_barracks_struct,happy_path,small_office_barracks,structured_form,(synthetic request),True,True,0.9,0.9,1,False,candidates=18 forbidden_regions=0,no_automated_flags,
+ifc_office_s,happy_path,office,IFC,data\Office_S_20110811_optimized.ifc,True,True,0.84,0.84,1,False,candidates=620 zones=4,irregular_building_label,
+ifc_office_a,happy_path,office,IFC,data\Office_A_20110811_optimized.ifc,True,True,0.94,0.94,0,False,candidates=4857 zones=3,irregular_building_label,
+ifc_clinic_arch,happy_path,healthcare_clinic,IFC,data\NBU_MedicalClinic\NBU_MedicalClinic_Arch-Optimized.ifc,True,True,0.94,0.94,0,False,candidates=16128 zones=4,irregular_building_label,
+dxf_synthetic_baseline,happy_path,office,DXF,C:\Users\harsh\AppData\Local\Temp\tmpy5gaq24t.dxf,True,True,0.84,0.84,1,False,candidates=20,no_automated_flags,
+raster_office_clean,cross_input,office,floor_plan_image,reports\benchmark_cache\raster_clean.png,True,True,0.84,0.84,2,False,candidates=8,no_automated_flags,
+raster_office_blur,robustness,office,floor_plan_image,reports\benchmark_cache\raster_office_blur.png,True,True,0.84,0.84,1,False,candidates=13,irregular_building_label,
+raster_office_skew,robustness,office,floor_plan_image,reports\benchmark_cache\raster_office_skew.png,True,True,0.84,0.84,1,False,candidates=60,irregular_building_label,
+raster_office_crop,robustness,office,floor_plan_image,reports\benchmark_cache\raster_office_crop.png,True,True,0.84,0.84,3,False,candidates=4,no_automated_flags,
+raster_compressed_scan,robustness,office,floor_plan_image,reports\benchmark_cache\raster_compressed_scan.png,True,True,0.84,0.84,2,False,candidates=8,no_automated_flags,
+raster_low_resolution,robustness,office,floor_plan_image,reports\benchmark_cache\raster_low_resolution.png,True,True,0.84,0.84,1,False,candidates=16,irregular_building_label,
+raster_missing_dimension_labels,robustness,office,floor_plan_image,reports\benchmark_cache\raster_missing_dimension_labels.png,True,True,0.84,0.84,2,False,candidates=8,no_automated_flags,
+raster_ambiguous_unit_labels,robustness,office,floor_plan_image,reports\benchmark_cache\raster_ambiguous_unit_labels.png,True,True,0.84,0.84,2,False,candidates=8,no_automated_flags,
+raster_no_grid_labels,robustness,office,floor_plan_image,reports\benchmark_cache\raster_no_grid_labels.png,True,True,0.84,0.84,2,False,candidates=8,no_automated_flags,
+adv_open_lobby_struct,adversarial,office,structured_form,(synthetic request),True,True,0.9,0.9,1,False,candidates=120 forbidden_regions=0,no_automated_flags,
+adv_atrium_struct,adversarial,retail_atrium,structured_form,(synthetic request),True,True,0.9,0.9,1,False,candidates=64 forbidden_regions=4,no_automated_flags,
+adv_broken_stack_struct,adversarial,office,structured_form,(synthetic request),True,True,0.9,0.9,1,False,candidates=100 forbidden_regions=0,no_automated_flags,
+adv_irregular_struct,adversarial,mixed_use,structured_form,(synthetic request),True,True,0.9,0.9,1,False,candidates=105 forbidden_regions=0,irregular_building_label,
+cross_duplex_ifc_pdf,consistency,residential_duplex,missing,,False,False,,,0,False,,,No IFC or PDF/raster duplex assets in repository data/ (required cross-input case unresolved).
+cross_clinic_pdf,consistency,healthcare_clinic,missing,,False,False,,,0,False,,,No PDF/raster clinic plan in data/; only IFC clinic available. PDF cross-input unresolved.
+cross_office_pdf,consistency,office,missing,,False,False,,,0,False,,,No PDF office plan in data/; benchmark uses IFC vs synthetic raster as partial proxy only.

@@ -1,0 +1,25 @@
+# Legacy pipeline model config.
+#
+# After the Step 1 cleanup, CubiCasa is the only registered perception
+# adapter (deepfloorplan / roomformer / polyroom / raster_to_graph were
+# retired with their weights).  The canonical source for all CV model
+# metadata going forward is ``config/weights_manifest.yaml``, consumed by
+# ``backend.weights.WeightsLoader``; this file exists only to keep the
+# legacy ``backend/pipeline/`` orchestrator (and its unit tests) from
+# breaking at import time.
+
+defaults:
+  device: cpu
+  dtype: float32
+
+models:
+  cubicasa:
+    architecture: cubicasa_hg
+    # Head resize — the checkpoint was pretrained with 51 output classes,
+    # inference runs with 44.  See config/weights_manifest.yaml for the
+    # authoritative parameters; this block is a legacy echo only.
+    bootstrap_n_classes: 51
+    num_classes: 44
+    n_rooms: 12
+    n_icons: 11
+    tta_rotations: 4

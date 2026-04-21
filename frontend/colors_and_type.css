@@ -1,0 +1,310 @@
+/* ============================================================
+   VELLUM STRUCTURES — Colors & Type
+   The Digital Vellum: warm drafting paper, monochrome foundation,
+   functional color as data.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  /* ——————————————————————————————————————————
+     FOUNDATION — Paper, Charcoal, Tooling
+     —————————————————————————————————————————— */
+  --surface:                    #fbf9f2;   /* the paper */
+  --surface-bright:             #fbf9f2;
+  --surface-dim:                #dadbca;
+  --surface-container-lowest:   #ffffff;
+  --surface-container-low:      #f5f4eb;   /* drawing board */
+  --surface-container:          #efeee3;
+  --surface-container-high:     #e9e9dc;
+  --surface-container-highest:  #e3e4d4;   /* active component */
+  --surface-variant:            #e3e4d4;
+  --inverse-surface:            #0e0f0b;
+  --inverse-on-surface:         #9e9d97;
+
+  --on-surface:                 #313429;   /* technical charcoal — never #000 */
+  --on-background:              #313429;
+  --on-surface-variant:         #5e6054;
+
+  --primary:                    #5f5e5e;   /* primary tooling */
+  --primary-dim:                #535252;
+  --primary-container:          #e4e2e1;
+  --primary-fixed:              #e4e2e1;
+  --primary-fixed-dim:          #d6d4d3;
+  --on-primary:                 #faf7f6;
+  --on-primary-container:       #525151;
+  --on-primary-fixed:           #3f3f3f;
+  --on-primary-fixed-variant:   #5c5b5b;
+
+  /* ——————————————————————————————————————————
+     FUNCTIONAL ACCENTS — color is data, never decoration
+     —————————————————————————————————————————— */
+  --secondary:                  #006a6a;   /* Teal — core services, structural spine */
+  --secondary-dim:              #005d5d;
+  --secondary-container:        #93f2f2;
+  --secondary-fixed:            #93f2f2;
+  --secondary-fixed-dim:        #85e4e3;
+  --on-secondary:               #e0fffe;
+  --on-secondary-container:     #005c5c;
+  --on-secondary-fixed:         #004747;
+  --on-secondary-fixed-variant: #006666;
+
+  --tertiary:                   #605f57;   /* warm neutral for soft data */
+  --tertiary-dim:               #54534c;
+  --tertiary-container:         #f6f4e9;
+  --tertiary-fixed:             #f6f4e9;
+  --tertiary-fixed-dim:         #e8e5db;
+  --on-tertiary:                #fcf9ee;
+  --on-tertiary-container:      #5c5c54;
+  --on-tertiary-fixed:          #4a4a42;
+  --on-tertiary-fixed-variant:  #67665e;
+
+  /* Domain-specific functional colors (from DESIGN.md) */
+  --fn-purple:                  #6a4c93;   /* Open plates & voids */
+  --fn-purple-container:        #ece3f6;
+  --fn-pink:                    #b5548c;   /* Pedestrian corridors & flow */
+  --fn-pink-container:          #f6dce8;
+  --fn-coral:                   #c2615b;   /* Transfer-risk zones */
+  --fn-coral-container:         #f6dcd9;
+  --fn-blue:                    #3c6e91;   /* Informational overlays, metadata */
+  --fn-blue-container:          #dbe7f0;
+
+  /* Confidence / safety */
+  --success:                    #4a7c59;   /* high confidence */
+  --success-container:          #dde9df;
+  --warning:                    #b8842b;   /* amber — review */
+  --warning-container:          #f4e6c7;
+  --error:                      #9f403d;   /* red — safety threshold */
+  --error-dim:                  #4e0309;
+  --error-container:            #fe8983;
+  --on-error:                   #fff7f6;
+  --on-error-container:         #752121;
+
+  /* Lines — used only at 0.5px or with low alpha. NEVER 1px opaque */
+  --outline:                    #7a7c6f;
+  --outline-variant:            #b2b3a5;
+
+  /* ——————————————————————————————————————————
+     TYPOGRAPHY
+     —————————————————————————————————————————— */
+  --font-headline: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-body:     'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-label:    'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono:     'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
+  /* Type scale — matches Material-3-like tokens used across the product */
+  --display-lg:   3.5rem;    /* 56px  — hero metric */
+  --display-md:   2.8125rem; /* 45px */
+  --display-sm:   2.25rem;   /* 36px */
+  --headline-lg:  2rem;      /* 32px */
+  --headline-md:  1.75rem;   /* 28px */
+  --headline-sm:  1.5rem;    /* 24px — section starts */
+  --title-lg:     1.375rem;  /* 22px */
+  --title-md:     1rem;      /* 16px */
+  --title-sm:     0.875rem;  /* 14px */
+  --body-lg:      1rem;      /* 16px */
+  --body-md:      0.875rem;  /* 14px */
+  --body-sm:      0.75rem;   /* 12px */
+  --label-lg:     0.875rem;  /* 14px */
+  --label-md:     0.75rem;   /* 12px */
+  --label-sm:     0.6875rem; /* 11px — blueprint annotations */
+
+  /* ——————————————————————————————————————————
+     SPACING — strict 4px / 8px baseline grid
+     —————————————————————————————————————————— */
+  --space-0:  0;
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* Radius — stay in the "technical" range. No full/xl on structural elements. */
+  --radius-none: 0;
+  --radius-sm:   0.125rem;  /* 2px  — default for buttons/chips */
+  --radius-md:   0.25rem;   /* 4px  */
+  --radius-lg:   0.5rem;    /* 8px  — only for floating overlays */
+  --radius-xl:   0.75rem;   /* 12px — rarely, bubble/pill UI */
+
+  /* ——————————————————————————————————————————
+     ELEVATION — tonal layering, no software-generic shadows
+     —————————————————————————————————————————— */
+  /* Level 0 = surface (the desk). Level 1–3 = stacked vellum. */
+  --elev-0: none;
+  --elev-1: 0 1px 0 0 rgba(49, 52, 41, 0.04);
+  --elev-2: 0 12px 24px -12px rgba(49, 52, 41, 0.04), 0 2px 6px -2px rgba(49, 52, 41, 0.03);
+  --elev-3: 0 24px 32px -8px rgba(49, 52, 41, 0.04);
+  --elev-floating: 0 28px 32px -12px rgba(49, 52, 41, 0.06);
+
+  /* ——————————————————————————————————————————
+     PAPER MOTIFS
+     —————————————————————————————————————————— */
+  /* Drafting grid (40px orthogonal) */
+  --bg-canvas-grid:
+    linear-gradient(to right, rgba(49, 52, 41, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(49, 52, 41, 0.05) 1px, transparent 1px);
+  --bg-canvas-grid-size: 40px 40px;
+
+  /* Hairline separator — ALWAYS with alpha; never 100% opaque */
+  --hairline: 0.5px solid rgba(49, 52, 41, 0.10);
+
+  /* Motion */
+  --ease-draft: cubic-bezier(0.2, 0.0, 0.0, 1.0);
+  --dur-fast:   120ms;
+  --dur-med:    200ms;
+  --dur-slow:   320ms;
+}
+
+/* ============================================================
+   SEMANTIC TYPE CLASSES
+   ============================================================ */
+html, body {
+  background: var(--surface);
+  color: var(--on-surface);
+  font-family: var(--font-body);
+  font-size: var(--body-md);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.display-lg, h1.display, .v-display {
+  font-family: var(--font-headline);
+  font-size: var(--display-lg);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+.display-md {
+  font-family: var(--font-headline);
+  font-size: var(--display-md);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.08;
+}
+.headline-lg, h1 {
+  font-family: var(--font-headline);
+  font-size: var(--headline-lg);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+.headline-md, h2 {
+  font-family: var(--font-headline);
+  font-size: var(--headline-md);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1.2;
+}
+.headline-sm, h3 {
+  font-family: var(--font-headline);
+  font-size: var(--headline-sm);
+  font-weight: 500;
+  line-height: 1.25;
+}
+.title-lg, h4 {
+  font-family: var(--font-headline);
+  font-size: var(--title-lg);
+  font-weight: 500;
+  line-height: 1.3;
+}
+.title-md, h5 {
+  font-family: var(--font-headline);
+  font-size: var(--title-md);
+  font-weight: 500;
+  line-height: 1.4;
+}
+.title-sm, h6 {
+  font-family: var(--font-label);
+  font-size: var(--title-sm);
+  font-weight: 600;
+  line-height: 1.4;
+}
+.body-lg, p.lead {
+  font-family: var(--font-body);
+  font-size: var(--body-lg);
+  line-height: 1.55;
+}
+.body-md, p {
+  font-family: var(--font-body);
+  font-size: var(--body-md);
+  line-height: 1.5;
+}
+.body-sm {
+  font-family: var(--font-body);
+  font-size: var(--body-sm);
+  line-height: 1.45;
+  color: var(--on-surface-variant);
+}
+.label-lg {
+  font-family: var(--font-label);
+  font-size: var(--label-lg);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+.label-md {
+  font-family: var(--font-label);
+  font-size: var(--label-md);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--on-surface-variant);
+}
+.label-sm, .annotation {
+  font-family: var(--font-label);
+  font-size: var(--label-sm);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;  /* increased tracking for blueprint feel */
+  color: var(--on-surface-variant);
+}
+.mono, code, kbd, samp {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  letter-spacing: -0.01em;
+}
+
+/* "The Big and Small" editorial pairing */
+.metric-pair {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.metric-pair .metric {
+  font-family: var(--font-headline);
+  font-size: var(--display-lg);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+}
+.metric-pair .descriptor {
+  font-family: var(--font-label);
+  font-size: var(--label-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--on-surface-variant);
+}
+
+/* Links — NEVER bright blue. Teal or charcoal, always underlined. */
+a.v-link {
+  color: var(--secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 0.5px;
+}
+a.v-link:hover { color: var(--secondary-dim); }
+
+/* Material Symbols default weight */
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 300, "GRAD" 0, "opsz" 24;
+  vertical-align: middle;
+}
