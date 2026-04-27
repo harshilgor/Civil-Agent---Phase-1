@@ -5,6 +5,7 @@ const STYLES: Record<InputSource, { bg: string; fg: string }> = {
   IFC: { bg: "var(--fn-blue-container)", fg: "#042c53" },
   DXF: { bg: "var(--fn-purple-container)", fg: "#3a206d" },
   IMAGE: { bg: "var(--fn-pink-container)", fg: "#5a1f44" },
+  SIZER: { bg: "var(--tertiary-container)", fg: "var(--on-tertiary-container)" },
 };
 
 export function SourceBadge({ source }: { source: InputSource }) {

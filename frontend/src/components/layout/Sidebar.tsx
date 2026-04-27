@@ -1,14 +1,15 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useMemo } from "react";
 import {
   ArrowDownToLine,
   BarChart3,
+  Calculator,
   Clipboard,
   Clock3,
   Crosshair,
+  FileDown,
   Grid3x3,
   Info,
   Layers,
@@ -17,11 +18,16 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   PencilRuler,
+  Ruler,
   Settings,
+  SlidersHorizontal,
 } from "lucide-react";
+import { toast } from "sonner";
 import { useProjectsStore } from "@/stores/projectsStore";
 import { useCanvasStore } from "@/stores/canvasStore";
 import type { PhaseId } from "@/types/domain";
+import { useSizerUiStore } from "@/stores/sizerUiStore";
+import { downloadBlob, exportSizerPdf, getSelectedSizerResult } from "@/lib/sizer";
 
 type NavItem = {
   label: string;
@@ -30,6 +36,7 @@ type NavItem = {
   requiresPhase?: PhaseId;
   group: "views" | "tools";
   topLevel?: boolean; // /dashboard etc uses / instead of /projects/[id]/...
+  action?: "assumptions" | "export";
 };
 
 const NAV: NavItem[] = [
@@ -46,12 +53,23 @@ const NAV: NavItem[] = [
   { label: "Settings", icon: Settings, subpath: "/settings", group: "tools" },
 ];
 
+const SIZER_NAV: NavItem[] = [
+  { label: "Overview", icon: BarChart3, subpath: "/sizer/overview", group: "views" },
+  { label: "Members", icon: Calculator, subpath: "/sizer/members", group: "views" },
+  { label: "Schemes", icon: Ruler, subpath: "/sizer/schemes", group: "views" },
+  { label: "Calculations", icon: Clipboard, subpath: "/sizer/calculations", group: "views" },
+  { label: "Export", icon: FileDown, subpath: "/sizer/overview", group: "views", action: "export" },
+  { label: "Assumptions", icon: SlidersHorizontal, subpath: "/sizer/overview", group: "tools", action: "assumptions" },
+  { label: "Settings", icon: Settings, subpath: "/sizer/settings", group: "tools" },
+];
+
 export function Sidebar() {
   const pathname = usePathname() ?? "/";
   const router = useRouter();
   const collapsed = useCanvasStore((s) => s.sidebarCollapsed);
   const toggleSidebar = useCanvasStore((s) => s.toggleSidebar);
   const getAll = useProjectsStore((s) => s.getAll);
+  const setAssumptionsOpen = useSizerUiStore((s) => s.setAssumptionsOpen);
 
   const projectMatch = pathname.match(/\/projects\/([^/]+)/);
   const projectId = projectMatch?.[1] ?? null;
@@ -59,6 +77,7 @@ export function Sidebar() {
     () => (projectId ? getAll().find((p) => p.id === projectId) ?? null : null),
     [projectId, getAll],
   );
+  const nav = project?.projectType === "wood_framing_sizer" ? SIZER_NAV : NAV;
 
   function resolveHref(it: NavItem) {
     if (it.topLevel) return "/";
@@ -67,6 +86,7 @@ export function Sidebar() {
   }
 
   function isActive(it: NavItem) {
+    if (it.action) return false;
     if (it.topLevel) return pathname === "/" || pathname === "/projects";
     if (!projectId) return false;
     const href = `/projects/${projectId}${it.subpath}`;
@@ -79,8 +99,31 @@ export function Sidebar() {
     return project.phaseStatus[it.requiresPhase] !== "complete";
   }
 
-  const viewItems = NAV.filter((i) => i.group === "views");
-  const toolItems = NAV.filter((i) => i.group === "tools");
+  async function handleAction(it: NavItem) {
+    if (it.action === "assumptions") {
+      setAssumptionsOpen(true);
+      return;
+    }
+    if (it.action === "export") {
+      const result = project ? getSelectedSizerResult(project) : null;
+      if (!project || !result) {
+        toast.error("No sizer result available to export.");
+        return;
+      }
+      try {
+        const blob = await exportSizerPdf(result);
+        downloadBlob(blob, `${project.name.replace(/[^a-z0-9_-]+/gi, "-")}-calculations.pdf`);
+        toast.success("Calculation package exported.");
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Export failed.");
+      }
+      return;
+    }
+    router.push(resolveHref(it));
+  }
+
+  const viewItems = nav.filter((i) => i.group === "views");
+  const toolItems = nav.filter((i) => i.group === "tools");
 
   return (
     <aside
@@ -103,7 +146,7 @@ export function Sidebar() {
               collapsed={collapsed}
               onClick={() => {
                 if (isGated(it)) return;
-                router.push(resolveHref(it));
+                void handleAction(it);
               }}
             />
           ))}
@@ -126,7 +169,7 @@ export function Sidebar() {
               active={isActive(it)}
               gated={false}
               collapsed={collapsed}
-              onClick={() => router.push(resolveHref(it))}
+              onClick={() => void handleAction(it)}
             />
           ))}
         </nav>

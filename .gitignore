@@ -86,3 +86,9 @@ dist/
 # === Cleanup artifacts ===
 pre-rewrite-refs.txt
 cleanup-paths.txt
+
+# === Local browser/debug scratch ===
+.edge-profile/
+data/edge-headless-profile/
+data/edge-headless-profile-2/
+frontend/dev*.log

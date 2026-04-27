@@ -23,7 +23,10 @@ export type PipelineStage =
   | "phase_5_running"
   | "phase_5_complete";
 
-export type InputSource = "STRUCTURED" | "IFC" | "DXF" | "IMAGE";
+export type InputSource = "STRUCTURED" | "IFC" | "DXF" | "IMAGE" | "SIZER";
+export type ProjectType = "building_graph" | "wood_framing_sizer";
+
+export const WOOD_FRAMING_SIZER = "wood_framing_sizer" as const;
 
 export type ProjectStatus =
   | "COMPLETE"
@@ -313,8 +316,166 @@ export type AnalysisResult = {
   deflectionStatus: "pass" | "fail";
 };
 
+export type SizerLayout = "A" | "B";
+
+export type SizerLoadParameters = {
+  dead_load_psf: number;
+  live_load_psf: number;
+  species: string;
+  grade: string;
+  deflection_live_limit?: number;
+  deflection_total_limit?: number;
+  soil_bearing_psf?: number;
+  service_condition?: "dry";
+  temperature_f?: number;
+  incised?: boolean;
+  column_height_ft?: number;
+  beam_material_preference?: "any" | "sawn" | "glulam" | "lvl_1.9E" | "lvl_2.0E";
+};
+
+export type SizerPlanInput = {
+  project_name: string;
+  dimensions: {
+    length_ft: number;
+    width_ft: number;
+  };
+  load_parameters: SizerLoadParameters;
+  layouts: Array<{
+    name: SizerLayout;
+    layout_type: "perimeter_support" | "center_beam";
+    joist_span_ft: number;
+    joist_spacing_in: number;
+    description?: string;
+    beam_span_ft?: number;
+    beam_total_length_ft?: number;
+    beam_tributary_width_ft?: number;
+    beam_span_config?: "simple" | "two_span_equal" | "three_span_equal";
+  }>;
+};
+
+export type SizerTraceValue = {
+  name: string;
+  value: number | string | boolean;
+  unit?: string | null;
+  source: string;
+  confidence?: string | null;
+};
+
+export type SizerCodeCheck = {
+  name: string;
+  demand: number;
+  capacity: number;
+  unit: string;
+  ratio: number;
+  passed: boolean;
+  source: string;
+  equation: string;
+  details?: Record<string, unknown>;
+};
+
+export type SizerMaterialSpec = {
+  material_type: "sawn_lumber" | "glulam" | "lvl" | "concrete";
+  species?: string | null;
+  grade?: string | null;
+  nominal_size?: string | null;
+  actual_width_in?: number | null;
+  actual_depth_in?: number | null;
+};
+
+export type SizerMemberResult = {
+  member_id: string;
+  member_type: string;
+  selected: boolean;
+  material: SizerMaterialSpec;
+  span_ft?: number | null;
+  length_ft?: number | null;
+  spacing_in?: number | null;
+  quantity: number;
+  trace: {
+    member_id: string;
+    member_type: string;
+    material: SizerMaterialSpec;
+    span_ft?: number | null;
+    length_ft?: number | null;
+    spacing_in?: number | null;
+    span_config?: string | null;
+    loads: Array<SizerTraceValue & { load_type?: string | null }>;
+    section_properties: SizerTraceValue[];
+    reference_design_values: SizerTraceValue[];
+    adjusted_design_values: SizerTraceValue[];
+    adjustment_factors: Array<{
+      symbol: string;
+      name: string;
+      value: number;
+      applies_to: string[];
+      source: string;
+      confidence?: string | null;
+      note?: string | null;
+    }>;
+    checks: SizerCodeCheck[];
+    connections?: Record<string, {
+      interface: string;
+      demand_lb: number;
+      product: string;
+      allowable_load_lb: number;
+      utilisation: number;
+      source: string;
+      note: string;
+      warning?: string | null;
+    }>;
+    governing_check?: string | null;
+    final_utilization: number;
+    warning?: string | null;
+    passed: boolean;
+    assumptions: string[];
+  };
+};
+
+export type SizerResult = {
+  project_name: string;
+  layout: SizerLayout;
+  members: SizerMemberResult[];
+  summary: {
+    lumber_volume_ft3: number;
+    glulam_volume_ft3: number;
+    concrete_volume_ft3: number;
+    joist_count: number;
+    footing_count: number;
+    span_count: number;
+    cost_estimate?: {
+      lumber_installed_dollars: number;
+      concrete_dollars: number;
+      hardware_dollars: number;
+      total_dollars: number;
+      currency: "USD";
+    };
+  };
+  assumptions: Array<{ description: string; source: string }>;
+  questions: string[];
+};
+
+export type SizerComparisonResult = {
+  layout_a: SizerResult;
+  layout_b: SizerResult;
+  comparison: {
+    cost_difference_dollars: number;
+    cheaper_layout: SizerLayout;
+    lumber_volume_difference_ft3: number;
+  };
+};
+
+export type SizerProjectData = {
+  status: "in_progress" | "complete" | "needs_review";
+  selectedLayout: SizerLayout | null;
+  inputParams: SizerPlanInput;
+  layoutAResult?: SizerResult | null;
+  layoutBResult?: SizerResult | null;
+  comparisonResult?: SizerComparisonResult["comparison"] | null;
+};
+
 export type ProjectV2 = {
   id: string;
+  projectType: ProjectType;
   name: string;
   description?: string;
   buildingType: string;
@@ -332,4 +493,5 @@ export type ProjectV2 = {
   structuralGraph: StructuralGraph | null;
   loadSummary: LoadSummary | null;
   analysis: AnalysisResult | null;
+  sizerProject?: SizerProjectData | null;
 };

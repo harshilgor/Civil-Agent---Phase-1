@@ -1,9 +1,18 @@
 "use client";
-
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useSyncExternalStore } from "react";
-import { Plus, MoreHorizontal, Building2, Copy, Trash2, ExternalLink, Download } from "lucide-react";
+import {
+  ArrowRight,
+  Building2,
+  Copy,
+  Download,
+  ExternalLink,
+  Layers,
+  MoreHorizontal,
+  Plus,
+  Ruler,
+  Trash2,
+} from "lucide-react";
 import { MetricCard } from "@/components/shared/MetricCard";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { SourceBadge } from "@/components/shared/SourceBadge";
@@ -37,6 +46,7 @@ export default function Dashboard() {
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [sortBy, setSortBy] = useState<SortBy>("recent");
+  const [newProjectOpen, setNewProjectOpen] = useState(false);
 
   const counts = useMemo(() => {
     const by = (s: ProjectStatus) => projects.filter((p) => p.status === s).length;
@@ -97,7 +107,7 @@ export default function Dashboard() {
             />
             <button
               type="button"
-              onClick={() => router.push("/projects/new")}
+              onClick={() => setNewProjectOpen(true)}
               className="h-8 inline-flex items-center gap-vs-2 px-vs-3 rounded-sm bg-on-surface text-on-primary text-body-md font-medium hover:opacity-90 pressable"
             >
               <Plus className="w-3.5 h-3.5" strokeWidth={1.5} />
@@ -153,13 +163,14 @@ export default function Dashboard() {
               </div>
             </div>
             {statusFilter === "all" ? (
-              <Link
-                href="/projects/new"
+              <button
+                type="button"
+                onClick={() => setNewProjectOpen(true)}
                 className="h-8 inline-flex items-center gap-vs-2 px-vs-3 rounded-sm bg-on-surface text-on-primary text-body-md font-medium hover:opacity-90 pressable"
               >
                 <Plus className="w-3.5 h-3.5" />
                 Create your first project
-              </Link>
+              </button>
             ) : (
               <button
                 type="button"
@@ -175,8 +186,8 @@ export default function Dashboard() {
             <div className="grid grid-cols-[minmax(240px,1fr)_110px_140px_120px_130px_130px_60px] px-vs-4 py-vs-3 border-b-hairline bg-surface-container-low text-[10px] uppercase tracking-[0.12em] text-on-surface-variant">
               <div>Project</div>
               <div>Source</div>
-              <div>Phase 1</div>
-              <div>Phase 2</div>
+              <div>Phase 1 / Members</div>
+              <div>Phase 2 / Sizer</div>
               <div>Status</div>
               <div>Last modified</div>
               <div></div>
@@ -186,7 +197,13 @@ export default function Dashboard() {
                 <ProjectRow
                   key={p.id}
                   project={p}
-                  onOpen={() => router.push(`/projects/${p.id}/building-graph`)}
+                  onOpen={() =>
+                    router.push(
+                      p.projectType === "wood_framing_sizer"
+                        ? `/projects/${p.id}/sizer/overview`
+                        : `/projects/${p.id}/building-graph`,
+                    )
+                  }
                   onDuplicate={() => {
                     const newId = duplicateProject(p.id);
                     if (newId) toast.success(`Duplicated "${p.name}"`);
@@ -199,6 +216,13 @@ export default function Dashboard() {
               ))}
             </ul>
           </div>
+        )}
+        {newProjectOpen && (
+          <NewProjectTypeModal
+            onClose={() => setNewProjectOpen(false)}
+            onSelectBuildingGraph={() => router.push("/projects/new")}
+            onSelectSizer={() => router.push("/projects/new/sizer")}
+          />
         )}
       </div>
     </div>
@@ -239,29 +263,39 @@ function ProjectRow({
         <SourceBadge source={project.source} />
       </div>
       <div>
-        <div className="flex items-center gap-vs-2">
-          <div
-            className="h-[4px] w-16 rounded-full overflow-hidden"
-            style={{ background: "rgba(49,52,41,0.08)" }}
-          >
-            <div
-              className="h-full rounded-full"
-              style={{
-                width: `${Math.round(project.phase1Completeness * 100)}%`,
-                background:
-                  project.phase1Completeness >= 0.8
-                    ? "var(--score-strong)"
-                    : "var(--score-secondary)",
-              }}
-            />
-          </div>
+        {project.projectType === "wood_framing_sizer" ? (
           <span className="font-mono text-[12px] text-on-surface-variant">
-            {Math.round(project.phase1Completeness * 100)}%
+            {countProjectMembers(project)} members
           </span>
-        </div>
+        ) : (
+          <div className="flex items-center gap-vs-2">
+            <div
+              className="h-[4px] w-16 rounded-full overflow-hidden"
+              style={{ background: "rgba(49,52,41,0.08)" }}
+            >
+              <div
+                className="h-full rounded-full"
+                style={{
+                  width: `${Math.round(project.phase1Completeness * 100)}%`,
+                  background:
+                    project.phase1Completeness >= 0.8
+                      ? "var(--score-strong)"
+                      : "var(--score-secondary)",
+                }}
+              />
+            </div>
+            <span className="font-mono text-[12px] text-on-surface-variant">
+              {Math.round(project.phase1Completeness * 100)}%
+            </span>
+          </div>
+        )}
       </div>
       <div>
-        {project.phase2Confidence > 0 ? (
+        {project.projectType === "wood_framing_sizer" ? (
+          <span className="font-mono text-[11px] uppercase text-on-surface-variant">
+            {sizerDisplayStatus(project)}
+          </span>
+        ) : project.phase2Confidence > 0 ? (
           <ConfidenceBadge value={project.phase2Confidence} />
         ) : (
           <span className="text-body-sm text-on-surface-variant">—</span>
@@ -333,5 +367,117 @@ function MenuItem({
       <Icon className="w-3.5 h-3.5" strokeWidth={1.5} />
       {label}
     </button>
+  );
+}
+
+function countProjectMembers(project: ProjectV2): number {
+  const result =
+    project.sizerProject?.selectedLayout === "A"
+      ? project.sizerProject.layoutAResult
+      : project.sizerProject?.layoutBResult;
+  return result?.members.reduce((sum, member) => sum + (member.quantity || 1), 0) ?? 0;
+}
+
+function sizerDisplayStatus(project: ProjectV2): string {
+  if (project.sizerProject?.status === "in_progress") return "IN PROGRESS";
+  if (project.sizerProject?.status === "needs_review") return "NEEDS REVIEW";
+  return project.status === "NEEDS_REVIEW" ? "NEEDS REVIEW" : project.status;
+}
+
+function NewProjectTypeModal({
+  onClose,
+  onSelectBuildingGraph,
+  onSelectSizer,
+}: {
+  onClose: () => void;
+  onSelectBuildingGraph: () => void;
+  onSelectSizer: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-[rgba(14,15,11,0.18)] flex items-center justify-center px-vs-4"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-[760px] bg-surface-container-lowest border-hairline rounded-sm shadow-elev-floating"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="px-vs-5 py-vs-4 border-b-hairline flex items-start justify-between gap-vs-4">
+          <div>
+            <h2 className="font-headline text-title-lg font-medium">New project</h2>
+            <p className="text-body-sm text-on-surface-variant">
+              Choose the workflow for this structural design.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="h-7 px-vs-2 rounded-sm text-body-sm hover:bg-surface-container-low"
+          >
+            Close
+          </button>
+        </div>
+        <div className="grid md:grid-cols-2 gap-vs-3 p-vs-5">
+          <ProjectTypeOption
+            icon={Layers}
+            title="Building Graph"
+            lines={[
+              "Commercial and multi-story structural design.",
+              "Import massing from Revit, Rhino, or IFC.",
+              "Phase 1 -> Phase 2",
+            ]}
+            onSelect={onSelectBuildingGraph}
+          />
+          <ProjectTypeOption
+            icon={Ruler}
+            title="Wood Framing - Sizer"
+            lines={[
+              "Residential floor framing to NDS 2018.",
+              "Size joists, beams, columns, and footings.",
+              "Gravity loads. Stamp-ready output.",
+            ]}
+            onSelect={onSelectSizer}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProjectTypeOption({
+  icon: Icon,
+  title,
+  lines,
+  onSelect,
+}: {
+  icon: typeof Layers;
+  title: string;
+  lines: string[];
+  onSelect: () => void;
+}) {
+  return (
+    <section className="border-hairline rounded-sm bg-surface p-vs-4 flex flex-col gap-vs-4">
+      <div className="flex items-start gap-vs-3">
+        <span className="w-8 h-8 rounded-sm bg-surface-container-low inline-flex items-center justify-center">
+          <Icon className="w-4 h-4" strokeWidth={1.5} />
+        </span>
+        <div className="min-w-0">
+          <h3 className="font-headline text-title-md font-medium">{title}</h3>
+          <div className="mt-vs-2 flex flex-col gap-vs-1 text-body-sm text-on-surface-variant">
+            {lines.map((line) => (
+              <p key={line}>{line}</p>
+            ))}
+          </div>
+        </div>
+      </div>
+      <button
+        type="button"
+        onClick={onSelect}
+        className="self-start h-8 inline-flex items-center gap-vs-2 px-vs-3 rounded-sm bg-on-surface text-on-primary text-body-md font-medium hover:opacity-90 pressable"
+      >
+        Select
+        <ArrowRight className="w-3.5 h-3.5" strokeWidth={1.5} />
+      </button>
+    </section>
   );
 }

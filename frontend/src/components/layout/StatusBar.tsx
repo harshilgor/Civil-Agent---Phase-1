@@ -2,9 +2,10 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { fetchCivilAgentHealth } from "@/lib/api";
+import { fetchCivilAgentHealth, fetchSizerHealth } from "@/lib/api";
 import { useCanvasStore } from "@/stores/canvasStore";
 import { useProjectsStore } from "@/stores/projectsStore";
+import { useSizerUiStore } from "@/stores/sizerUiStore";
 
 const VIEW_NAMES: Array<[RegExp, string]> = [
   [/^\/$/, "Projects dashboard"],
@@ -30,6 +31,7 @@ export function StatusBar({
   const zoom = useCanvasStore((s) => s.zoom);
   const floor = useCanvasStore((s) => s.floor);
   const viewMode = useCanvasStore((s) => s.viewMode);
+  const sizingInProgress = useSizerUiStore((s) => s.sizingInProgress);
   const projectMatch = pathname.match(/\/projects\/([^/]+)/);
   const projectId = projectMatch?.[1] ?? null;
   const getAll = useProjectsStore((s) => s.getAll);
@@ -38,8 +40,12 @@ export function StatusBar({
     [projectId, getAll],
   );
 
-  const viewName =
+  const defaultViewName =
     VIEW_NAMES.find(([re]) => re.test(pathname))?.[1] ?? "Civil Agent";
+  const viewName =
+    project?.projectType === "wood_framing_sizer"
+      ? `Wood framing sizer · ${project.name}`
+      : defaultViewName;
 
   const runningPhase = project
     ? (Object.entries(project.phaseStatus).find(([, v]) => v === "running")?.[0] as string | undefined)
@@ -48,8 +54,8 @@ export function StatusBar({
   const [elapsed, setElapsed] = useState(0);
   useEffect(() => {
     if (!runningPhase) {
-      setElapsed(0);
-      return;
+      const t = setTimeout(() => setElapsed(0), 0);
+      return () => clearTimeout(t);
     }
     const start = Date.now();
     const t = setInterval(() => setElapsed(Date.now() - start), 100);
@@ -57,11 +63,26 @@ export function StatusBar({
   }, [runningPhase]);
 
   const [backend, setBackend] = useState<"ok" | "err" | "pending">("pending");
+  const [sizerBackend, setSizerBackend] = useState<"ok" | "err" | "pending">("pending");
   useEffect(() => {
     let cancelled = false;
     async function ping() {
       const { ok } = await fetchCivilAgentHealth();
       if (!cancelled) setBackend(ok ? "ok" : "err");
+    }
+    void ping();
+    const id = setInterval(() => void ping(), 30_000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function ping() {
+      const { ok } = await fetchSizerHealth();
+      if (!cancelled) setSizerBackend(ok ? "ok" : "err");
     }
     void ping();
     const id = setInterval(() => void ping(), 30_000);
@@ -109,6 +130,26 @@ export function StatusBar({
               ? "online"
               : "offline"}
         </span>
+        <span className="text-on-surface-variant">Â·</span>
+        <span className="inline-flex items-center gap-vs-2">
+          <span
+            className="w-[6px] h-[6px] rounded-full"
+            style={{
+              background:
+                sizerBackend === "ok"
+                  ? "var(--success)"
+                  : sizerBackend === "err"
+                    ? "var(--error)"
+                    : "var(--on-surface-variant)",
+            }}
+          />
+          Sizer API{" "}
+          {sizerBackend === "pending"
+            ? "..."
+            : sizerBackend === "ok"
+              ? "online"
+              : "offline"}
+        </span>
       </div>
       <div className="flex items-center gap-vs-4">
         {cursor && (cursor.x != null || cursor.y != null) && (
@@ -117,7 +158,15 @@ export function StatusBar({
             {cursor.z != null && ` · Z ${cursor.z.toFixed(2)}m`}
           </span>
         )}
-        {runningPhase ? (
+        {sizingInProgress ? (
+          <span
+            className="inline-flex items-center gap-vs-2"
+            style={{ color: "var(--fn-blue)" }}
+          >
+            <span className="pulse-dot w-[6px] h-[6px] rounded-full" style={{ background: "var(--fn-blue)" }} />
+            Sizing in progress...
+          </span>
+        ) : runningPhase ? (
           <span
             className="inline-flex items-center gap-vs-2"
             style={{ color: "var(--fn-blue)" }}

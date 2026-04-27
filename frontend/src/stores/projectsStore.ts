@@ -2,15 +2,16 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { createSafeJsonStorage } from "@/lib/safeStorage";
 import type {
-  AnalysisResult,
-  BuildingGraph,
-  LoadSummary,
   PhaseId,
   PhaseStatus,
   ProjectStatus,
   ProjectV2,
-  StructuralGraph,
+  SizerComparisonResult,
+  SizerLayout,
+  SizerPlanInput,
+  SizerResult,
   StructuredInput,
 } from "@/types/domain";
 import { defaultStructuredInput } from "@/lib/graph/nlParser";
@@ -56,6 +57,7 @@ function makeSeed(
   const updatedAt = createdAt;
   return {
     id,
+    projectType: "building_graph",
     name,
     buildingType,
     subtitle,
@@ -81,6 +83,7 @@ function makeSeed(
     structuralGraph: sg,
     loadSummary: ls,
     analysis: an,
+    sizerProject: null,
   };
 }
 
@@ -187,10 +190,20 @@ type ProjectsState = {
   userProjects: ProjectV2[];
   _hydrated: boolean;
   createProject: (input: StructuredInput, name?: string) => string;
+  createSizerProject: (args: {
+    inputParams: SizerPlanInput;
+    selectedLayout: SizerLayout;
+    result: SizerResult;
+  }) => string;
   deleteProject: (id: string) => void;
   duplicateProject: (id: string) => string | null;
   renameProject: (id: string, name: string) => void;
   updateProject: (id: string, patch: Partial<ProjectV2>) => void;
+  updateSizerProject: (
+    id: string,
+    patch: Partial<NonNullable<ProjectV2["sizerProject"]>>,
+  ) => void;
+  setSizerComparison: (id: string, comparison: SizerComparisonResult) => void;
   updateInput: (id: string, patch: Partial<StructuredInput>) => void;
   setPhase: (id: string, phase: PhaseId, status: PhaseStatus) => void;
   runPhase2: (id: string) => Promise<void>;
@@ -213,6 +226,27 @@ function normalizeId(name: string): string {
   return `${base}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
+function selectedSizerResult(
+  sizer: NonNullable<ProjectV2["sizerProject"]>,
+): SizerResult | null {
+  if (sizer.selectedLayout === "A") return sizer.layoutAResult ?? null;
+  if (sizer.selectedLayout === "B") return sizer.layoutBResult ?? null;
+  return sizer.layoutBResult ?? sizer.layoutAResult ?? null;
+}
+
+function sizerProjectStatus(result: SizerResult): ProjectStatus {
+  const hasWarning =
+    result.members.some((m) => m.trace.warning || !m.trace.passed);
+  return hasWarning ? "NEEDS_REVIEW" : "COMPLETE";
+}
+
+function sizerSubtitle(input: SizerPlanInput, layout: SizerLayout): string {
+  const shortSpecies = input.load_parameters.species === "Douglas Fir-Larch"
+    ? "DF-L"
+    : input.load_parameters.species;
+  return `Layout ${layout} - ${shortSpecies} ${input.load_parameters.grade} - NDS 2018`;
+}
+
 export const useProjectsStore = create<ProjectsState>()(
   persist(
     (set, get) => ({
@@ -225,6 +259,7 @@ export const useProjectsStore = create<ProjectsState>()(
         const bg = generateBuildingGraph(id, input);
         const project: ProjectV2 = {
           id,
+          projectType: "building_graph",
           name: finalName,
           buildingType: `${input.occupancy.replace("_", " ")}, ${input.stories} stories`,
           subtitle: `${input.material === "rc" ? "Reinforced concrete" : input.material === "steel" ? "Structural steel" : input.material} · ${input.coreLocation.replace("_", " ")} core`,
@@ -247,6 +282,55 @@ export const useProjectsStore = create<ProjectsState>()(
           structuralGraph: null,
           loadSummary: null,
           analysis: null,
+          sizerProject: null,
+        };
+        set((s) => ({ userProjects: [project, ...s.userProjects] }));
+        return id;
+      },
+
+      createSizerProject: ({ inputParams, selectedLayout, result }) => {
+        const finalName =
+          inputParams.project_name.trim() || "Untitled wood framing project";
+        const id = normalizeId(finalName);
+        const status = sizerProjectStatus(result);
+        const project: ProjectV2 = {
+          id,
+          projectType: "wood_framing_sizer",
+          name: finalName,
+          buildingType: "Residential",
+          subtitle: sizerSubtitle(inputParams, selectedLayout),
+          source: "SIZER",
+          createdAt: nowIso(),
+          updatedAt: nowIso(),
+          status,
+          phase1Completeness: 0,
+          phase2Confidence: 0,
+          phaseStatus: {
+            1: "not_started",
+            2: "not_started",
+            3: "not_started",
+            4: "not_started",
+            5: "not_started",
+          },
+          pipelineStage: status === "COMPLETE" ? "phase_5_complete" : "awaiting_input",
+          input: {
+            ...defaultStructuredInput(),
+            buildingName: finalName,
+            occupancy: "residential",
+            material: "timber",
+          },
+          buildingGraph: null,
+          structuralGraph: null,
+          loadSummary: null,
+          analysis: null,
+          sizerProject: {
+            status: status === "NEEDS_REVIEW" ? "needs_review" : "complete",
+            selectedLayout,
+            inputParams,
+            layoutAResult: selectedLayout === "A" ? result : null,
+            layoutBResult: selectedLayout === "B" ? result : null,
+            comparisonResult: null,
+          },
         };
         set((s) => ({ userProjects: [project, ...s.userProjects] }));
         return id;
@@ -282,6 +366,47 @@ export const useProjectsStore = create<ProjectsState>()(
           userProjects: s.userProjects.map((p) =>
             p.id === id ? { ...p, ...patch, updatedAt: nowIso() } : p,
           ),
+        })),
+
+      updateSizerProject: (id, patch) =>
+        set((s) => ({
+          userProjects: s.userProjects.map((p) => {
+            if (p.id !== id || !p.sizerProject) return p;
+            const next = { ...p.sizerProject, ...patch };
+            const selected = selectedSizerResult(next);
+            const status = selected ? sizerProjectStatus(selected) : p.status;
+            return {
+              ...p,
+              sizerProject: next,
+              status,
+              subtitle: sizerSubtitle(next.inputParams, next.selectedLayout ?? "A"),
+              updatedAt: nowIso(),
+            };
+          }),
+        })),
+
+      setSizerComparison: (id, comparison) =>
+        set((s) => ({
+          userProjects: s.userProjects.map((p) => {
+            if (p.id !== id || !p.sizerProject) return p;
+            const selectedLayout =
+              p.sizerProject.selectedLayout ?? comparison.comparison.cheaper_layout;
+            const selected =
+              selectedLayout === "A" ? comparison.layout_a : comparison.layout_b;
+            return {
+              ...p,
+              status: sizerProjectStatus(selected),
+              subtitle: sizerSubtitle(p.sizerProject.inputParams, selectedLayout),
+              sizerProject: {
+                ...p.sizerProject,
+                selectedLayout,
+                layoutAResult: comparison.layout_a,
+                layoutBResult: comparison.layout_b,
+                comparisonResult: comparison.comparison,
+              },
+              updatedAt: nowIso(),
+            };
+          }),
         })),
 
       updateInput: (id, patch) =>
@@ -421,6 +546,7 @@ export const useProjectsStore = create<ProjectsState>()(
     }),
     {
       name: "civil-agent-projects-v2",
+      storage: createSafeJsonStorage(),
       partialize: (s) => ({ userProjects: s.userProjects }),
       onRehydrateStorage: () => (state) => {
         if (state) state._hydrated = true;

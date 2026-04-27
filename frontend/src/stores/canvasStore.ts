@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { createSafeJsonStorage } from "@/lib/safeStorage";
 
 export type ViewMode = "2d" | "3d";
 export type OverlayMode = "none" | "zones" | "supports" | "load_paths" | "utilization";
@@ -77,6 +78,7 @@ export const useCanvasStore = create<CanvasState>()(
     }),
     {
       name: "civil-agent-canvas",
+      storage: createSafeJsonStorage(),
       partialize: (s) => ({
         viewMode: s.viewMode,
         overlayMode: s.overlayMode,
