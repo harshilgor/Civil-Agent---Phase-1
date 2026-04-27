@@ -1,0 +1,74 @@
+source: "Civilresearch4.md P1-D manufacturer I-joist research; current manufacturer specifier guides required before stamped use"
+confidence: "low"
+notes: "NDS Chapter 7 does not provide generic I-joist design values. These values are provisional research placeholders and are not loaded by the V1 sizing engine."
+framework:
+  source: "NDS 2018 Chapter 7, Prefabricated Wood I-Joists"
+  confidence: "high"
+  required_manufacturer_values:
+    - allowable_moment_capacity
+    - allowable_shear_capacity
+    - stiffness_ei
+    - allowable_reaction_by_bearing_length
+    - web_hole_chart
+    - web_stiffener_requirements
+products:
+  - series: "Weyerhaeuser TJI 210"
+    source: "Civilresearch4.md P1-D-2 provisional values; verify against current Weyerhaeuser TJ-4000/TJ-9000"
+    confidence: "low"
+    depths:
+      - depth: "9-1/2"
+        mr_ftlb: 1345
+        vr_lb: 1120
+        ei_million_in2_lb: 240
+      - depth: "11-7/8"
+        mr_ftlb: 2225
+        vr_lb: 1345
+        ei_million_in2_lb: 435
+      - depth: "14"
+        mr_ftlb: 3115
+        vr_lb: 1540
+        ei_million_in2_lb: 685
+      - depth: "16"
+        mr_ftlb: 3890
+        vr_lb: 1700
+        ei_million_in2_lb: 940
+  - series: "Weyerhaeuser TJI 230"
+    source: "Civilresearch4.md P1-D-2 provisional values; verify against current Weyerhaeuser TJ-4000/TJ-9000"
+    confidence: "low"
+    depths:
+      - depth: "9-1/2"
+        mr_ftlb: 1660
+        vr_lb: 1315
+        ei_million_in2_lb: 295
+      - depth: "11-7/8"
+        mr_ftlb: 2750
+        vr_lb: 1595
+        ei_million_in2_lb: 540
+      - depth: "14"
+        mr_ftlb: 3815
+        vr_lb: 1830
+        ei_million_in2_lb: 845
+      - depth: "16"
+        mr_ftlb: 4790
+        vr_lb: 2020
+        ei_million_in2_lb: 1160
+  - series: "Weyerhaeuser TJI 360"
+    source: "Civilresearch4.md P1-D-2 provisional values; verify against current Weyerhaeuser TJ-4000/TJ-9000"
+    confidence: "low"
+    depths:
+      - depth: "11-7/8"
+        mr_ftlb: 3530
+        vr_lb: 1780
+        ei_million_in2_lb: 665
+      - depth: "14"
+        mr_ftlb: 4975
+        vr_lb: 2040
+        ei_million_in2_lb: 1065
+      - depth: "16"
+        mr_ftlb: 6200
+        vr_lb: 2250
+        ei_million_in2_lb: 1465
+      - depth: "18"
+        mr_ftlb: 7300
+        vr_lb: 2450
+        ei_million_in2_lb: 1910

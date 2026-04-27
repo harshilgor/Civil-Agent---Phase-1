@@ -1,0 +1,33 @@
+sawn_lumber_asd:
+  source: "NDS 2018 Table 2.3.1 and Chapter 4 adjustment-factor applicability"
+  confidence: "very_high"
+  factors_by_property:
+    fb: ["CD", "CM", "Ct", "CL", "CF", "Cfu", "Ci", "Cr"]
+    ft: ["CD", "CM", "Ct", "CF", "Ci"]
+    fv: ["CD", "CM", "Ct", "Ci"]
+    fc_perp: ["CM", "Ct", "Ci", "Cb"]
+    fc: ["CD", "CM", "Ct", "CF", "Ci", "CP"]
+    e: ["CM", "Ct", "Ci"]
+    emin: ["CM", "Ct", "Ci"]
+glulam_asd:
+  source: "NDS 2018 Table 5.3.1 glulam adjustment-factor applicability"
+  confidence: "very_high"
+  factors_by_property:
+    fb: ["CD", "CM", "Ct", "min(CL,CV)", "Cfu", "Cc"]
+    ft: ["CD", "CM", "Ct"]
+    fv: ["CD", "CM", "Ct"]
+    fc_perp: ["CM", "Ct", "Cb"]
+    fc: ["CD", "CM", "Ct", "CP"]
+    e: ["CM", "Ct"]
+    emin: ["CM", "Ct"]
+lvl_asd:
+  source: "NDS 2018 Chapter 8 / manufacturer LVL adjustment-factor applicability from verified prompt"
+  confidence: "medium"
+  factors_by_property:
+    fb: ["CD", "CM", "Ct", "min(CL,CV)", "Cr"]
+    ft: ["CD", "CM", "Ct"]
+    fv: ["CD", "CM", "Ct"]
+    fc_perp: ["CM", "Ct", "Cb"]
+    fc: ["CD", "CM", "Ct", "CP"]
+    e: ["CM", "Ct"]
+    emin: ["CM", "Ct"]

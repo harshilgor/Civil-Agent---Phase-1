@@ -1,0 +1,508 @@
+sections:
+  - nominal: "3.125x6.0"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 3.125
+    actual_depth_in: 6.0
+    laminations: 4
+    area_in2: 18.75
+    sx_in3: 18.75
+    ix_in4: 56.25
+    sy_in3: 9.766
+    iy_in4: 15.259
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 32"
+    confidence: "very_high"
+  - nominal: "3.125x7.5"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 3.125
+    actual_depth_in: 7.5
+    laminations: 5
+    area_in2: 23.438
+    sx_in3: 29.297
+    ix_in4: 109.863
+    sy_in3: 12.207
+    iy_in4: 19.073
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 32"
+    confidence: "very_high"
+  - nominal: "3.125x9.0"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 3.125
+    actual_depth_in: 9.0
+    laminations: 6
+    area_in2: 28.125
+    sx_in3: 42.188
+    ix_in4: 189.844
+    sy_in3: 14.648
+    iy_in4: 22.888
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 32"
+    confidence: "very_high"
+  - nominal: "3.125x10.5"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 3.125
+    actual_depth_in: 10.5
+    laminations: 7
+    area_in2: 32.813
+    sx_in3: 57.422
+    ix_in4: 301.465
+    sy_in3: 17.09
+    iy_in4: 26.703
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 32"
+    confidence: "very_high"
+  - nominal: "3.125x12.0"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 3.125
+    actual_depth_in: 12.0
+    laminations: 8
+    area_in2: 37.5
+    sx_in3: 75.0
+    ix_in4: 450.0
+    sy_in3: 19.531
+    iy_in4: 30.518
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 32"
+    confidence: "very_high"
+  - nominal: "3.125x13.5"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 3.125
+    actual_depth_in: 13.5
+    laminations: 9
+    area_in2: 42.188
+    sx_in3: 94.922
+    ix_in4: 640.723
+    sy_in3: 21.973
+    iy_in4: 34.332
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 32"
+    confidence: "very_high"
+  - nominal: "3.125x15.0"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 3.125
+    actual_depth_in: 15.0
+    laminations: 10
+    area_in2: 46.875
+    sx_in3: 117.188
+    ix_in4: 878.906
+    sy_in3: 24.414
+    iy_in4: 38.147
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 32"
+    confidence: "very_high"
+  - nominal: "3.125x16.5"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 3.125
+    actual_depth_in: 16.5
+    laminations: 11
+    area_in2: 51.563
+    sx_in3: 141.797
+    ix_in4: 1169.824
+    sy_in3: 26.855
+    iy_in4: 41.962
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 33"
+    confidence: "very_high"
+  - nominal: "3.125x18.0"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 3.125
+    actual_depth_in: 18.0
+    laminations: 12
+    area_in2: 56.25
+    sx_in3: 168.75
+    ix_in4: 1518.75
+    sy_in3: 29.297
+    iy_in4: 45.776
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 33"
+    confidence: "very_high"
+  - nominal: "5.125x6.0"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 5.125
+    actual_depth_in: 6.0
+    laminations: 4
+    area_in2: 30.75
+    sx_in3: 30.75
+    ix_in4: 92.25
+    sy_in3: 26.266
+    iy_in4: 67.307
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 33"
+    confidence: "very_high"
+  - nominal: "5.125x7.5"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 5.125
+    actual_depth_in: 7.5
+    laminations: 5
+    area_in2: 38.438
+    sx_in3: 48.047
+    ix_in4: 180.176
+    sy_in3: 32.832
+    iy_in4: 84.134
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 33"
+    confidence: "very_high"
+  - nominal: "5.125x9.0"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 5.125
+    actual_depth_in: 9.0
+    laminations: 6
+    area_in2: 46.125
+    sx_in3: 69.188
+    ix_in4: 311.344
+    sy_in3: 39.398
+    iy_in4: 100.96
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 33"
+    confidence: "very_high"
+  - nominal: "5.125x10.5"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 5.125
+    actual_depth_in: 10.5
+    laminations: 7
+    area_in2: 53.813
+    sx_in3: 94.172
+    ix_in4: 494.402
+    sy_in3: 45.964
+    iy_in4: 117.787
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 33"
+    confidence: "very_high"
+  - nominal: "5.125x12.0"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 5.125
+    actual_depth_in: 12.0
+    laminations: 8
+    area_in2: 61.5
+    sx_in3: 123.0
+    ix_in4: 738.0
+    sy_in3: 52.531
+    iy_in4: 134.614
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 33"
+    confidence: "very_high"
+  - nominal: "5.125x13.5"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 5.125
+    actual_depth_in: 13.5
+    laminations: 9
+    area_in2: 69.188
+    sx_in3: 155.672
+    ix_in4: 1050.785
+    sy_in3: 59.097
+    iy_in4: 151.44
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 33"
+    confidence: "very_high"
+  - nominal: "5.125x15.0"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 5.125
+    actual_depth_in: 15.0
+    laminations: 10
+    area_in2: 76.875
+    sx_in3: 192.188
+    ix_in4: 1441.406
+    sy_in3: 65.663
+    iy_in4: 168.267
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 34"
+    confidence: "very_high"
+  - nominal: "5.125x16.5"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 5.125
+    actual_depth_in: 16.5
+    laminations: 11
+    area_in2: 84.563
+    sx_in3: 232.547
+    ix_in4: 1918.516
+    sy_in3: 72.23
+    iy_in4: 185.094
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 34"
+    confidence: "very_high"
+  - nominal: "5.125x18.0"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 5.125
+    actual_depth_in: 18.0
+    laminations: 12
+    area_in2: 92.25
+    sx_in3: 276.75
+    ix_in4: 2490.75
+    sy_in3: 78.796
+    iy_in4: 201.92
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 34"
+    confidence: "very_high"
+  - nominal: "5.125x19.5"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 5.125
+    actual_depth_in: 19.5
+    laminations: 13
+    area_in2: 99.938
+    sx_in3: 324.797
+    ix_in4: 3166.797
+    sy_in3: 85.362
+    iy_in4: 218.747
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 34"
+    confidence: "very_high"
+  - nominal: "5.125x21.0"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 5.125
+    actual_depth_in: 21.0
+    laminations: 14
+    area_in2: 107.625
+    sx_in3: 376.688
+    ix_in4: 3955.219
+    sy_in3: 91.929
+    iy_in4: 235.574
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 34"
+    confidence: "very_high"
+  - nominal: "5.125x22.5"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 5.125
+    actual_depth_in: 22.5
+    laminations: 15
+    area_in2: 115.313
+    sx_in3: 432.422
+    ix_in4: 4864.746
+    sy_in3: 98.495
+    iy_in4: 252.4
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 34"
+    confidence: "very_high"
+  - nominal: "5.125x24.0"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 5.125
+    actual_depth_in: 24.0
+    laminations: 16
+    area_in2: 123.0
+    sx_in3: 492.0
+    ix_in4: 5904.0
+    sy_in3: 105.063
+    iy_in4: 269.227
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 34"
+    confidence: "very_high"
+  - nominal: "5.125x25.5"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 5.125
+    actual_depth_in: 25.5
+    laminations: 17
+    area_in2: 130.688
+    sx_in3: 555.422
+    ix_in4: 7081.582
+    sy_in3: 111.628
+    iy_in4: 286.054
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 34"
+    confidence: "very_high"
+  - nominal: "5.125x27.0"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 5.125
+    actual_depth_in: 27.0
+    laminations: 18
+    area_in2: 138.375
+    sx_in3: 622.688
+    ix_in4: 8406.281
+    sy_in3: 118.195
+    iy_in4: 302.88
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 34"
+    confidence: "very_high"
+  - nominal: "6.75x6.0"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 6.75
+    actual_depth_in: 6.0
+    laminations: 4
+    area_in2: 40.5
+    sx_in3: 40.5
+    ix_in4: 121.5
+    sy_in3: 45.563
+    iy_in4: 153.773
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 35"
+    confidence: "very_high"
+  - nominal: "6.75x7.5"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 6.75
+    actual_depth_in: 7.5
+    laminations: 5
+    area_in2: 50.625
+    sx_in3: 63.281
+    ix_in4: 237.305
+    sy_in3: 56.953
+    iy_in4: 192.217
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 35"
+    confidence: "very_high"
+  - nominal: "6.75x9.0"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 6.75
+    actual_depth_in: 9.0
+    laminations: 6
+    area_in2: 60.75
+    sx_in3: 91.125
+    ix_in4: 410.063
+    sy_in3: 68.344
+    iy_in4: 230.66
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 35"
+    confidence: "very_high"
+  - nominal: "6.75x10.5"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 6.75
+    actual_depth_in: 10.5
+    laminations: 7
+    area_in2: 70.875
+    sx_in3: 124.031
+    ix_in4: 651.164
+    sy_in3: 79.734
+    iy_in4: 269.104
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 35"
+    confidence: "very_high"
+  - nominal: "6.75x12.0"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 6.75
+    actual_depth_in: 12.0
+    laminations: 8
+    area_in2: 81.0
+    sx_in3: 162.0
+    ix_in4: 972.0
+    sy_in3: 91.125
+    iy_in4: 307.547
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 35"
+    confidence: "very_high"
+  - nominal: "6.75x13.5"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 6.75
+    actual_depth_in: 13.5
+    laminations: 9
+    area_in2: 91.125
+    sx_in3: 205.031
+    ix_in4: 1383.961
+    sy_in3: 102.516
+    iy_in4: 345.99
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 35"
+    confidence: "very_high"
+  - nominal: "6.75x15.0"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 6.75
+    actual_depth_in: 15.0
+    laminations: 10
+    area_in2: 101.25
+    sx_in3: 253.125
+    ix_in4: 1898.438
+    sy_in3: 113.906
+    iy_in4: 384.434
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 35"
+    confidence: "very_high"
+  - nominal: "6.75x16.5"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 6.75
+    actual_depth_in: 16.5
+    laminations: 11
+    area_in2: 111.375
+    sx_in3: 306.281
+    ix_in4: 2526.82
+    sy_in3: 125.297
+    iy_in4: 422.877
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 35"
+    confidence: "very_high"
+  - nominal: "6.75x18.0"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 6.75
+    actual_depth_in: 18.0
+    laminations: 12
+    area_in2: 121.5
+    sx_in3: 364.5
+    ix_in4: 3280.5
+    sy_in3: 136.688
+    iy_in4: 461.32
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 35"
+    confidence: "very_high"
+  - nominal: "6.75x19.5"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 6.75
+    actual_depth_in: 19.5
+    laminations: 13
+    area_in2: 131.625
+    sx_in3: 427.781
+    ix_in4: 4170.867
+    sy_in3: 148.078
+    iy_in4: 499.764
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 36"
+    confidence: "very_high"
+  - nominal: "6.75x21.0"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 6.75
+    actual_depth_in: 21.0
+    laminations: 14
+    area_in2: 141.75
+    sx_in3: 496.125
+    ix_in4: 5209.313
+    sy_in3: 159.469
+    iy_in4: 538.207
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 36"
+    confidence: "very_high"
+  - nominal: "6.75x22.5"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 6.75
+    actual_depth_in: 22.5
+    laminations: 15
+    area_in2: 151.875
+    sx_in3: 569.531
+    ix_in4: 6407.227
+    sy_in3: 170.859
+    iy_in4: 576.65
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 36"
+    confidence: "very_high"
+  - nominal: "6.75x24.0"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 6.75
+    actual_depth_in: 24.0
+    laminations: 16
+    area_in2: 162.0
+    sx_in3: 648.0
+    ix_in4: 7776.0
+    sy_in3: 182.25
+    iy_in4: 615.094
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 36"
+    confidence: "very_high"
+  - nominal: "6.75x25.5"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 6.75
+    actual_depth_in: 25.5
+    laminations: 17
+    area_in2: 172.125
+    sx_in3: 731.531
+    ix_in4: 9327.023
+    sy_in3: 193.641
+    iy_in4: 653.537
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 36"
+    confidence: "very_high"
+  - nominal: "6.75x27.0"
+    material_type: "glulam"
+    family: "glulam"
+    actual_width_in: 6.75
+    actual_depth_in: 27.0
+    laminations: 18
+    area_in2: 182.25
+    sx_in3: 820.125
+    ix_in4: 11071.688
+    sy_in3: 205.031
+    iy_in4: 691.98
+    source: "Common glulam geometry; draft transcription from supplied research PDF page 36"
+    confidence: "very_high"

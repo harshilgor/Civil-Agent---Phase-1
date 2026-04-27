@@ -1,0 +1,68 @@
+load_duration:
+  source: "NDS 2018 Table 2.3.2; draft transcription from supplied research PDF pages 1-2"
+  confidence: "very_high"
+  rows:
+    - name: "permanent"
+      cd: 0.90
+      typical_loads: ["D"]
+    - name: "ten_year"
+      cd: 1.00
+      typical_loads: ["L"]
+    - name: "two_month"
+      cd: 1.15
+      typical_loads: ["S"]
+    - name: "seven_day"
+      cd: 1.25
+      typical_loads: ["construction"]
+    - name: "ten_minute"
+      cd: 1.60
+      typical_loads: ["W", "E"]
+    - name: "impact"
+      cd: 2.00
+      typical_loads: ["impact"]
+temperature:
+  source: "NDS 2018 Table 2.3.3; V1 interior residential normal-temperature assumption"
+  confidence: "very_high"
+  normal_temperature_default:
+    ct: 1.00
+    max_temperature_f: 100
+bearing_area_factor:
+  source: "NDS 2018 3.10.4; end-bearing Cb = 1.0 for V1 member support checks"
+  confidence: "very_high"
+  formula: "Cb = (lb + 0.375) / lb for interior bearing length less than 6 in; otherwise 1.0"
+  rows:
+    - bearing_length_in: 0.5
+      cb: 1.75
+    - bearing_length_in: 1.0
+      cb: 1.38
+    - bearing_length_in: 1.5
+      cb: 1.25
+    - bearing_length_in: 2.0
+      cb: 1.19
+    - bearing_length_in: 3.0
+      cb: 1.13
+    - bearing_length_in: 3.5
+      cb: 1.11
+    - bearing_length_in: 4.0
+      cb: 1.09
+    - bearing_length_in: 6.0
+      cb: 1.00
+beam_stability:
+  source: "NDS 2018 3.3.3 and Table 3.3.3; draft transcription from supplied research PDF pages 7-9"
+  confidence: "high"
+  ylinen_c: 0.95
+  fbe_coefficient: 1.20
+  slenderness_limit_rb: 50.0
+column_stability:
+  source: "NDS 2018 3.7.1; draft transcription from supplied research PDF pages 11-13"
+  confidence: "high"
+  fce_coefficient: 0.822
+  c_sawn_lumber: 0.8
+  c_glulam: 0.9
+  slenderness_limit: 50.0
+glulam_volume_factor:
+  source: "NDS 2018 Section 5.3.6, glulam volume factor"
+  confidence: "very_high"
+  k_l_uniform_load: 1.0
+  x_exponent: 10.0
+  formula: "CV = K_L * (21/L)^(1/10) * (12/d)^(1/10) * (5.125/b)^(1/10), capped at 1.0; K_L = 1.0 for uniform load"

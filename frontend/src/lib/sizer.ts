@@ -103,7 +103,11 @@ async function postSizer<T>(path: string, body: unknown, timeoutMs: number): Pro
     });
     if (!response.ok) {
       const message = await response.text();
-      throw new Error(extractError(message) || `Sizer API returned HTTP ${response.status}`);
+      throw new Error(
+        sizerHttpError(response.status, message) ||
+          extractError(message) ||
+          `Sizer API returned HTTP ${response.status}`,
+      );
     }
     return (await response.json()) as T;
   } catch (error) {
@@ -123,6 +127,16 @@ function extractError(raw: string): string {
   } catch {
     return raw;
   }
+}
+
+function sizerHttpError(status: number, raw: string): string {
+  if (status === 404 && raw.includes("DNS_HOSTNAME_RESOLVED_PRIVATE")) {
+    return "Sizer API is not reachable from Vercel. Deploy the sizer API to a public URL and set SIZER_BACKEND_PROXY_URL on the frontend project.";
+  }
+  if (status === 404) {
+    return "Sizer API proxy is not configured for this deployment. Set SIZER_BACKEND_PROXY_URL on Vercel and redeploy.";
+  }
+  return "";
 }
 
 export function getSelectedSizerResult(project: ProjectV2): SizerResult | null {

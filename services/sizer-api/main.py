@@ -26,6 +26,8 @@ DEFAULT_ALLOWED_ORIGINS = [
     "http://localhost:3002",
     "http://127.0.0.1:3002",
     "https://civil-agent.com",
+    "https://civilagentproduct-harshils-projects-a18ce240.vercel.app",
+    "https://civilagentproduct-git-main-harshils-projects-a18ce240.vercel.app",
 ]
 
 app = FastAPI(title="Civil Agent Sizer API", version=SIZER_VERSION)
@@ -43,7 +45,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1):3\d{3}$",
+    allow_origin_regex=r"^(https?://(localhost|127\.0\.0\.1):3\d{3}|https://[a-z0-9-]+\.vercel\.app)$",
 )
 
 

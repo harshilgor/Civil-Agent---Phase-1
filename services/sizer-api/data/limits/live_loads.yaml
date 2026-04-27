@@ -1,0 +1,16 @@
+residential_floor:
+  live_load_psf: 40
+  source: "ASCE 7-22 Table 4.3-1; draft transcription from supplied research PDF pages 39-40"
+  confidence: "high"
+garage_passenger_vehicle:
+  live_load_psf: 40
+  source: "ASCE 7-22 Table 4.3-1; draft transcription from supplied research PDF page 39"
+  confidence: "high"
+attic_without_storage:
+  live_load_psf: 10
+  source: "ASCE 7-22 Table 4.3-1; draft transcription from supplied research PDF page 39"
+  confidence: "high"
+attic_with_storage:
+  live_load_psf: 20
+  source: "ASCE 7-22 Table 4.3-1; draft transcription from supplied research PDF page 39"
+  confidence: "high"

@@ -36,7 +36,7 @@ export async function fetchCivilAgentHealth(): Promise<{
 }> {
   const base = getApiBaseUrl();
   try {
-    const r = await fetch(`${base}/health`, { cache: "no-store" });
+    const r = await fetch(base ? `${base}/health` : "/api-proxy/health", { cache: "no-store" });
     if (!r.ok) return { ok: false, error: `HTTP ${r.status}` };
     const j = (await r.json()) as { status?: string };
     return { ok: true, status: j.status ?? "ok" };
@@ -55,7 +55,7 @@ export async function fetchSizerHealth(): Promise<{
 }> {
   const base = getSizerApiBaseUrl();
   try {
-    const r = await fetch(`${base}/health`, { cache: "no-store" });
+    const r = await fetch(base ? `${base}/health` : "/sizer-proxy/health", { cache: "no-store" });
     if (!r.ok) return { ok: false, error: `HTTP ${r.status}` };
     const j = (await r.json()) as { status?: string };
     return { ok: true, status: j.status ?? "ok" };

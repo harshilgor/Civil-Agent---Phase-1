@@ -1,0 +1,9 @@
+material_cost_multipliers:
+  source: "Project prompt approximate installed cost multipliers for Sprint 1 material comparison; not a cost-estimation layer"
+  confidence: "requires_verification"
+  notes: "Used only to choose an economical option when material_preference is any; actual costs require a later cost module."
+  rows:
+    - {material_type: "sawn_lumber", grade: null, multiplier: 1.0}
+    - {material_type: "glulam", grade: null, multiplier: 2.5}
+    - {material_type: "lvl", grade: "lvl_1.9E", multiplier: 2.0}
+    - {material_type: "lvl", grade: "lvl_2.0E", multiplier: 2.2}

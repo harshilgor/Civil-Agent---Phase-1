@@ -1,0 +1,30 @@
+source: "Civilresearch4.md P1-E/P4 manufacturer-data roadmap; current manufacturer ESR/specifier guide required before stamped use"
+confidence: "low"
+notes: "These PSL/LSL values are provisional research placeholders. They are stored so the codebase does not lose the research, but runtime sizing must not use them until verified against current manufacturer evaluation reports."
+products:
+  - product: "Weyerhaeuser Parallam PSL 2.0E"
+    material_type: "psl"
+    values:
+      fb_psi: 2900
+      ft_psi: 2025
+      fv_psi: 290
+      fc_perp_psi: 750
+      fc_psi: 2900
+      e_psi: 2000000
+      emin_psi: 1056000
+    confidence: "low"
+    source: "Civilresearch4.md P1-E-1 / P4-A-2 provisional values; verify against Weyerhaeuser product literature or ICC-ES ESR"
+    notes: "Approximate values from research summary; not loaded by the V1 sizing engine."
+  - product: "Weyerhaeuser TimberStrand LSL 1.55E"
+    material_type: "lsl"
+    values:
+      fb_psi: 2325
+      ft_psi: 1260
+      fv_psi: 410
+      fc_perp_psi: 875
+      fc_psi: 1950
+      e_psi: 1550000
+      emin_psi: 817000
+    confidence: "low"
+    source: "Civilresearch4.md P1-E-2 / P4-A-3 provisional values; verify against Weyerhaeuser product literature or ICC-ES ESR"
+    notes: "Approximate values from research summary; not loaded by the V1 sizing engine."

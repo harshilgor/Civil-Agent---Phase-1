@@ -1,0 +1,5 @@
+floor:
+  live_limit_ratio: 360
+  total_limit_ratio: 240
+  source: "IBC 2021 Table 1604.3; draft transcription from supplied research PDF page 37"
+  confidence: "high"

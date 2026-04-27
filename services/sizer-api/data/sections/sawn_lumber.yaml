@@ -1,0 +1,205 @@
+sections:
+  - nominal: "2x4"
+    material_type: "sawn_lumber"
+    family: "dimension"
+    actual_width_in: 1.5
+    actual_depth_in: 3.5
+    area_in2: 5.25
+    sx_in3: 3.063
+    ix_in4: 5.359
+    sy_in3: 1.313
+    iy_in4: 0.984
+    source: "NDS 2018 Supplement Table 1B; draft transcription from supplied research PDF page 22"
+    confidence: "very_high"
+  - nominal: "2x6"
+    material_type: "sawn_lumber"
+    family: "dimension"
+    actual_width_in: 1.5
+    actual_depth_in: 5.5
+    area_in2: 8.25
+    sx_in3: 7.563
+    ix_in4: 20.797
+    sy_in3: 2.063
+    iy_in4: 1.547
+    source: "NDS 2018 Supplement Table 1B; draft transcription from supplied research PDF page 22"
+    confidence: "very_high"
+  - nominal: "2x8"
+    material_type: "sawn_lumber"
+    family: "dimension"
+    actual_width_in: 1.5
+    actual_depth_in: 7.25
+    area_in2: 10.875
+    sx_in3: 13.141
+    ix_in4: 47.635
+    sy_in3: 2.719
+    iy_in4: 2.039
+    source: "NDS 2018 Supplement Table 1B; draft transcription from supplied research PDF page 22"
+    confidence: "very_high"
+  - nominal: "2x10"
+    material_type: "sawn_lumber"
+    family: "dimension"
+    actual_width_in: 1.5
+    actual_depth_in: 9.25
+    area_in2: 13.875
+    sx_in3: 21.391
+    ix_in4: 98.932
+    sy_in3: 3.469
+    iy_in4: 2.602
+    source: "NDS 2018 Supplement Table 1B; draft transcription from supplied research PDF page 22"
+    confidence: "very_high"
+  - nominal: "2x12"
+    material_type: "sawn_lumber"
+    family: "dimension"
+    actual_width_in: 1.5
+    actual_depth_in: 11.25
+    area_in2: 16.875
+    sx_in3: 31.641
+    ix_in4: 177.979
+    sy_in3: 4.219
+    iy_in4: 3.164
+    source: "NDS 2018 Supplement Table 1B; draft transcription from supplied research PDF page 22"
+    confidence: "very_high"
+  - nominal: "4x4"
+    material_type: "sawn_lumber"
+    family: "dimension"
+    actual_width_in: 3.5
+    actual_depth_in: 3.5
+    area_in2: 12.25
+    sx_in3: 7.146
+    ix_in4: 12.505
+    sy_in3: 7.146
+    iy_in4: 12.505
+    source: "NDS 2018 Supplement Table 1B; draft transcription from supplied research PDF page 22"
+    confidence: "very_high"
+  - nominal: "4x6"
+    material_type: "sawn_lumber"
+    family: "dimension"
+    actual_width_in: 3.5
+    actual_depth_in: 5.5
+    area_in2: 19.25
+    sx_in3: 17.646
+    ix_in4: 48.526
+    sy_in3: 11.229
+    iy_in4: 19.651
+    source: "NDS 2018 Supplement Table 1B; draft transcription from supplied research PDF page 22"
+    confidence: "very_high"
+  - nominal: "4x8"
+    material_type: "sawn_lumber"
+    family: "dimension"
+    actual_width_in: 3.5
+    actual_depth_in: 7.25
+    area_in2: 25.375
+    sx_in3: 30.661
+    ix_in4: 111.148
+    sy_in3: 14.802
+    iy_in4: 25.904
+    source: "NDS 2018 Supplement Table 1B; draft transcription from supplied research PDF page 22"
+    confidence: "very_high"
+  - nominal: "4x10"
+    material_type: "sawn_lumber"
+    family: "dimension"
+    actual_width_in: 3.5
+    actual_depth_in: 9.25
+    area_in2: 32.375
+    sx_in3: 49.911
+    ix_in4: 230.84
+    sy_in3: 18.885
+    iy_in4: 33.049
+    source: "NDS 2018 Supplement Table 1B; draft transcription from supplied research PDF page 22"
+    confidence: "very_high"
+  - nominal: "4x12"
+    material_type: "sawn_lumber"
+    family: "dimension"
+    actual_width_in: 3.5
+    actual_depth_in: 11.25
+    area_in2: 39.375
+    sx_in3: 73.828
+    ix_in4: 415.283
+    sy_in3: 22.969
+    iy_in4: 40.195
+    source: "NDS 2018 Supplement Table 1B; draft transcription from supplied research PDF page 23"
+    confidence: "very_high"
+  - nominal: "6x6"
+    material_type: "sawn_lumber"
+    family: "timber"
+    actual_width_in: 5.5
+    actual_depth_in: 5.5
+    area_in2: 30.25
+    sx_in3: 27.729
+    ix_in4: 76.255
+    sy_in3: 27.729
+    iy_in4: 76.255
+    source: "NDS 2018 Supplement Table 1B; draft transcription from supplied research PDF page 23"
+    confidence: "very_high"
+  - nominal: "6x8"
+    material_type: "sawn_lumber"
+    family: "timber"
+    actual_width_in: 5.5
+    actual_depth_in: 7.5
+    area_in2: 41.25
+    sx_in3: 51.563
+    ix_in4: 193.359
+    sy_in3: 37.813
+    iy_in4: 103.984
+    source: "NDS 2018 Supplement Table 1B; draft transcription from supplied research PDF page 23"
+    confidence: "very_high"
+  - nominal: "6x10"
+    material_type: "sawn_lumber"
+    family: "timber"
+    actual_width_in: 5.5
+    actual_depth_in: 9.5
+    area_in2: 52.25
+    sx_in3: 82.729
+    ix_in4: 392.963
+    sy_in3: 47.896
+    iy_in4: 131.714
+    source: "NDS 2018 Supplement Table 1B; draft transcription from supplied research PDF page 23"
+    confidence: "very_high"
+  - nominal: "6x12"
+    material_type: "sawn_lumber"
+    family: "timber"
+    actual_width_in: 5.5
+    actual_depth_in: 11.5
+    area_in2: 63.25
+    sx_in3: 121.229
+    ix_in4: 697.068
+    sy_in3: 57.979
+    iy_in4: 159.443
+    source: "NDS 2018 Supplement Table 1B; draft transcription from supplied research PDF page 23"
+    confidence: "very_high"
+  - nominal: "8x8"
+    material_type: "sawn_lumber"
+    family: "timber"
+    actual_width_in: 7.5
+    actual_depth_in: 7.5
+    area_in2: 56.25
+    sx_in3: 70.313
+    ix_in4: 263.672
+    sy_in3: 70.313
+    iy_in4: 263.672
+    source: "NDS 2018 Supplement Table 1B; draft transcription from supplied research PDF page 23"
+    confidence: "very_high"
+  - nominal: "8x10"
+    material_type: "sawn_lumber"
+    family: "timber"
+    actual_width_in: 7.5
+    actual_depth_in: 9.5
+    area_in2: 71.25
+    sx_in3: 112.813
+    ix_in4: 535.859
+    sy_in3: 89.063
+    iy_in4: 333.984
+    source: "NDS 2018 Supplement Table 1B; draft transcription from supplied research PDF page 23"
+    confidence: "very_high"
+  - nominal: "8x12"
+    material_type: "sawn_lumber"
+    family: "timber"
+    actual_width_in: 7.5
+    actual_depth_in: 11.5
+    area_in2: 86.25
+    sx_in3: 165.313
+    ix_in4: 950.547
+    sy_in3: 107.813
+    iy_in4: 404.297
+    source: "NDS 2018 Supplement Table 1B; draft transcription from supplied research PDF page 23"
+    confidence: "very_high"

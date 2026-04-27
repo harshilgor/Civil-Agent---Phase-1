@@ -1,0 +1,234 @@
+﻿connectors:
+  - model: "LU24"
+    description: "Face-mount joist hanger for 2x4 joist"
+    category: "face_mount_joist_hanger"
+    applicable_nominal_depths: ["2x4"]
+    dimensions: {W: 1.5625, H: 3.125, B: 1.5}
+    fasteners_header: "2-10d x 1.5"
+    fasteners_joist: 4
+    species: "DF-L"
+    fastener_condition: "10d nails; all specified fasteners installed"
+    allowable_download_lb: 530
+    allowable_download_basis: "10d_CD1.0"
+    download:
+      10d_CD1.6: 465
+      16d_CD1.6: 555
+      10d_CD1.0: 530
+      16d_CD1.0: 630
+      10d_CD1.15: 570
+      16d_CD1.15: 655
+    allowable_uplift_lb: 240
+    confidence: "very_high"
+    source: "Simpson Strong-Tie LU hanger verified V1 data supplied 2026-04-26"
+    notes: "Default V1 download uses 10d_CD1.0; alternate tabulated downloads retained in raw YAML."
+  - model: "LU26"
+    description: "Face-mount joist hanger for 2x6 joist"
+    category: "face_mount_joist_hanger"
+    applicable_nominal_depths: ["2x6"]
+    dimensions: {W: 1.5625, H: 4.75, B: 1.5}
+    fasteners_header: "4-10d x 1.5"
+    fasteners_joist: 6
+    species: "DF-L"
+    fastener_condition: "10d nails; all specified fasteners installed"
+    allowable_download_lb: 800
+    allowable_download_basis: "10d_CD1.0"
+    download:
+      10d_CD1.6: 695
+      16d_CD1.6: 835
+      10d_CD1.0: 800
+      16d_CD1.0: 950
+      10d_CD1.15: 860
+      16d_CD1.15: 1030
+    allowable_uplift_lb: 540
+    confidence: "very_high"
+    source: "Simpson Strong-Tie LU hanger verified V1 data supplied 2026-04-26"
+    notes: "Default V1 download uses 10d_CD1.0; alternate tabulated downloads retained in raw YAML."
+  - model: "LU28"
+    description: "Face-mount joist hanger for 2x8 joist"
+    category: "face_mount_joist_hanger"
+    applicable_nominal_depths: ["2x8"]
+    dimensions: {W: 1.5625, H: 6.375, B: 1.5}
+    fasteners_header: "6-10d x 1.5"
+    fasteners_joist: 8
+    species: "DF-L"
+    fastener_condition: "10d nails; all specified fasteners installed"
+    allowable_download_lb: 1065
+    allowable_download_basis: "10d_CD1.0"
+    download:
+      10d_CD1.6: 930
+      16d_CD1.6: 1110
+      10d_CD1.0: 1065
+      16d_CD1.0: 1180
+      10d_CD1.15: 1145
+      16d_CD1.15: 1180
+    allowable_uplift_lb: 850
+    confidence: "very_high"
+    source: "Simpson Strong-Tie LU hanger verified V1 data supplied 2026-04-26"
+    notes: "Default V1 download uses 10d_CD1.0; alternate tabulated downloads retained in raw YAML."
+  - model: "LU210"
+    description: "Face-mount joist hanger for 2x10 joist"
+    category: "face_mount_joist_hanger"
+    applicable_nominal_depths: ["2x10"]
+    dimensions: {W: 1.5625, H: 7.8125, B: 1.5}
+    fasteners_header: "6-10d x 1.5"
+    fasteners_joist: 10
+    species: "DF-L"
+    fastener_condition: "10d nails; all specified fasteners installed"
+    allowable_download_lb: 1330
+    allowable_download_basis: "10d_CD1.0"
+    download:
+      10d_CD1.6: 1160
+      16d_CD1.6: 1390
+      10d_CD1.0: 1330
+      16d_CD1.0: 1580
+      10d_CD1.15: 1430
+      16d_CD1.15: 1615
+    allowable_uplift_lb: 850
+    confidence: "very_high"
+    source: "Simpson Strong-Tie LU hanger verified V1 data supplied 2026-04-26"
+    notes: "Default V1 download uses 10d_CD1.0; alternate tabulated downloads retained in raw YAML."
+  - model: "LU212"
+    description: "Face-mount joist hanger for 2x12 joist"
+    category: "face_mount_joist_hanger"
+    applicable_nominal_depths: ["2x12"]
+    species: "DF-L"
+    fastener_condition: "All specified nails installed"
+    allowable_download_lb: 1050
+    allowable_download_basis: "placeholder_CD1.0"
+    allowable_uplift_lb: 0
+    confidence: "requires_verification"
+    source: "Simpson Strong-Tie prior placeholder; LU212 was not included in verified V1 Simpson data supplied 2026-04-26"
+    notes: "Structural placeholder retained only so existing 2x12 sample joist output can run; verify before use."
+  - model: "HU26"
+    description: "Heavy face-mount joist hanger for 2x6 joist"
+    category: "face_mount_joist_hanger"
+    applicable_nominal_depths: ["2x6"]
+    species: "DF-L"
+    fastener_condition: "All specified nails installed"
+    allowable_download_lb: 1050
+    allowable_download_basis: "placeholder_CD1.0"
+    allowable_uplift_lb: 0
+    confidence: "requires_verification"
+    source: "Simpson Strong-Tie prior placeholder; HU series was not included in verified V1 Simpson data supplied 2026-04-26"
+    notes: "Structural placeholder retained for heavy hanger fallback; verify before use."
+  - model: "HU28"
+    description: "Heavy face-mount joist hanger for 2x8 joist"
+    category: "face_mount_joist_hanger"
+    applicable_nominal_depths: ["2x8"]
+    species: "DF-L"
+    fastener_condition: "All specified nails installed"
+    allowable_download_lb: 1545
+    allowable_download_basis: "placeholder_CD1.0"
+    allowable_uplift_lb: 0
+    confidence: "requires_verification"
+    source: "Simpson Strong-Tie prior placeholder; HU series was not included in verified V1 Simpson data supplied 2026-04-26"
+    notes: "Structural placeholder retained for heavy hanger fallback; verify before use."
+  - model: "HU210"
+    description: "Heavy face-mount joist hanger for 2x10 joist"
+    category: "face_mount_joist_hanger"
+    applicable_nominal_depths: ["2x10"]
+    species: "DF-L"
+    fastener_condition: "All specified nails installed"
+    allowable_download_lb: 2010
+    allowable_download_basis: "placeholder_CD1.0"
+    allowable_uplift_lb: 0
+    confidence: "requires_verification"
+    source: "Simpson Strong-Tie prior placeholder; HU series was not included in verified V1 Simpson data supplied 2026-04-26"
+    notes: "Structural placeholder retained for heavy hanger fallback; verify before use."
+  - model: "HU212"
+    description: "Heavy face-mount joist hanger for 2x12 joist"
+    category: "face_mount_joist_hanger"
+    applicable_nominal_depths: ["2x12"]
+    species: "DF-L"
+    fastener_condition: "All specified nails installed"
+    allowable_download_lb: 2305
+    allowable_download_basis: "placeholder_CD1.0"
+    allowable_uplift_lb: 0
+    confidence: "requires_verification"
+    source: "Simpson Strong-Tie prior placeholder; HU series was not included in verified V1 Simpson data supplied 2026-04-26"
+    notes: "Structural placeholder retained for heavy hanger fallback; verify before use."
+  - model: "ABA24-2Z"
+    description: "Adjustable post base for 2x4 post"
+    category: "post_base"
+    applicable_post_sizes: ["2x4"]
+    anchor_bolt_diameter: 0.5
+    nails: "6-10d x 2.5"
+    allowable_download_lb: 5925
+    allowable_download_basis: "download_CD1.6"
+    allowable_uplift_lb: 630
+    confidence: "very_high"
+    source: "Simpson Strong-Tie ABA post base verified V1 data supplied 2026-04-26"
+    notes: "Download is tabulated at CD=1.6; uplift already increased for wind/earthquake per verified data."
+  - model: "ABA44Z"
+    description: "Adjustable post base for 4x4 post"
+    category: "post_base"
+    applicable_post_sizes: ["4x4"]
+    anchor_bolt_diameter: 0.5
+    nails: "6-10d common"
+    allowable_download_lb: 5925
+    allowable_download_basis: "download_CD1.6"
+    allowable_uplift_lb: 690
+    confidence: "very_high"
+    source: "Simpson Strong-Tie ABA post base verified V1 data supplied 2026-04-26"
+    notes: "Download is tabulated at CD=1.6; uplift already increased for wind/earthquake per verified data."
+  - model: "ABA44RZ"
+    description: "Adjustable retrofit post base for 4x4 post"
+    category: "post_base"
+    applicable_post_sizes: ["4x4"]
+    anchor_bolt_diameter: 0.5
+    nails: "6-10d common"
+    allowable_download_lb: 7215
+    allowable_download_basis: "download_CD1.6"
+    allowable_uplift_lb: 655
+    confidence: "very_high"
+    source: "Simpson Strong-Tie ABA post base verified V1 data supplied 2026-04-26"
+    notes: "Download is tabulated at CD=1.6; uplift already increased for wind/earthquake per verified data."
+  - model: "ABA46Z"
+    description: "Adjustable post base for 4x6 post"
+    category: "post_base"
+    applicable_post_sizes: ["4x6"]
+    anchor_bolt_diameter: 0.625
+    nails: "8-16d common"
+    allowable_download_lb: 10500
+    allowable_download_basis: "download_CD1.6"
+    allowable_uplift_lb: 870
+    confidence: "very_high"
+    source: "Simpson Strong-Tie ABA post base verified V1 data supplied 2026-04-26"
+    notes: "Download is tabulated at CD=1.6; uplift already increased for wind/earthquake per verified data."
+  - model: "ABA46RZ"
+    description: "Adjustable retrofit post base for 4x6 post"
+    category: "post_base"
+    applicable_post_sizes: ["4x6"]
+    anchor_bolt_diameter: 0.625
+    nails: "8-16d common"
+    allowable_download_lb: 10695
+    allowable_download_basis: "download_CD1.6"
+    allowable_uplift_lb: 870
+    confidence: "very_high"
+    source: "Simpson Strong-Tie ABA post base verified V1 data supplied 2026-04-26"
+    notes: "Download is tabulated at CD=1.6; uplift already increased for wind/earthquake per verified data."
+  - model: "ABA66Z"
+    description: "Adjustable post base for 6x6 post"
+    category: "post_base"
+    applicable_post_sizes: ["6x6"]
+    anchor_bolt_diameter: 0.625
+    nails: "8-16d common"
+    allowable_download_lb: 10245
+    allowable_download_basis: "download_CD1.6"
+    allowable_uplift_lb: 850
+    confidence: "very_high"
+    source: "Simpson Strong-Tie ABA post base verified V1 data supplied 2026-04-26"
+    notes: "Download is tabulated at CD=1.6; uplift already increased for wind/earthquake per verified data."
+  - model: "ABA66RZ"
+    description: "Adjustable retrofit post base for 6x6 post"
+    category: "post_base"
+    applicable_post_sizes: ["6x6"]
+    anchor_bolt_diameter: 0.625
+    nails: "8-16d common"
+    allowable_download_lb: 11500
+    allowable_download_basis: "download_CD1.6"
+    allowable_uplift_lb: 850
+    confidence: "very_high"
+    source: "Simpson Strong-Tie ABA post base verified V1 data supplied 2026-04-26"
+    notes: "Download is tabulated at CD=1.6; uplift already increased for wind/earthquake per verified data."
+

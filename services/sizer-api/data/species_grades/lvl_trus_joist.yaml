@@ -1,0 +1,31 @@
+entries:
+  - product: "Trus Joist Microllam LVL 1.9E"
+    material_type: "lvl"
+    grade: "lvl_1.9E"
+    values:
+      fb_psi: 2600
+      ft_psi: 1840
+      fv_psi: 285
+      fc_perp_psi: 750
+      fc_psi: 2510
+      e_psi: 1900000
+      emin_psi: 1000000
+    source: "Weyerhaeuser Trus Joist TJ-9000 Specifier's Guide, Table 1"
+    confidence: "medium"
+    notes: "E has very_high confidence; Fb and Fv medium_high. Other values require verification against current TJ-9000 Table 1 before stamped use."
+  - product: "Trus Joist Microllam LVL 2.0E"
+    material_type: "lvl"
+    grade: "lvl_2.0E"
+    values:
+      fb_psi: 2600
+      ft_psi: 1895
+      fv_psi: 285
+      fc_perp_psi: 750
+      fc_psi: 2510
+      e_psi: 2000000
+      emin_psi: 1016535
+    g_psi: 125000
+    specific_gravity: 0.50
+    source: "Weyerhaeuser Microllam LVL 2.0E verified V1 data supplied 2026-04-26"
+    confidence: "very_high"
+    notes: "Beam orientation values: G=125000 psi and SG=0.50 are retained in raw YAML for audit; runtime DesignValues model uses the ASD stress and modulus fields."

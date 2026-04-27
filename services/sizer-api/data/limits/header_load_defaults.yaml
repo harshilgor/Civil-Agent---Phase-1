@@ -1,0 +1,27 @@
+header_load_conditions:
+  roof_only:
+    components:
+      - {name: "roof dead", load_type: "D", value_psf: 20, source: "Project prompt default roof dead load for Sprint 2 headers", confidence: "requires_verification"}
+      - {name: "roof live", load_type: "L", value_psf: 20, source: "ASCE 7-22 Section 4.8 roof live load default from project prompt; snow not implemented", confidence: "requires_verification"}
+    notes: "Snow load is out of scope and must be checked separately in snowy climates."
+  one_floor_above:
+    components:
+      - {name: "floor dead", load_type: "D", value_psf: 15, source: "Project prompt default floor dead load", confidence: "high"}
+      - {name: "floor live", load_type: "L", value_psf: 40, source: "ASCE 7-22 Table 4.3-1 residential live load", confidence: "high"}
+      - {name: "roof dead", load_type: "D", value_psf: 20, source: "Project prompt default roof dead load for Sprint 2 headers", confidence: "requires_verification"}
+      - {name: "roof live", load_type: "L", value_psf: 20, source: "ASCE 7-22 Section 4.8 roof live load default from project prompt; snow not implemented", confidence: "requires_verification"}
+    notes: "Engineer must verify actual floor/roof load path and tributary width."
+  two_floors_above:
+    components:
+      - {name: "floor dead level 1", load_type: "D", value_psf: 15, source: "Project prompt default floor dead load", confidence: "high"}
+      - {name: "floor live level 1", load_type: "L", value_psf: 40, source: "ASCE 7-22 Table 4.3-1 residential live load", confidence: "high"}
+      - {name: "floor dead level 2", load_type: "D", value_psf: 15, source: "Project prompt default floor dead load", confidence: "high"}
+      - {name: "floor live level 2", load_type: "L", value_psf: 40, source: "ASCE 7-22 Table 4.3-1 residential live load", confidence: "high"}
+      - {name: "roof dead", load_type: "D", value_psf: 20, source: "Project prompt default roof dead load for Sprint 2 headers", confidence: "requires_verification"}
+      - {name: "roof live", load_type: "L", value_psf: 20, source: "ASCE 7-22 Section 4.8 roof live load default from project prompt; snow not implemented", confidence: "requires_verification"}
+    notes: "Simplified stacked load condition; jack stud table is prescriptive placeholder and must be reviewed."
+  floor_only:
+    components:
+      - {name: "floor dead", load_type: "D", value_psf: 15, source: "Project prompt default floor dead load", confidence: "high"}
+      - {name: "floor live", load_type: "L", value_psf: 40, source: "ASCE 7-22 Table 4.3-1 residential live load", confidence: "high"}
+    notes: "Interior floor-only header condition."

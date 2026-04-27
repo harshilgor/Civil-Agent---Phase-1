@@ -1,0 +1,19 @@
+presumptive_values:
+  source: "IBC 2021 Table 1806.2; draft transcription from supplied research PDF page 38"
+  confidence: "high"
+  rows:
+    - material: "crystalline_bedrock"
+      allowable_psf: 12000
+    - material: "sedimentary_and_foliated_rock"
+      allowable_psf: 4000
+    - material: "sandy_gravel_or_gravel"
+      allowable_psf: 3000
+    - material: "sand_silty_sand_clayey_sand_silty_gravel_clayey_gravel"
+      allowable_psf: 2000
+    - material: "clay_sandy_clay_silty_clay_clayey_silt"
+      allowable_psf: 1500
+default:
+  material: "unknown_or_unclassified"
+  allowable_psf: 1500
+  source: "IBC 2021 Table 1806.2 default project assumption from supplied research PDF page 38"
+  confidence: "high"

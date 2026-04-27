@@ -1,0 +1,16 @@
+asd:
+  source: "ASCE 7-22 Section 2.4; draft transcription from supplied research PDF pages 40-41"
+  confidence: "high"
+  combinations:
+    - name: "D"
+      expression: "D"
+      cd: 0.90
+    - name: "D+L"
+      expression: "D + L"
+      cd: 1.00
+    - name: "D+S"
+      expression: "D + S"
+      cd: 1.15
+    - name: "D+0.75L+0.75S"
+      expression: "D + 0.75L + 0.75S"
+      cd: 1.15

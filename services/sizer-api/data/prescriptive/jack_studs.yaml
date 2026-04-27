@@ -1,0 +1,128 @@
+source: "IRC 2021 Table R602.7(2) - reconstructed, requires verification"
+confidence: "medium"
+note: "Verify every cell against IRC 2021 Table R602.7(2) before stamped use"
+tables:
+  roof_ceiling_only:
+    snow_le_30psf:
+      building_width_le_24ft:
+        span_le_4ft: 1
+        span_le_6ft: 1
+        span_le_8ft: 1
+        span_le_10ft: 2
+        span_le_12ft: 2
+      building_width_le_28ft:
+        span_le_4ft: 1
+        span_le_6ft: 1
+        span_le_8ft: 2
+        span_le_10ft: 2
+        span_le_12ft: 2
+      building_width_le_32ft:
+        span_le_4ft: 1
+        span_le_6ft: 1
+        span_le_8ft: 2
+        span_le_10ft: 2
+        span_le_12ft: 2
+      building_width_le_36ft:
+        span_le_4ft: 1
+        span_le_6ft: 2
+        span_le_8ft: 2
+        span_le_10ft: 2
+        span_le_12ft: 3
+    snow_le_50psf:
+      building_width_le_24ft:
+        span_le_4ft: 1
+        span_le_6ft: 1
+        span_le_8ft: 2
+        span_le_10ft: 2
+        span_le_12ft: 2
+      building_width_le_28ft:
+        span_le_4ft: 1
+        span_le_6ft: 1
+        span_le_8ft: 2
+        span_le_10ft: 2
+        span_le_12ft: 2
+      building_width_le_32ft:
+        span_le_4ft: 1
+        span_le_6ft: 2
+        span_le_8ft: 2
+        span_le_10ft: 2
+        span_le_12ft: 3
+      building_width_le_36ft:
+        span_le_4ft: 1
+        span_le_6ft: 2
+        span_le_8ft: 2
+        span_le_10ft: 3
+        span_le_12ft: 3
+  one_floor_roof_ceiling:
+    snow_le_30psf:
+      building_width_le_24ft:
+        span_le_4ft: 1
+        span_le_6ft: 1
+        span_le_8ft: 2
+        span_le_10ft: 2
+        span_le_12ft: 2
+      building_width_le_28ft:
+        span_le_4ft: 1
+        span_le_6ft: 2
+        span_le_8ft: 2
+        span_le_10ft: 2
+        span_le_12ft: 3
+      building_width_le_32ft:
+        span_le_4ft: 1
+        span_le_6ft: 2
+        span_le_8ft: 2
+        span_le_10ft: 3
+        span_le_12ft: 3
+      building_width_le_36ft:
+        span_le_4ft: 2
+        span_le_6ft: 2
+        span_le_8ft: 3
+        span_le_10ft: 3
+        span_le_12ft: 3
+    snow_le_50psf:
+      building_width_le_24ft:
+        span_le_4ft: 1
+        span_le_6ft: 2
+        span_le_8ft: 2
+        span_le_10ft: 2
+        span_le_12ft: 3
+      building_width_le_28ft:
+        span_le_4ft: 1
+        span_le_6ft: 2
+        span_le_8ft: 2
+        span_le_10ft: 3
+        span_le_12ft: 3
+      building_width_le_32ft:
+        span_le_4ft: 2
+        span_le_6ft: 2
+        span_le_8ft: 3
+        span_le_10ft: 3
+        span_le_12ft: 3
+      building_width_le_36ft:
+        span_le_4ft: 2
+        span_le_6ft: 2
+        span_le_8ft: 3
+        span_le_10ft: 3
+        span_le_12ft: 4
+  two_floors_roof_ceiling:
+    any_snow:
+      building_width_le_24ft:
+        span_le_4ft: 1
+        span_le_6ft: 2
+        span_le_8ft: 2
+        span_le_10ft: 2
+      building_width_le_28ft:
+        span_le_4ft: 2
+        span_le_6ft: 2
+        span_le_8ft: 2
+        span_le_10ft: 3
+      building_width_le_32ft:
+        span_le_4ft: 2
+        span_le_6ft: 2
+        span_le_8ft: 3
+        span_le_10ft: 3
+      building_width_le_36ft:
+        span_le_4ft: 2
+        span_le_6ft: 3
+        span_le_8ft: 3
+        span_le_10ft: 4

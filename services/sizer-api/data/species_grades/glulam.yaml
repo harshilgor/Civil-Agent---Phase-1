@@ -1,0 +1,31 @@
+entries:
+  - grade: "24F-V4 DF/DF"
+    species: "Douglas Fir"
+    values:
+      fbx_positive_psi: 2400
+      fbx_negative_psi: 1850
+      fvx_psi: 265
+      fc_perp_x_psi: 650
+      fc_psi: 1650
+      ft_psi: 1100
+      ex_psi: 1800000
+      ey_psi: 1600000
+      ex_min_psi: 950000
+    source: "NDS 2018 Supplement Table 5A and Rosboro/APA PR-L251, 24F-V4 DF/DF"
+    confidence: "very_high"
+    notes: "Unbalanced layup. Ex is apparent modulus used for deflection; PR-L251 lists E_true approximately 1900000 psi, E_app 1800000 psi, and Ex_min 950000 psi."
+  - grade: "24F-V8 DF/DF"
+    species: "Douglas Fir"
+    values:
+      fbx_positive_psi: 2400
+      fbx_negative_psi: 2400
+      fvx_psi: 265
+      fc_perp_x_psi: 650
+      fc_psi: 1650
+      ft_psi: 1100
+      ex_psi: 1800000
+      ey_psi: 1600000
+      ex_min_psi: 950000
+    source: "NDS 2018 Supplement Table 5A and Rosboro/APA PR-L251, 24F-V8 DF/DF"
+    confidence: "very_high"
+    notes: "Balanced layup. Fbx+ and Fbx- are both 2400 psi; Ex is apparent modulus used for deflection."

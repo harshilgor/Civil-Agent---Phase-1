@@ -1,0 +1,101 @@
+size_factor:
+  source: "NDS 2018 Supplement Table 4A adjustment factors; draft transcription from supplied research PDF pages 15-16"
+  confidence: "high"
+  applies_to_species_except:
+    - "Southern Pine"
+  rows:
+    - nominal_depth_in: 2
+      fb: 1.50
+      ft: 1.50
+      fc: 1.15
+    - nominal_depth_in: 3
+      fb: 1.50
+      ft: 1.50
+      fc: 1.15
+    - nominal_depth_in: 4
+      fb: 1.50
+      ft: 1.50
+      fc: 1.15
+    - nominal_depth_in: 5
+      fb: 1.40
+      ft: 1.40
+      fc: 1.10
+    - nominal_depth_in: 6
+      fb: 1.30
+      ft: 1.30
+      fc: 1.10
+    - nominal_depth_in: 8
+      fb: 1.20
+      ft: 1.20
+      fc: 1.05
+    - nominal_depth_in: 10
+      fb: 1.10
+      ft: 1.10
+      fc: 1.00
+    - nominal_depth_in: 12
+      fb: 1.00
+      ft: 1.00
+      fc: 1.00
+    - nominal_depth_in: 14
+      fb: 0.90
+      ft: 0.90
+      fc: 0.90
+flat_use_factor:
+  source: "NDS 2018 4.3.6 / Supplement adjustment factors; draft transcription from supplied research PDF pages 16-17"
+  confidence: "medium"
+  rows:
+    - nominal_depth_in: 4
+      thickness_2_or_3: 1.10
+      thickness_4: null
+    - nominal_depth_in: 5
+      thickness_2_or_3: 1.10
+      thickness_4: 1.05
+    - nominal_depth_in: 6
+      thickness_2_or_3: 1.15
+      thickness_4: 1.05
+    - nominal_depth_in: 8
+      thickness_2_or_3: 1.15
+      thickness_4: 1.05
+    - nominal_depth_in: 10
+      thickness_2_or_3: 1.20
+      thickness_4: 1.10
+incising_factor:
+  source: "NDS 2018 4.3.8; draft transcription from supplied research PDF pages 17-18"
+  confidence: "high"
+  incised: {fb: 0.80, ft: 0.80, fv: 0.80, fc_perp: 1.00, fc: 0.80, e: 0.95, emin: 0.95}
+  not_incised: {fb: 1.00, ft: 1.00, fv: 1.00, fc_perp: 1.00, fc: 1.00, e: 1.00, emin: 1.00}
+repetitive_member_factor:
+  source: "NDS 2018 4.3.9; draft transcription from supplied research PDF page 18"
+  confidence: "very_high"
+  value: 1.15
+  max_spacing_in: 24.0
+  applies_to: ["fb"]
+wet_service_factor:
+  source: "NDS 2018 Supplement Table 4.3.1 wet-service factors; footnote exceptions verified by Civilresearch4 overlay"
+  confidence: "very_high"
+  service_moisture_threshold_percent: 19
+  dry_service:
+    fb: 1.00
+    ft: 1.00
+    fv: 1.00
+    fc_perp: 1.00
+    fc: 1.00
+    e: 1.00
+    emin: 1.00
+  wet_service:
+    fb: 0.85
+    ft: 1.00
+    fv: 0.97
+    fc_perp: 0.67
+    fc: 0.80
+    e: 0.90
+    emin: 0.90
+  exceptions:
+    fb:
+      condition: "Use CM = 1.0 when Fb * CF <= 1150 psi."
+      threshold_psi: 1150
+      value: 1.00
+    fc:
+      condition: "Use CM = 1.0 when Fc * CF <= 750 psi."
+      threshold_psi: 750
+      value: 1.00
