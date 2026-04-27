@@ -8,7 +8,10 @@ export function getApiBaseUrl(): string {
   const raw = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
   if (raw) return raw.replace(/\/$/, "");
   if (typeof window !== "undefined") {
-    return `${window.location.protocol}//${window.location.hostname}:8000`;
+    if (isLocalHostname(window.location.hostname)) {
+      return `${window.location.protocol}//${window.location.hostname}:8000`;
+    }
+    return "";
   }
   return "http://localhost:8000";
 }
@@ -17,7 +20,10 @@ export function getSizerApiBaseUrl(): string {
   const raw = process.env.NEXT_PUBLIC_SIZER_API_BASE_URL?.trim();
   if (raw) return raw.replace(/\/$/, "");
   if (typeof window !== "undefined") {
-    return `${window.location.protocol}//${window.location.hostname}:8001`;
+    if (isLocalHostname(window.location.hostname)) {
+      return `${window.location.protocol}//${window.location.hostname}:8001`;
+    }
+    return "";
   }
   return "http://localhost:8001";
 }
@@ -64,10 +70,18 @@ export async function fetchSizerHealth(): Promise<{
 /** Prefix for versioned REST routes: /api/v1/... */
 export function apiV1Url(path: string): string {
   const p = path.startsWith("/") ? path : `/${path}`;
-  return `${getApiBaseUrl()}/api/v1${p}`;
+  const base = getApiBaseUrl();
+  if (!base) return `/api-proxy/api/v1${p}`;
+  return `${base}/api/v1${p}`;
 }
 
 export function sizerApiV1Url(path: string): string {
   const p = path.startsWith("/") ? path : `/${path}`;
-  return `${getSizerApiBaseUrl()}/api/v1${p}`;
+  const base = getSizerApiBaseUrl();
+  if (!base) return `/sizer-proxy/api/v1${p}`;
+  return `${base}/api/v1${p}`;
+}
+
+function isLocalHostname(hostname: string): boolean {
+  return hostname === "localhost" || hostname === "127.0.0.1";
 }
